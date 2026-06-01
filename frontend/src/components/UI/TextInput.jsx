@@ -1,0 +1,60 @@
+import React, { useId } from "react";
+
+export default function TextInput({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  error,
+  hint,
+  required,
+  disabled,
+  readOnly,
+  type = "text",
+  className = "",
+  inputClassName = "",
+  ...rest
+}) {
+  const reactId = useId();
+  const inputId = id || `textinput-${reactId}`;
+  const describedById = hint || error ? `${inputId}-help` : undefined;
+
+  return (
+    <div className={`mb-4 ${className}`}>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="block mb-1.5 text-[13px] font-semibold text-gray-800"
+        >
+          {label}
+          {required && <span className="text-red-500 font-black ml-1">*</span>}
+        </label>
+      )}
+      <input
+        id={inputId}
+        type={type}
+        value={value ?? ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        disabled={disabled || readOnly}
+        aria-invalid={!!error}
+        aria-describedby={describedById}
+        className={`w-full px-3.5 capitalize py-2.5 border rounded-xl outline-none transition-all bg-white text-gray-900 placeholder:text-gray-400
+          ${error ? "border-red-300 focus:ring-2 focus:ring-red-200 focus:border-red-400" : "border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"}
+          ${disabled || readOnly ? "bg-gray-50 text-gray-500 cursor-not-allowed" : ""}
+          ${inputClassName}`}
+        {...rest}
+      />
+      {(hint || error) && (
+        <p
+          id={describedById}
+          className={`text-xs mt-1.5 ${error ? "text-red-600 font-semibold" : "text-gray-500"}`}
+        >
+          {error || hint}
+        </p>
+      )}
+    </div>
+  );
+}
