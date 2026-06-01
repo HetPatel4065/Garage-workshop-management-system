@@ -264,6 +264,7 @@ export default function CustomerLogin() {
         {/* ── Main Card Container ─────────────────────────────────── */}
         <div className="bg-[#161920] rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
           {/* Accent Line Gradient */}
+          <div className="h-1 w-full bg-linear-to-r from-blue-400 via-blue-500 to-blue-500" />
 
           <div className="p-6 sm:p-8">
             <AnimatePresence mode="wait">

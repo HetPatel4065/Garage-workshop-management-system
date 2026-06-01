@@ -256,8 +256,8 @@ export const Footer = () => {
           </h4>
           <ul className="space-y-4">
             {[
-              { label: "About Us", href: "#", type: "anchor" },
-              { label: "Staff Login", href: "/login", type: "link" },
+              { label: "About Us", href: "/aboutus", type: "link" },
+              { label: "Garage Login", href: "/login", type: "link" },
               {
                 label: "Privacy Policy",
                 href: "/privacy-policy",

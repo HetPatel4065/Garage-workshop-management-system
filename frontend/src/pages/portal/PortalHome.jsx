@@ -100,74 +100,46 @@ export default function PortalHome() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-700">
       {/* ── Header ── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-2 md:py-3" : "py-4 md:py-5"}`}
-        style={
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? {
-                background: "rgba(248,250,255,0.92)",
-                backdropFilter: "blur(24px)",
-                borderBottom: "1px solid rgba(99,102,241,0.10)",
-                boxShadow: "0 4px 32px rgba(99,102,241,0.08)",
-              }
-            : { background: "transparent" }
-        }
+            ? "py-2 backdrop-blur-2xl border-b border-indigo-500/10 bg-transparent shadow-[0_4px_32px_rgba(99,102,241,0.08)] md:py-3"
+            : "py-4 bg-transparent md:py-5"
+        }`}
       >
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 md:px-6">
+          {/* Logo / Brand Button */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-2 md:gap-2.5 group bg-transparent border-none cursor-auto"
-            style={{ textDecoration: "none" }}
+            className="group flex items-center gap-2 transition-transform active:scale-98 md:gap-2.5"
           >
-            <div
-              className="w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center text-white font-extrabold text-xs md:text-sm group-hover:scale-110 transition-transform duration-300"
-              style={{
-                background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",
-                boxShadow: "0 4px 16px rgba(99,102,241,0.35)",
-              }}
-            >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 to-blue-500 text-xs font-extrabold text-white shadow-[0_4px_16px_rgba(99,102,241,0.35)] transition-transform duration-300 group-hover:scale-110 md:h-9 md:w-9 md:text-sm">
               GP
             </div>
-            <span
-              className="text-lg md:text-xl font-extrabold tracking-tight"
-              style={{ color: "#1e1b4b" }}
-            >
+            <span className="text-lg font-extrabold tracking-tight text-indigo-950 dark:text-zinc-100 md:text-xl">
               GaragePro
             </span>
           </button>
 
+          {/* Right Side Actions */}
           <div className="flex items-center gap-2 md:gap-3">
             {!isAuthenticated && (
               <button
                 onClick={() => setIsLoginModalOpen(true)}
-                className="px-4 md:px-5 py-2 text-xs md:text-sm font-bold transition-colors duration-200 hover:text-indigo-600 rounded-xl hover:bg-indigo-50 bg-transparent border-none cursor-auto"
-                style={{ color: "#64748b" }}
+                className="rounded-xl px-4 py-2 text-xs font-bold text-slate-500 transition-colors duration-200 hover:bg-indigo-50 hover:text-indigo-600 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-indigo-400 md:text-sm"
               >
                 Sign in
               </button>
             )}
+
             <button
               onClick={() =>
                 isAuthenticated
                   ? navigate("/portal/dashboard")
                   : setIsLoginModalOpen(true)
               }
-              className="px-4 md:px-6 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold text-white flex items-center gap-1.5 transition-all duration-200 border-none cursor-auto"
-              style={{
-                background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",
-                boxShadow: "0 4px 16px rgba(99,102,241,0.32)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 6px 24px rgba(99,102,241,0.48)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 4px 16px rgba(99,102,241,0.32)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
+              className="flex items-center gap-1.5 rounded-xl bg-linear-to-br from-indigo-500 to-blue-500 px-4 py-2 text-xs font-bold text-white shadow-[0_4px_16px_rgba(99,102,241,0.32)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(99,102,241,0.48)] active:translate-y-0 md:px-6 md:py-2.5 md:text-sm"
             >
-              {isAuthenticated ? "Dashboard" : "Get Started"}
+              <span>{isAuthenticated ? "Dashboard" : "Get Started"}</span>
               <ArrowRight size={14} className="hidden sm:block" />
             </button>
           </div>
@@ -418,6 +390,17 @@ export default function PortalHome() {
                     <Link
                       key={l}
                       to="/privacy-policy"
+                      className="text-[13px] text-slate-400 font-medium hover:text-blue-600 transition-colors"
+                    >
+                      {l}
+                    </Link>
+                  );
+                }
+                if (l === "Contact Support") {
+                  return (
+                    <Link
+                      key={l}
+                      to="/portal/support"
                       className="text-[13px] text-slate-400 font-medium hover:text-blue-600 transition-colors"
                     >
                       {l}

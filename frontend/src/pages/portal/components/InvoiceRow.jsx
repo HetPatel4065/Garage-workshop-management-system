@@ -27,6 +27,7 @@ const InvoiceRow = ({
   portalPreviewCustomerId = "",
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const hasParts = (invoice.parts || []).length > 0;
   const hasServices = (invoice.services || []).length > 0;
@@ -37,17 +38,63 @@ const InvoiceRow = ({
       : `${import.meta.env.VITE_API_URL.replace("/api", "")}${invoice.pdfUrl.startsWith("/") ? "" : "/"}${invoice.pdfUrl}`
     : null;
 
+  const handleDownloadPdf = async () => {
+    if (!token) return;
+    setIsDownloading(true);
+
+    try {
+      const generateRes = await axios.get(
+        `${import.meta.env.VITE_API_URL}/portal/invoices/${invoice._id}/pdf`,
+        {
+          headers: buildPortalAuthHeaders(token, portalPreviewCustomerId),
+        },
+      );
+
+      const pdfUrl =
+        generateRes?.data?.pdfUrl ||
+        (invoice.pdfUrl &&
+          (invoice.pdfUrl.startsWith("http")
+            ? invoice.pdfUrl
+            : `${import.meta.env.VITE_API_URL.replace("/api", "")}${invoice.pdfUrl.startsWith("/") ? "" : "/"}${invoice.pdfUrl}`));
+
+      if (!pdfUrl) {
+        throw new Error("Unable to determine invoice PDF URL.");
+      }
+
+      const response = await axios.get(pdfUrl, {
+        headers: buildPortalAuthHeaders(token, portalPreviewCustomerId),
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = invoice.invoiceId
+        ? `${invoice.invoiceId}.pdf`
+        : `Invoice-${invoice._id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Invoice download failed:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
       case "paid":
       case "finalized":
       case "completed":
-        return <CheckCircle2 className="w-3 h-3 sm:w-3.5 h-3.5" />;
+        return <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />;
       case "pending":
       case "sent":
-        return <Clock className="w-3 h-3 sm:w-3.5 h-3.5" />;
+        return <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />;
       default:
-        return <AlertCircle className="w-3 h-3 sm:w-3.5 h-3.5" />;
+        return <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />;
     }
   };
 
@@ -184,7 +231,7 @@ const InvoiceRow = ({
                               key={i}
                               className="flex items-center justify-between px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-50/40 dark:hover:bg-zinc-850/20 transition-colors"
                             >
-                              <span className="w-2/3 capitalize font-bold text-slate-700 dark:text-zinc-300 break-words pr-2">
+                              <span className="w-2/3 capitalize font-bold text-slate-700 dark:text-zinc-300 wrap-break-word pr-2">
                                 {s.name}
                               </span>
                               <span className="w-1/3 font-black text-slate-800 dark:text-zinc-200 text-right whitespace-nowrap">
@@ -248,7 +295,7 @@ const InvoiceRow = ({
                               className="hover:bg-slate-50/40 dark:hover:bg-zinc-850/20 transition-colors"
                             >
                               <div className="block sm:hidden p-3 space-y-1.5">
-                                <div className="font-bold text-slate-700 dark:text-zinc-300 text-xs capitalize break-words">
+                                <div className="font-bold text-slate-700 dark:text-zinc-300 text-xs capitalize wrap-break-word">
                                   {p.name}
                                 </div>
                                 <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
@@ -268,7 +315,7 @@ const InvoiceRow = ({
                               </div>
 
                               <div className="hidden sm:grid grid-cols-12 gap-2 items-center px-4 py-2.5 text-xs sm:text-sm">
-                                <span className="col-span-6 capitalize font-bold text-slate-700 dark:text-zinc-300 break-words pr-1">
+                                <span className="col-span-6 capitalize font-bold text-slate-700 dark:text-zinc-300 wrap-break-word pr-1">
                                   {p.name}
                                 </span>
                                 <span className="col-span-2 font-bold text-slate-600 dark:text-zinc-400 text-center">
@@ -368,14 +415,21 @@ const InvoiceRow = ({
                     </h4>
 
                     {downloadUrl ? (
-                      <a
-                        href={downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs sm:text-sm transition-all active:scale-95 shadow-md shadow-blue-200 dark:shadow-none"
+                      <button
+                        type="button"
+                        onClick={handleDownloadPdf}
+                        disabled={isDownloading}
+                        className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-black text-xs sm:text-sm transition-all active:scale-95 shadow-md shadow-blue-200 dark:shadow-none ${
+                          isDownloading
+                            ? "bg-slate-200 text-slate-500 border border-slate-200 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
+                        }`}
                       >
-                        <Download className="w-4 h-4" /> Download Official PDF
-                      </a>
+                        <Download className="w-4 h-4" />
+                        {isDownloading
+                          ? "Downloading..."
+                          : "Download Official PDF"}
+                      </button>
                     ) : (
                       <div className="flex flex-col items-center gap-3 p-4 bg-slate-50/50 dark:bg-zinc-850/20 rounded-xl border border-dashed border-slate-200 dark:border-zinc-800">
                         <p className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 text-center">

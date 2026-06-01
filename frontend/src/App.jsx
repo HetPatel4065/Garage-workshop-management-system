@@ -35,6 +35,8 @@ const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const PortalSupport = lazy(() => import("./pages/portal/PortalSupport"));
 const PartnershipLeads = lazy(() => import("./pages/PartnershipLeads"));
 const MarketplaceListings = lazy(() => import("./pages/MarketplaceListings"));
 const PortalVehicleDetails = lazy(
@@ -100,7 +102,11 @@ function App() {
 
   const hasPortalAccess =
     !!portalToken ||
-    (!loading && !!token && !!user && isVerified && canAccessCustomerPortal(user.role));
+    (!loading &&
+      !!token &&
+      !!user &&
+      isVerified &&
+      canAccessCustomerPortal(user.role));
 
   if (loading) {
     return (
@@ -250,10 +256,26 @@ function App() {
             />
 
             <Route
+              path="/aboutus"
+              element={
+                <PageTransition>
+                  <AboutUs />
+                </PageTransition>
+              }
+            />
+            <Route
               path="/privacy-policy"
               element={
                 <PageTransition>
                   <PrivacyPolicy />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/portal/support"
+              element={
+                <PageTransition>
+                  <PortalSupport />
                 </PageTransition>
               }
             />
@@ -331,7 +353,9 @@ function App() {
               <Route
                 path="/vehicles"
                 element={
-                  <ProtectedRoute allowedRoles={["owner", "admin","mechanic","advisor"]}>
+                  <ProtectedRoute
+                    allowedRoles={["owner", "admin", "mechanic", "advisor"]}
+                  >
                     <PageTransition>
                       <Vehicles />
                     </PageTransition>
@@ -451,7 +475,9 @@ function App() {
               <Route
                 path="/help"
                 element={
-                  <ProtectedRoute allowedRoles={["owner", "admin","mechanic","advisor"]}>
+                  <ProtectedRoute
+                    allowedRoles={["owner", "admin", "mechanic", "advisor"]}
+                  >
                     <PageTransition>
                       <HelpCenter />
                     </PageTransition>
