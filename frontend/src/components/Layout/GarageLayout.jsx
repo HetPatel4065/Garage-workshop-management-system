@@ -10,6 +10,12 @@ import ServiceReminderModal from "../UI/ServiceReminderModal";
 export default function GarageLayout({ children }) {
   const { user, token, selectedGarage, exitGaragePreview } = useAuth();
   const location = useLocation();
+  const hideNavbar =
+    user?.role?.toLowerCase() === "admin" &&
+    !selectedGarage &&
+    ["/dashboard", "/partnership-leads"].some((path) =>
+      location.pathname.startsWith(path),
+    );
 
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== "undefined") {
@@ -172,13 +178,15 @@ export default function GarageLayout({ children }) {
       <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden relative">
         {/* Navbar */}
 
-        <GarageNavbar
-          role={user?.role || ""}
-          userName={user?.name || "User"}
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          showNotifications={showNotifications}
-          setShowNotifications={setShowNotifications}
-        />
+        {!hideNavbar && (
+          <GarageNavbar
+            role={user?.role || ""}
+            userName={user?.name || "User"}
+            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+            showNotifications={showNotifications}
+            setShowNotifications={setShowNotifications}
+          />
+        )}
 
         {/* ========================================================= */}
         {/* ADMIN PREVIEW BANNER */}

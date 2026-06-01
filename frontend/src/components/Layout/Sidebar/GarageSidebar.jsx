@@ -22,10 +22,13 @@ import {
   Store,
   HardHat,
   Tag,
+  ExternalLink,
+  LogOut,
 } from "lucide-react";
 import { FaCar } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
 import { useNotifications } from "../../../context/NotificationContext";
+import ThemeToggle from "../../theme/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { ROLE_LABELS } from "../../../utils/roles";
 
@@ -131,7 +134,7 @@ const NAV_SECTIONS = [
         name: "Help Center",
         path: "/help",
         icon: HelpCircle,
-        roles: ["admin", "owner","advisor","mechanic"],
+        roles: ["admin", "owner", "advisor", "mechanic"],
       },
     ],
   },
@@ -140,9 +143,13 @@ const NAV_SECTIONS = [
 export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, selectedGarage } = useAuth();
+  const { user, selectedGarage, logout } = useAuth();
   const role = user?.role?.toLowerCase() || "mechanic";
   const { unreadCount } = useNotifications();
+  const isAdminDashboard =
+    role === "admin" &&
+    location.pathname.startsWith("/dashboard") &&
+    !selectedGarage;
 
   const [collapsed, setCollapsed] = useState(() => {
     return sessionStorage.getItem("sidebar_collapsed") === "true";
@@ -509,6 +516,51 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
             isCollapsedDesktop ? "p-2" : "p-3"
           }`}
         >
+          {isAdminDashboard && (
+            <div
+              className={`mb-3 flex flex-col gap-2 ${
+                isCollapsedDesktop ? "items-center" : "items-start"
+              }`}
+            >
+              {/* Theme Toggle - Circular and Left-Aligned */}
+              <div
+                className={`flex w-full ${isCollapsedDesktop ? "justify-center" : "justify-start px-1"}`}
+              >
+                <ThemeToggle />
+              </div>
+
+              {/* Customer Portal Button */}
+              <button
+                type="button"
+                onClick={() => navigate("/portal/dashboard")}
+                title="Customer Portal"
+                className={`inline-flex w-full items-center rounded-2xl text-[15px] font-medium transition-colors duration-200 ${
+                  isCollapsedDesktop
+                    ? "justify-center p-3"
+                    : "justify-start gap-4 px-4 py-3.5"
+                } bg-zinc-800 text-zinc-100 hover:bg-zinc-700/80`}
+              >
+                <ExternalLink size={22} className="shrink-0 stroke-2" />
+                {!isCollapsedDesktop && <span>Customer Portal</span>}
+              </button>
+
+              {/* Sign Out Button */}
+              <button
+                type="button"
+                onClick={logout}
+                title="Sign Out"
+                className={`inline-flex w-full items-center rounded-2xl text-[15px] font-medium transition-colors duration-200 ${
+                  isCollapsedDesktop
+                    ? "justify-center p-3"
+                    : "justify-start gap-4 px-4 py-3.5"
+                } bg-red-950/20 text-red-400 hover:bg-red-950/40`}
+              >
+                <LogOut size={22} className="shrink-0 stroke-2" />
+                {!isCollapsedDesktop && <span>Sign Out</span>}
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => navigate("/profile")}

@@ -1168,7 +1168,7 @@ export default function MarketplaceListings({
                   <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-zinc-500">
                     Model
                   </span>
-                  <span className="text-xs font-bold text-slate-700 dark:text-zinc-350 mt-0.5">
+                  <span className="text-xs font-bold capitalize text-slate-700 dark:text-zinc-350 mt-0.5">
                     {item.model}
                   </span>
                 </div>

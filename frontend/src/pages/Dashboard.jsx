@@ -35,6 +35,7 @@ import PendingApprovals from "../components/Dashboard/PendingApprovals";
 import DashboardSkeleton from "../components/Dashboard/DashboardSkeleton";
 import { useAuth } from "../context/AuthContext";
 import AdminDirectory from "../components/Dashboard/AdminDirectory";
+import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "../utils/roles";
 
 const STATUS_COLORS = {
   Completed: "#10b981",
@@ -51,6 +52,10 @@ export default function Dashboard() {
   const { user, token, selectedGarage } = useAuth();
   const rawRole = user?.role || "user";
   const role = rawRole === "admin" && selectedGarage ? "owner" : rawRole;
+  const roleLabel =
+    ROLE_LABELS[rawRole] ||
+    `${rawRole.charAt(0).toUpperCase()}${rawRole.slice(1)}`;
+  const roleDescription = ROLE_DESCRIPTIONS[rawRole];
 
   const [data, setData] = useState({
     stats: {
@@ -241,20 +246,27 @@ export default function Dashboard() {
 
   return (
     <div className="bg-gray-100 min-h-screen px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
-      <div className="flex flex-col xl:flex-row justify-between xl:items-center mb-6 sm:mb-8 gap-4 sm:gap-6">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center mb-1">
-            <span className="inline-flex items-center whitespace-nowrap bg-blue-600/5 border border-blue-600/15 text-blue-600 font-bold uppercase tracking-wider rounded-lg px-2 py-1 text-[10px] sm:text-xs">
-              Hello & Welcome, {user?.name || "Guest"}
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:gap-6 xl:flex-row xl:items-center xl:justify-between">
+        {/* Left Side: Identity & Greetings */}
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex items-center">
+            <span className="inline-flex items-center whitespace-nowrap rounded-md bg-blue-950/80 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-blue-500">
+              Hello & Welcome, {user?.name}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight capitalize">
-            {role} Dashboard
+
+          <h1 className="text-2xl font-extrabold tracking-tight text-white leading-tight sm:text-2xl lg:text-3xl sm:whitespace-nowrap">
+            {roleLabel} Dashboard
           </h1>
+
+          <p className="mt-1 text-sm font-bold tracking-tight text-zinc-300">
+            {roleDescription}
+          </p>
         </div>
-        {/* Right Side: Actions */}
-        <div className="flex flex-col w-full xl:w-auto shrink-0">
-          <div className="flex flex-wrap lg:flex-nowrap gap-2">
+
+        {/* Right Side: Quick Action Buttons wrapper */}
+        <div className="w-full shrink-0 xl:w-auto pt-5">
+          <div className="flex flex-wrap gap-2.5 lg:flex-nowrap">
             <QuickActionButtons
               role={role}
               onAddCustomer={() => navigate("/customers")}

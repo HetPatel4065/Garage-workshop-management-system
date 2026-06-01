@@ -3,13 +3,25 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const getTransporter = () => {
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (!user || !pass) {
+    console.error(
+      "[EMAIL] SMTP_USER or SMTP_PASS is missing. Please check backend/.env",
+    );
+    return null;
+  }
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user,
+      pass,
+    },
+  });
+};
+
+const transporter = getTransporter();
 
 export const sendOTP = async (email, otp) => {
   const mailOptions = {
@@ -32,6 +44,7 @@ export const sendOTP = async (email, otp) => {
   };
 
   try {
+    if (!transporter) return false;
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
@@ -107,6 +120,7 @@ export const sendWelcomeEmail = async (
   };
 
   try {
+    if (!transporter) return false;
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
@@ -175,6 +189,7 @@ export const sendInspectionReminderToOwner = async (
   };
 
   try {
+    if (!transporter) return false;
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
@@ -212,6 +227,7 @@ export const sendRejectionEmail = async (email, name, garageName, reason) => {
   };
 
   try {
+    if (!transporter) return false;
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
@@ -280,6 +296,7 @@ export const sendGarageOnboardingEmail = async (
   };
 
   try {
+    if (!transporter) return false;
     await transporter.sendMail(mailOptions);
     console.log(`✅ Onboarding email sent successfully to: ${email}`);
     return true;

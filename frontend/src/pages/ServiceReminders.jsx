@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import {
   Search,
   Eye,
@@ -183,7 +184,7 @@ const StatCard = ({
 );
 
 // ─── Reminder Card (mirrors RequestCard layout) ───────────────────
-function ReminderCard({ r, onSendEmail, onSendSMS, onCall }) {
+function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const nextDateNorm = new Date(r.nextServiceDate);
@@ -268,13 +269,19 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall }) {
         {/* Right: contact actions */}
         <div className="flex items-center gap-2">
           {r.customerId?.email && (
-            <a
-              href={`mailto:${r.customerId.email}?subject=Service Reminder - ${r.licensePlate}&body=Dear ${r.customerId.name || r.customerName}, your vehicle ${r.make} ${r.model} (${r.licensePlate}) is due for service on ${format(new Date(r.nextServiceDate), "dd MMM yyyy")}.`}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-600 hover:text-white transition active:scale-95"
+            <button
+              type="button"
+              onClick={() => onSendEmail(r)}
+              disabled={isSending}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold rounded-xl transition active:scale-95 ${
+                isSending
+                  ? "bg-slate-200 text-slate-500 border border-slate-200 cursor-not-allowed"
+                  : "text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-600 hover:text-white"
+              }`}
             >
               <Mail size={14} />
-              Email
-            </a>
+              {isSending ? "Sending..." : "Email"}
+            </button>
           )}
           {r.customerId?.phone && (
             <>
@@ -305,6 +312,7 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall }) {
 // ─── Main Component ───────────────────────────────────────────────
 export default function ServiceReminders() {
   const { token } = useAuth();
+  const { addToast } = useToast();
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -331,6 +339,8 @@ export default function ServiceReminders() {
     fetchReminders();
   }, []);
 
+  const [sendingReminderId, setSendingReminderId] = useState(null);
+
   const handleRefresh = () => {
     setIsRefreshing(true);
     setTimeout(() => {
@@ -338,6 +348,39 @@ export default function ServiceReminders() {
       setIsRefreshing(false);
     }, 5000);
   };
+
+  const handleSendEmail = async (r) => {
+    if (!r.customerId?.email) {
+      addToast("Customer email is not available.", "error");
+      return;
+    }
+
+    try {
+      setSendingReminderId(r._id);
+      const res = await axios.post(
+        "/api/notifications/service-reminder",
+        { vehicleId: r._id },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      addToast(
+        res.data.message || "Reminder email sent successfully.",
+        "success",
+      );
+      fetchReminders();
+    } catch (err) {
+      addToast(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to send reminder email.",
+        "error",
+      );
+    } finally {
+      setSendingReminderId(null);
+    }
+  };
+
+  const handleSendSMS = (r) => console.log("SMS", r);
+  const handleCall = (r) => console.log("Call", r);
 
   const filteredReminders = reminders.filter((r) => {
     if (!r.nextServiceDate) return false;
@@ -494,9 +537,6 @@ export default function ServiceReminders() {
   ];
 
   // Placeholder handlers
-  const handleSendEmail = (r) => console.log("Email", r);
-  const handleSendSMS = (r) => console.log("SMS", r);
-  const handleCall = (r) => console.log("Call", r);
 
   const exportColumns = [
     { header: "License Plate", accessor: "licensePlate" },
@@ -658,6 +698,7 @@ export default function ServiceReminders() {
               onSendEmail={handleSendEmail}
               onSendSMS={handleSendSMS}
               onCall={handleCall}
+              isSending={sendingReminderId === r._id}
             />
           ))
         )}
