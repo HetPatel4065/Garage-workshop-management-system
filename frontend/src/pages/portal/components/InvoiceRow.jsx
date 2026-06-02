@@ -43,27 +43,20 @@ const InvoiceRow = ({
     setIsDownloading(true);
 
     try {
-      const generateRes = await axios.get(
+      // 1. Ensure the PDF has been generated first
+      await axios.get(
         `${import.meta.env.VITE_API_URL}/portal/invoices/${invoice._id}/pdf`,
         {
           headers: buildPortalAuthHeaders(token, portalPreviewCustomerId),
         },
       );
 
-      const pdfUrl =
-        generateRes?.data?.pdfUrl ||
-        (invoice.pdfUrl &&
-          (invoice.pdfUrl.startsWith("http")
-            ? invoice.pdfUrl
-            : `${import.meta.env.VITE_API_URL.replace("/api", "")}${invoice.pdfUrl.startsWith("/") ? "" : "/"}${invoice.pdfUrl}`));
-
-      if (!pdfUrl) {
-        throw new Error("Unable to determine invoice PDF URL.");
-      }
+      // 2. Fetch the PDF through the secure customer portal download endpoint
+      const pdfUrl = `${import.meta.env.VITE_API_URL}/portal/invoices/${invoice._id}/download-pdf`;
 
       const response = await axios.get(pdfUrl, {
-        headers: buildPortalAuthHeaders(token, portalPreviewCustomerId),
         responseType: "blob",
+        headers: buildPortalAuthHeaders(token, portalPreviewCustomerId),
       });
 
       const blob = new Blob([response.data], { type: "application/pdf" });
@@ -130,27 +123,33 @@ const InvoiceRow = ({
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-sm sm:text-base md:text-lg capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
+            <h3 className="font-bold text-base sm:text-lg md:text-xl capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
               {(invoice.services || []).map((s) => s.name).join(" - ") ||
                 "Service Invoice"}
             </h3>
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-1.5">
-              <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 shrink-0">
+              <span className="text-xs font-bold text-slate-400 dark:text-zinc-500 shrink-0">
                 {invoice.invoiceId}
               </span>
-              <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 shrink-0">
+              <span className="text-xs font-bold text-slate-400 dark:text-zinc-500 shrink-0">
                 {new Date(invoice.createdAt).toLocaleDateString("en-IN", {
                   day: "2-digit",
                   month: "short",
                   year: "numeric",
                 })}
               </span>
+              {invoice.vehicleMake && invoice.vehicleModel && (
+                <span className="text-xs font-bold font-mono text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
+                  {invoice.vehicleMake} {invoice.vehicleModel}
+                </span>
+              ) }
               {invoice.licensePlate && (
-                <span className="text-[11px] font-bold font-mono text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
+                <span className="text-xs font-bold font-mono text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
                   {invoice.licensePlate}
                 </span>
               )}
+              
               {/* ✅ FIXED MOBILE VIEW STATUS BADGE */}
               <span
                 className={`sm:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 ${getStatusColor(invoice.status)}`}

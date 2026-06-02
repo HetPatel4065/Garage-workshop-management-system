@@ -7,6 +7,8 @@ import GarageLead from "../models/GarageLead.js";
 import { createNotification } from "../utils/notificationHelper.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs/promises";
 
 const resolveUserByIdAcrossCollections = async (id) => {
   let user = await User.findById(id).select("+password");
@@ -17,9 +19,13 @@ const resolveUserByIdAcrossCollections = async (id) => {
 };
 
 const createToken = (id, role, permissions, extraClaims = {}) => {
-  return jwt.sign({ id, role, permissions, ...extraClaims }, process.env.JWT_SECRET, {
-    expiresIn: "15d",
-  });
+  return jwt.sign(
+    { id, role, permissions, ...extraClaims },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "15d",
+    },
+  );
 };
 
 // 📝 REGISTER (Unified User Creation)
@@ -60,12 +66,10 @@ export const register = async (req, res) => {
         const ownerMatch = await Owner.findOne({ garageId: ownerId });
 
         if (!ownerMatch) {
-          return res
-            .status(400)
-            .json({
-              error:
-                "Invalid 10-digit Garage Connection ID (No matching owner found)",
-            });
+          return res.status(400).json({
+            error:
+              "Invalid 10-digit Garage Connection ID (No matching owner found)",
+          });
         }
         validatedOwnerId = ownerMatch._id;
       } else if (ownerId) {
@@ -103,8 +107,37 @@ export const register = async (req, res) => {
         garageName,
         address,
         mobileNumber,
-        logo: req.file ? req.file.path.replace(/\\/g, "/") : null,
       };
+
+      if (req.file) {
+        // configure cloudinary
+        if (process.env.CLOUDINARY_URL) {
+          cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+        } else {
+          cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+          });
+        }
+        try {
+          const uploaded = await cloudinary.uploader.upload(req.file.path, {
+            folder: `garage_logos/${newGarageId}`,
+          });
+          if (uploaded && uploaded.secure_url) {
+            garageData.logo = uploaded.secure_url;
+          }
+        } catch (err) {
+          console.error("Cloudinary upload failed for owner logo:", err);
+          garageData.logo = req.file.path.replace(/\\/g, "/");
+        }
+        try {
+          await fs.unlink(req.file.path);
+        } catch (err) {
+          // ignore
+        }
+      }
+
       user = await Owner.create(garageData);
 
       // ⚙️ INITIALIZE DEFAULT SETTINGS FOR NEW OWNER
@@ -117,8 +150,8 @@ export const register = async (req, res) => {
           emailReports: true, // Default to true so they get reports
           serviceReminders: true, // Default to true
           lowStock: true,
-          reminderSchedule: [-7, -3, 0, 3]
-        }
+          reminderSchedule: [-7, -3, 0, 3],
+        },
       });
     } else if (role === "advisor") {
       user = await Advisor.create(userData);
@@ -136,7 +169,7 @@ export const register = async (req, res) => {
         title: "New Staff Member Registered",
         message: `${name} has registered as a ${role} in your garage.`,
         type: "info",
-        link: "/staff-members"
+        link: "/staff-members",
       });
     }
 
@@ -178,12 +211,16 @@ export const login = async (req, res) => {
 
     if (!user) {
       console.warn("Login Failed: User not found", { email });
-      return res.status(401).json({ error: "No account found with this email" });
+      return res
+        .status(401)
+        .json({ error: "No account found with this email" });
     }
 
     if (user.isActive === false) {
       console.warn("Login Failed: Account inactive", { email });
-      return res.status(403).json({ error: "Your account is inactive. Please contact the owner." });
+      return res
+        .status(403)
+        .json({ error: "Your account is inactive. Please contact the owner." });
     }
 
     const isMatch = await user.comparePassword(password);
@@ -215,18 +252,23 @@ export const login = async (req, res) => {
       }
 
       if (!owner || !owner.garageId || owner.garageId !== garageId) {
-        console.warn("Login Failed: Garage ID mismatch for staff", { email, provided: garageId, expected: owner?.garageId });
-        return res
-          .status(401)
-          .json({
-            error:
-              "Access Denied: Garage ID does not match your assigned garage",
-          });
+        console.warn("Login Failed: Garage ID mismatch for staff", {
+          email,
+          provided: garageId,
+          expected: owner?.garageId,
+        });
+        return res.status(401).json({
+          error: "Access Denied: Garage ID does not match your assigned garage",
+        });
       }
     } else if (user.role === "owner" && garageId) {
       // If an owner provides a garageId, it must match their own (if they have one)
       if (user.garageId && user.garageId !== garageId) {
-        console.warn("Login Failed: Garage ID mismatch for owner", { email, provided: garageId, expected: user.garageId });
+        console.warn("Login Failed: Garage ID mismatch for owner", {
+          email,
+          provided: garageId,
+          expected: user.garageId,
+        });
         return res
           .status(401)
           .json({ error: "Invalid Garage ID for this owner account" });
@@ -245,22 +287,35 @@ export const login = async (req, res) => {
     // Resolve admin selected garage context (effectiveOwnerId)
     let effectiveOwnerIdForToken = undefined;
     if (user.role === "admin" && garageId) {
-      const ownerMatch = await Owner.findOne({ garageId: String(garageId) }).select("_id");
+      const ownerMatch = await Owner.findOne({
+        garageId: String(garageId),
+      }).select("_id");
       if (!ownerMatch) {
-        console.warn("Admin Login Failed: Target Garage ID not found", { email, garageId });
+        console.warn("Admin Login Failed: Target Garage ID not found", {
+          email,
+          garageId,
+        });
         return res.status(401).json({
-          error: "Invalid Garage ID: No matching owner found with this 10-digit ID",
+          error:
+            "Invalid Garage ID: No matching owner found with this 10-digit ID",
         });
       }
       effectiveOwnerIdForToken = ownerMatch._id;
     }
 
     const token = createToken(user._id, user.role, user.permissions, {
-      ...(effectiveOwnerIdForToken ? { effectiveOwnerId: effectiveOwnerIdForToken } : {}),
+      ...(effectiveOwnerIdForToken
+        ? { effectiveOwnerId: effectiveOwnerIdForToken }
+        : {}),
     });
 
     const refreshToken = jwt.sign(
-      { id: user._id, ...(effectiveOwnerIdForToken ? { effectiveOwnerId: effectiveOwnerIdForToken } : {}) },
+      {
+        id: user._id,
+        ...(effectiveOwnerIdForToken
+          ? { effectiveOwnerId: effectiveOwnerIdForToken }
+          : {}),
+      },
       process.env.REFRESH_SECRET,
       { expiresIn: "7d" },
     );
@@ -357,7 +412,12 @@ export const refreshToken = async (req, res) => {
         ? { effectiveOwnerId: decoded.effectiveOwnerId }
         : {};
 
-    const newAccessToken = createToken(user._id, role, permissions, extraClaims);
+    const newAccessToken = createToken(
+      user._id,
+      role,
+      permissions,
+      extraClaims,
+    );
     res.status(200).json({ token: newAccessToken });
   } catch (err) {
     res.status(403).json({ error: "Invalid refresh token" });
@@ -388,11 +448,14 @@ export const getStaff = async (req, res) => {
     }
 
     const staffResults = await Promise.all(staffQueries);
-    const flattenedStaff = staffResults.flat().filter(Boolean).map((member) => {
-      const obj = member.toObject();
-      delete obj.password;
-      return obj;
-    });
+    const flattenedStaff = staffResults
+      .flat()
+      .filter(Boolean)
+      .map((member) => {
+        const obj = member.toObject();
+        delete obj.password;
+        return obj;
+      });
 
     res.status(200).json(flattenedStaff);
   } catch (error) {
@@ -441,19 +504,28 @@ export const updateStaff = async (req, res) => {
     const updatePayload = { name: name.trim() };
     if (email?.trim()) updatePayload.email = email.trim();
     if (mobileNumber?.trim()) updatePayload.mobileNumber = mobileNumber.trim();
-    if (req.body.hasOwnProperty("isActive")) updatePayload.isActive = req.body.isActive;
+    if (req.body.hasOwnProperty("isActive"))
+      updatePayload.isActive = req.body.isActive;
 
     // Try to update across all staff collections
     const results = await Promise.all([
-      User.findOneAndUpdate({ _id: staffId, ownerId }, updatePayload, { new: true }),
-      Advisor.findOneAndUpdate({ _id: staffId, ownerId }, updatePayload, { new: true }),
-      Mechanic.findOneAndUpdate({ _id: staffId, ownerId }, updatePayload, { new: true }),
+      User.findOneAndUpdate({ _id: staffId, ownerId }, updatePayload, {
+        new: true,
+      }),
+      Advisor.findOneAndUpdate({ _id: staffId, ownerId }, updatePayload, {
+        new: true,
+      }),
+      Mechanic.findOneAndUpdate({ _id: staffId, ownerId }, updatePayload, {
+        new: true,
+      }),
     ]);
 
     // Admin can also update owners
     let updated = results.find((r) => r !== null);
     if (!updated && req.user.role === "admin") {
-      updated = await Owner.findByIdAndUpdate(staffId, updatePayload, { new: true });
+      updated = await Owner.findByIdAndUpdate(staffId, updatePayload, {
+        new: true,
+      });
     }
 
     if (!updated) {
@@ -475,7 +547,9 @@ export const removeAnyUser = async (req, res) => {
     const { id } = req.params;
 
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      return res
+        .status(403)
+        .json({ error: "Unauthorized: Admin access required" });
     }
 
     // Attempt deletion across all collections
@@ -513,7 +587,9 @@ export const getLeadDetailsByToken = async (req, res) => {
     });
 
     if (!lead) {
-      return res.status(400).json({ error: "Invalid or expired onboarding registration token" });
+      return res
+        .status(400)
+        .json({ error: "Invalid or expired onboarding registration token" });
     }
 
     res.status(200).json({
@@ -542,7 +618,9 @@ export const completeOwnerOnboarding = async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
     }
 
     const lead = await GarageLead.findOne({
@@ -551,7 +629,9 @@ export const completeOwnerOnboarding = async (req, res) => {
     });
 
     if (!lead) {
-      return res.status(400).json({ error: "Invalid or expired onboarding registration token" });
+      return res
+        .status(400)
+        .json({ error: "Invalid or expired onboarding registration token" });
     }
 
     // Check if owner email already exists
@@ -562,7 +642,9 @@ export const completeOwnerOnboarding = async (req, res) => {
       (await Mechanic.findOne({ email: lead.email }));
 
     if (alreadyExists) {
-      return res.status(400).json({ error: "This email is already registered in the system" });
+      return res
+        .status(400)
+        .json({ error: "This email is already registered in the system" });
     }
 
     // Generate unique 10-digit Garage ID
@@ -570,7 +652,7 @@ export const completeOwnerOnboarding = async (req, res) => {
     let isUnique = false;
     while (!isUnique) {
       newGarageId = Math.floor(
-        1000000000 + Math.random() * 9000000000
+        1000000000 + Math.random() * 9000000000,
       ).toString();
       const existing = await Owner.findOne({ garageId: newGarageId });
       if (!existing) isUnique = true;
@@ -620,7 +702,8 @@ export const completeOwnerOnboarding = async (req, res) => {
     });
   } catch (error) {
     console.error("COMPLETE ONBOARDING ERROR:", error);
-    res.status(500).json({ error: "Failed to complete onboarding: " + error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to complete onboarding: " + error.message });
   }
 };
-

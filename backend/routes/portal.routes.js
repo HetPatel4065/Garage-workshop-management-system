@@ -12,6 +12,7 @@ import {
   getPortalMe,
   getPortalEligibleCustomers,
   generatePortalInvoicePDF,
+  downloadPortalInvoicePDF,
 } from "../controllers/portal.controller.js";
 import { auth } from "../middleware/auth.middleware.js";
 
@@ -31,5 +32,6 @@ router.get("/linked-garages", auth, getLinkedGarages);
 router.post("/select-garage", auth, selectGarage);
 router.post("/allocate-garage", auth, allocateGarage);
 router.get("/invoices/:id/pdf", auth, generatePortalInvoicePDF);
+router.get("/invoices/:id/download-pdf", auth, downloadPortalInvoicePDF);
 
 export default router;

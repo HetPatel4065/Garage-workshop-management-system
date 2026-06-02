@@ -2,11 +2,6 @@ import sharp from "sharp";
 import fs from "fs";
 import path from "path";
 
-/**
- * Adds a white text watermark with black outline at the bottom right corner of an image.
- * @param {string} filePath - Absolute or relative path to the image file.
- * @param {string} text - Watermark text (e.g. garage name).
- */
 export const addWatermark = async (filePath, text) => {
   try {
     if (!fs.existsSync(filePath)) {

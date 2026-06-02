@@ -18,11 +18,24 @@ import axios from "axios";
 axios.interceptors.request.use(
   (config) => {
     const g = sessionStorage.getItem("admin_selected_garage");
-    if (g) {
+    if (g && config.url) {
       try {
         const garage = JSON.parse(g);
         if (garage && garage._id) {
-          config.headers["x-effective-owner-id"] = garage._id;
+          const backendBaseUrl = import.meta.env.VITE_API_URL.replace(
+            /\/api$/,
+            "",
+          );
+          const requestUrl = new URL(config.url, window.location.origin);
+          const backendOrigin = new URL(backendBaseUrl).origin;
+          const isBackendRequest =
+            requestUrl.origin === window.location.origin ||
+            requestUrl.origin === backendOrigin ||
+            requestUrl.pathname.startsWith("/api");
+
+          if (isBackendRequest) {
+            config.headers["x-effective-owner-id"] = garage._id;
+          }
         }
       } catch (e) {
         console.error("Error parsing admin_selected_garage in axios:", e);
@@ -43,13 +56,26 @@ window.fetch = async function (url, options = {}) {
     try {
       const garage = JSON.parse(g);
       if (garage && garage._id) {
-        if (!options.headers) {
-          options.headers = {};
-        }
-        if (options.headers instanceof Headers) {
-          options.headers.set("x-effective-owner-id", garage._id);
-        } else {
-          options.headers["x-effective-owner-id"] = garage._id;
+        const backendBaseUrl = import.meta.env.VITE_API_URL.replace(
+          /\/api$/,
+          "",
+        );
+        const requestUrl = new URL(url, window.location.origin);
+        const backendOrigin = new URL(backendBaseUrl).origin;
+        const isBackendRequest =
+          requestUrl.origin === window.location.origin ||
+          requestUrl.origin === backendOrigin ||
+          requestUrl.pathname.startsWith("/api");
+
+        if (isBackendRequest) {
+          if (!options.headers) {
+            options.headers = {};
+          }
+          if (options.headers instanceof Headers) {
+            options.headers.set("x-effective-owner-id", garage._id);
+          } else {
+            options.headers["x-effective-owner-id"] = garage._id;
+          }
         }
       }
     } catch (e) {

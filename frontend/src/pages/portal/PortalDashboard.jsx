@@ -277,7 +277,11 @@ const PortalDashboard = ({ garageSettings }) => {
               <div className="relative shrink-0">
                 {user?.garage?.logo ? (
                   <img
-                    src={`${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${user.garage.logo.replace(/^\//, "")}`}
+                    src={
+                      user.garage.logo.startsWith("http")
+                        ? user.garage.logo
+                        : `${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${user.garage.logo.replace(/^\//, "")}`
+                    }
                     alt="Garage Logo"
                     className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl object-cover border-2 border-white dark:border-zinc-800 shadow-xs"
                     onError={(e) => {
@@ -446,9 +450,18 @@ const PortalDashboard = ({ garageSettings }) => {
               className="space-y-6 sm:space-y-8"
             >
               <DashboardStats
-                vehicleCount={vehicles.length}
-                serviceCount={services.length}
-                invoiceCount={invoices.length}
+                vehicleCount={vehicles?.length || 0}
+                serviceCount={services?.length || 0}
+                invoiceCount={invoices?.length || 0}
+                invoiceAmount={
+                  Array.isArray(invoices)
+                    ? invoices.reduce((sum, inv) => {
+                        // Invoice model stores the grand total in `total` (not `totalAmount`)
+                        const amount = Number(inv?.total) || 0;
+                        return sum + amount;
+                      }, 0)
+                    : 0
+                }
               />
 
               {/* Reminders Panel */}
@@ -749,7 +762,14 @@ const PortalDashboard = ({ garageSettings }) => {
                         invoiceId: `${fullYear}-${invoice.invoiceNumber}`,
                         totalAmount: invoice.total,
                         licensePlate:
-                          invoice.serviceId?.vehicleId?.licensePlate,
+                          invoice.serviceId?.vehicleId?.licensePlate ||
+                          invoice.serviceId?.vehicle?.licensePlate,
+                        vehicleMake:
+                          invoice.serviceId?.vehicleId?.make ||
+                          invoice.serviceId?.vehicle?.make,
+                        vehicleModel:
+                          invoice.serviceId?.vehicleId?.model ||
+                          invoice.serviceId?.vehicle?.model,
                       }}
                       isOpen={invoiceExpand.isExpanded(invoice._id)}
                       toggleExpand={invoiceExpand.toggle}

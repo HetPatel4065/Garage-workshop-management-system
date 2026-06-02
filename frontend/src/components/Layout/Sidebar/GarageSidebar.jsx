@@ -91,7 +91,7 @@ const NAV_SECTIONS = [
         roles: ["admin", "owner"],
       },
       {
-        name: "Sell Vehicles",
+        name: "Sell Cars",
         path: "/sell-vehicles",
         icon: Tag,
         roles: ["admin", "owner"],

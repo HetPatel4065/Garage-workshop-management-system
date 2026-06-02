@@ -71,10 +71,14 @@ export default function VehicleCard({
         />
         <MetaField label="Fuel Type" primary={vehicle.fuelType || "—"} />
         <MetaField
-          label="Registered"
+          label="Registered Date"
           primary={
             vehicle.createdAt
-              ? new Date(vehicle.createdAt).toLocaleDateString("en-GB")
+              ? new Date(vehicle.createdAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
               : "—"
           }
         />

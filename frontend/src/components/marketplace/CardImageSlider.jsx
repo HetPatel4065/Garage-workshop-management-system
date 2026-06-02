@@ -2,12 +2,11 @@ import React, { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { FaCar } from "react-icons/fa";
 
-/**
- * Isolated image slider — photo index resets when the listing/photos change.
- */
+
 export default function CardImageSlider({
   photos,
   title,
+  watermarkText = "",
   emptyIcon: EmptyIcon = Tag,
   variant = "listing",
 }) {
@@ -61,7 +60,11 @@ export default function CardImageSlider({
   return (
     <div className={wrapperClass}>
       <img
-        src={`${baseUrl}/${photos[safeIdx]?.replace(/^\//, "")}`}
+        src={
+          photos[safeIdx]?.startsWith("http")
+            ? photos[safeIdx]
+            : `${baseUrl}/${photos[safeIdx]?.replace(/^\//, "")}`
+        }
         alt={`${title} - Photo ${safeIdx + 1}`}
         className="w-full h-full object-cover transition-transform duration-500 group-hover/slider:scale-103"
         onError={(e) => {
@@ -70,6 +73,11 @@ export default function CardImageSlider({
             "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80";
         }}
       />
+      {watermarkText && (
+        <div className="absolute left-3 bottom-3 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-white shadow-xl shadow-black/20 backdrop-blur-sm mix-blend-difference">
+          {watermarkText}
+        </div>
+      )}
       {photos.length > 1 && (
         <>
           <button

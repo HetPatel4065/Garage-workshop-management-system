@@ -1,11 +1,3 @@
-/**
- * Calculates the next service date based on a start date and interval in months.
- * Handles month-end cases correctly (e.g., Jan 31 + 1 month = Feb 28/29).
- * 
- * @param {Date|string} startDate - The actual service completion date.
- * @param {number} intervalMonths - The reminder interval in months.
- * @returns {Date|null} - The calculated next service date.
- */
 export const calculateNextServiceDate = (startDate, intervalMonths) => {
   if (!startDate) return null;
   

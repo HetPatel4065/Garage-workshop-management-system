@@ -225,7 +225,15 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
         />
         <MetaField
           label="Due Date"
-          primary={format(new Date(r.nextServiceDate), "dd MMM yyyy")}
+          primary={
+            r.nextServiceDate
+              ? new Date(r.nextServiceDate).toLocaleDateString("en-GB",{
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+              : "—"
+          }
           secondary={isOverdue ? "Overdue" : ""}
         />
       </div>

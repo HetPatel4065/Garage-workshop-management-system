@@ -1,10 +1,17 @@
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const UPLOADS_DIR = path.join(__dirname, "..", "uploads", "vehicles");
 import VehicleSale from "../models/VehicleSale.js";
 import Owner from "../models/Owner.js";
 import Wishlist from "../models/Wishlist.js";
 import Booking from "../models/Booking.js";
 import { getIO } from "../utils/socket.js";
 import { addWatermark } from "../utils/watermark.js";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs/promises";
 import {
   resolvePortalCustomerId,
   requirePortalCustomerId,
@@ -189,11 +196,20 @@ export const createListing = async (req, res) => {
       }
     }
 
-    const photos = req.files
-      ? req.files.map((file) => `/uploads/vehicles/${file.filename}`)
-      : [];
+    // Prepare photos array by watermarking and uploading to Cloudinary
+    let photos = [];
+    if (req.files && req.files.length > 0) {
+      // Configure Cloudinary from env
+      if (process.env.CLOUDINARY_URL) {
+        cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+      } else {
+        cloudinary.config({
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+      }
 
-    if (req.user.role !== "customer" && req.files && req.files.length > 0) {
       let garageName = req.user.garageName;
       if (!garageName && ownerId) {
         const ownerDoc = await Owner.findById(ownerId);
@@ -203,8 +219,31 @@ export const createListing = async (req, res) => {
       }
 
       for (const file of req.files) {
-        const filePath = path.join("uploads/vehicles", file.filename);
-        await addWatermark(filePath, garageName);
+        const filePath = path.join(UPLOADS_DIR, file.filename);
+        // Apply local watermark first (keeps existing behavior)
+        try {
+          await addWatermark(filePath, garageName);
+        } catch (err) {
+          console.error("Watermarking failed for", filePath, err);
+        }
+
+        // Upload to Cloudinary
+        try {
+          const uploadRes = await cloudinary.uploader.upload(filePath, {
+            folder: `vehicle_sales/${ownerId}`,
+          });
+          if (uploadRes && uploadRes.secure_url)
+            photos.push(uploadRes.secure_url);
+        } catch (err) {
+          console.error("Cloudinary upload failed for", filePath, err);
+        }
+
+        // Remove local file
+        try {
+          await fs.unlink(filePath);
+        } catch (err) {
+          // Not fatal
+        }
       }
     }
 
@@ -446,6 +485,17 @@ export const updateListing = async (req, res) => {
     }
 
     if (req.files && req.files.length > 0) {
+      // Configure Cloudinary
+      if (process.env.CLOUDINARY_URL) {
+        cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+      } else {
+        cloudinary.config({
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+      }
+
       if (req.user.role !== "customer") {
         let garageName = req.user.garageName;
         if (!garageName && ownerId) {
@@ -456,15 +506,49 @@ export const updateListing = async (req, res) => {
         }
 
         for (const file of req.files) {
-          const filePath = path.join("uploads/vehicles", file.filename);
-          await addWatermark(filePath, garageName);
+          const filePath = path.join(UPLOADS_DIR, file.filename);
+          try {
+            await addWatermark(filePath, garageName);
+          } catch (err) {
+            console.error("Watermarking failed for", filePath, err);
+          }
+
+          try {
+            const uploadRes = await cloudinary.uploader.upload(filePath, {
+              folder: `vehicle_sales/${ownerId}`,
+            });
+            if (uploadRes && uploadRes.secure_url)
+              updatedPhotos.push(uploadRes.secure_url);
+          } catch (err) {
+            console.error("Cloudinary upload failed for", filePath, err);
+          }
+
+          try {
+            await fs.unlink(filePath);
+          } catch (err) {
+            // ignore
+          }
+        }
+      } else {
+        // For customers, simply upload without watermark
+        for (const file of req.files) {
+          const filePath = path.join(UPLOADS_DIR, file.filename);
+          try {
+            const uploadRes = await cloudinary.uploader.upload(filePath, {
+              folder: `vehicle_sales/${ownerId}`,
+            });
+            if (uploadRes && uploadRes.secure_url)
+              updatedPhotos.push(uploadRes.secure_url);
+          } catch (err) {
+            console.error("Cloudinary upload failed for", filePath, err);
+          }
+          try {
+            await fs.unlink(filePath);
+          } catch (err) {
+            // ignore
+          }
         }
       }
-
-      const newPhotos = req.files.map(
-        (file) => `/uploads/vehicles/${file.filename}`,
-      );
-      updatedPhotos = [...updatedPhotos, ...newPhotos];
     }
 
     const validStatus = ["Available", "Booked", "Sold", "Hidden"];

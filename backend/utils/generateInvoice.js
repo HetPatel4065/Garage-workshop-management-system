@@ -60,16 +60,28 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
       const logoPathToUse = settings.logo || settings.invoiceLogo;
       if (logoPathToUse) {
         try {
-          // Ensure we handle absolute paths or paths starting with /
-          const cleanPath = logoPathToUse.startsWith("/")
-            ? logoPathToUse.substring(1)
-            : logoPathToUse;
-          const logoPath = path.isAbsolute(cleanPath)
-            ? cleanPath
-            : path.join(__dirname, "..", cleanPath);
+          if (logoPathToUse.startsWith("http://") || logoPathToUse.startsWith("https://")) {
+            console.log("[PDF Generation] Fetching remote logo:", logoPathToUse);
+            const response = await fetch(logoPathToUse);
+            if (response.ok) {
+              const arrayBuffer = await response.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              doc.image(buffer, 40, 15, { height: 50 });
+            } else {
+              console.error("[PDF Generation] Failed to fetch remote logo. Status:", response.statusText);
+            }
+          } else {
+            // Ensure we handle absolute paths or paths starting with /
+            const cleanPath = logoPathToUse.startsWith("/")
+              ? logoPathToUse.substring(1)
+              : logoPathToUse;
+            const logoPath = path.isAbsolute(cleanPath)
+              ? cleanPath
+              : path.join(__dirname, "..", cleanPath);
 
-          if (fs.existsSync(logoPath)) {
-            doc.image(logoPath, 40, 15, { height: 50 });
+            if (fs.existsSync(logoPath)) {
+              doc.image(logoPath, 40, 15, { height: 50 });
+            }
           }
         } catch (e) {
           console.error("PDF Logo Error:", e);

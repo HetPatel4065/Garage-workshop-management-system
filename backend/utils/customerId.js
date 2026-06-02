@@ -1,6 +1,3 @@
-/**
- * Compute next CUST-#### id from existing customerId strings (numeric max + 1).
- */
 export const nextCustomerIdFromExisting = (customerIds = []) => {
   let maxNum = 999;
 

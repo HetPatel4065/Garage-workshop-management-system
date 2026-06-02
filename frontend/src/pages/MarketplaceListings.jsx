@@ -1267,10 +1267,10 @@ export default function MarketplaceListings({
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <p className="text-[11px] font-black text-blue-600 uppercase tracking-[0.22em] mb-2">
-                  Vehicle Sales
+                  Car Sales
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
-                  Sell Vehicles
+                  Sell Cars
                 </h1>
                 <p className="text-sm font-medium text-slate-500 mt-3">
                   Manage vehicle listings.
@@ -2249,7 +2249,11 @@ export default function MarketplaceListings({
                   className="w-24 h-24 rounded-2xl bg-zinc-800 border border-zinc-800 overflow-hidden relative group"
                 >
                   <img
-                    src={`${import.meta.env.VITE_BASE_URL}${photo}`}
+                    src={
+                      photo?.startsWith("http")
+                        ? photo
+                        : `${import.meta.env.VITE_BASE_URL}${photo}`
+                    }
                     alt="existing-preview"
                     className="w-full h-full object-cover"
                   />

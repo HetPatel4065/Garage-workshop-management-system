@@ -9,18 +9,22 @@ import {
   deleteInvoice,
   shareInvoice,
   generateInvoicePDF,
+  downloadInvoicePDF,
 } from "../controllers/billing.controller.js";
-import multer from 'multer';
-import path from 'path';
+import multer from "multer";
+import path from "path";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),
+    );
+  },
 });
 
 const upload = multer({ storage: storage });
@@ -52,12 +56,7 @@ router.patch(
   updateInvoiceStatus,
 );
 
-router.delete(
-  "/:id",
-  auth,
-  authorize("manage_billing"),
-  deleteInvoice,
-);
+router.delete("/:id", auth, authorize("manage_billing"), deleteInvoice);
 
 router.post(
   "/:id/share",
@@ -75,5 +74,11 @@ router.post(
   generateInvoicePDF,
 );
 
-export default router;
+router.get(
+  "/:id/download-pdf",
+  auth,
+  authorize("manage_billing"),
+  downloadInvoicePDF,
+);
 
+export default router;

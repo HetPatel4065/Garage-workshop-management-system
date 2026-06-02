@@ -15,6 +15,10 @@ import jwt from "jsonwebtoken";
 import GarageSettings from "../models/GarageSettings.js";
 import { generateAndSaveInvoicePDF } from "../utils/generateInvoice.js";
 import { createNotification } from "../utils/notificationHelper.js";
+import { uploadInvoicePDF, getSignedDownloadUrl } from "../services/cloudinary.service.js";
+import fs from "fs/promises";
+import { createReadStream } from "fs";
+import path from "path";
 
 const STAFF_PORTAL_ROLES = ["admin"];
 
@@ -74,12 +78,10 @@ export const sendRegistrationOTP = async (req, res) => {
       ownerId: garageId,
     });
     if (existingCustomer && existingCustomer.status !== "Rejected") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Customer already exists for this garage",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Customer already exists for this garage",
+      });
     }
 
     // Generate 6-digit OTP
@@ -132,12 +134,10 @@ export const registerCustomer = async (req, res) => {
     ).trim();
 
     if (!name || !email || !phone || !garageId || !otp) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "All required fields must be provided",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be provided",
+      });
     }
 
     // Verify OTP
@@ -158,12 +158,10 @@ export const registerCustomer = async (req, res) => {
 
       if (otpData.attempts >= 3) {
         await OTP.deleteOne({ email });
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Max attempts reached. Please request a new OTP.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Max attempts reached. Please request a new OTP.",
+        });
       }
 
       return res.status(400).json({ success: false, message: "Invalid OTP" });
@@ -237,12 +235,10 @@ export const sendLoginOTP = async (req, res) => {
         .sort({ requestedAt: -1 });
 
       if (!requestedCustomer) {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: "No account or registration request found with this email",
-          });
+        return res.status(404).json({
+          success: false,
+          message: "No account or registration request found with this email",
+        });
       }
 
       // If they are pending or rejected, return status immediately without sending OTP
@@ -256,12 +252,10 @@ export const sendLoginOTP = async (req, res) => {
         requestedAt: requestedCustomer.requestedAt,
       });
     } else if (customer.status !== "Active") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: `Your account status is ${customer.status}. Please contact the garage.`,
-        });
+      return res.status(403).json({
+        success: false,
+        message: `Your account status is ${customer.status}. Please contact the garage.`,
+      });
     }
 
     // Generate 6-digit OTP
@@ -926,24 +920,153 @@ export const generatePortalInvoicePDF = async (req, res) => {
 
     // 3. Generate PDF and save to /uploads/invoices/
     const relativePath = await generateAndSaveInvoicePDF(invoice, branding);
+    const filePath = path.join(process.cwd(), "uploads", relativePath);
 
-    // 4. Build the public URL
-    const BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
-    const publicUrl = `${BASE_URL}/uploads/${relativePath}`;
+    // 4. Upload to Cloudinary via the centralised service
+    try {
+      const { secure_url, public_id } = await uploadInvoicePDF(filePath, ownerId);
+      invoice.pdfUrl = secure_url;
+      invoice.publicId = public_id;
+      await invoice.save();
+    } catch (err) {
+      console.error("[Portal] Cloudinary upload failed for portal invoice PDF:", err.message);
+      const BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
+      invoice.pdfUrl = `${BASE_URL}/uploads/${relativePath}`;
+      invoice.publicId = null;
+      await invoice.save();
+    }
 
-    // 5. Persist the URL on the invoice document
-    invoice.pdfUrl = publicUrl;
-    await invoice.save();
+    try {
+      await fs.unlink(filePath);
+    } catch (e) {}
 
     return res.status(200).json({
       success: true,
       message: "Invoice PDF generated successfully",
-      pdfUrl: `${publicUrl}?t=${Date.now()}`,
+      pdfUrl: `${invoice.pdfUrl}?t=${Date.now()}`,
     });
   } catch (error) {
     console.error("[Portal PDF Generation Error]:", error);
     return res
       .status(500)
       .json({ success: false, message: "Failed to generate invoice PDF" });
+  }
+};
+
+export const downloadPortalInvoicePDF = async (req, res) => {
+  const { id } = req.params;
+  let customerId = req.user._id || req.user.id;
+
+  if (isStaffPortalUser(req.user)) {
+    const previewId = getAdminPreviewCustomerId(req);
+    if (previewId) {
+      customerId = previewId;
+    }
+  }
+
+  try {
+    const invoice = await Invoice.findOne({ _id: id, customerId });
+    if (!invoice) {
+      console.error(`[Portal] downloadPortalInvoicePDF - invoice not found or unauthorized: ${id}, customerId: ${customerId}`);
+      return res.status(404).json({ error: "Invoice not found or unauthorized" });
+    }
+
+    const filename = `Invoice-${invoice.invoiceNumber || invoice._id}.pdf`;
+
+    // ── PATH 1: publicId exists → fetch from Cloudinary server-side and stream back ──
+    // We do NOT redirect because the browser would resend custom headers to Cloudinary,
+    // causing a CORS preflight failure. Backend fetches the PDF server-to-server and streams it.
+    if (invoice.publicId) {
+      try {
+        const signedUrl = getSignedDownloadUrl(invoice.publicId);
+        console.log("[Portal] downloadPortalInvoicePDF - fetching from Cloudinary signed URL (server-side)", {
+          invoiceId: id,
+          publicId: invoice.publicId,
+        });
+
+        const cloudinaryResponse = await fetch(signedUrl);
+
+        if (!cloudinaryResponse.ok) {
+          const errText = await cloudinaryResponse.text().catch(() => "");
+          console.error("[Portal] downloadPortalInvoicePDF - Cloudinary signed URL fetch failed", {
+            status: cloudinaryResponse.status,
+            body: errText,
+          });
+          // Fall through to on-the-fly regeneration
+        } else {
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+          // Stream Cloudinary response body → Express response
+          for await (const chunk of cloudinaryResponse.body) {
+            res.write(chunk);
+          }
+          return res.end();
+        }
+      } catch (signErr) {
+        console.error("[Portal] downloadPortalInvoicePDF - signed URL fetch error:", signErr.message);
+        // Fall through to on-the-fly regeneration
+      }
+    }
+
+    // ── PATH 2: no publicId (legacy / fallback) → regenerate on the fly ──
+    console.log(`[Portal] downloadPortalInvoicePDF - no publicId, regenerating PDF on the fly for invoice: ${id}`);
+
+    const populatedInvoice = await Invoice.findOne({ _id: id, customerId })
+      .populate("customerId")
+      .populate({
+        path: "serviceId",
+        populate: [{ path: "vehicleId" }, { path: "partsUsed.partId" }],
+      });
+
+    if (!populatedInvoice) {
+      return res.status(404).json({ error: "Invoice details not found" });
+    }
+
+    const ownerId = populatedInvoice.ownerId;
+    const [settings, owner] = await Promise.all([
+      GarageSettings.findOne({ ownerId }),
+      Owner.findById(ownerId).select("logo mobileNumber garageName address"),
+    ]);
+
+    const branding = {
+      ...(settings ? settings.toObject() : {}),
+      logo: settings?.invoiceLogo || owner?.logo || "",
+      mobileNumber: settings?.contactNumber || owner?.mobileNumber || "",
+      garageName: settings?.garageName || owner?.garageName || "Garage Name",
+      businessAddress: settings?.businessAddress || owner?.address || "Garage Address",
+    };
+
+    const relativePath = await generateAndSaveInvoicePDF(populatedInvoice, branding);
+    const generatedFilePath = path.join(process.cwd(), "uploads", relativePath);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    const readStream = createReadStream(generatedFilePath);
+
+    res.on("finish", async () => {
+      try {
+        await fs.unlink(generatedFilePath);
+      } catch (e) {
+        // non-fatal
+      }
+    });
+
+    readStream.on("error", (err) => {
+      console.error("[Portal] downloadPortalInvoicePDF - stream error:", err.message);
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Failed to stream invoice PDF" });
+      }
+    });
+
+    return readStream.pipe(res);
+  } catch (error) {
+    console.error("[Portal] downloadPortalInvoicePDF - unexpected error:", {
+      invoiceId: id,
+      customerId,
+      error: error?.message || error,
+    });
+    return res.status(500).json({ error: "Failed to download invoice PDF", details: error.message });
   }
 };

@@ -27,22 +27,21 @@ const JobCardRow = ({ job, isOpen, toggleExpand }) => {
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-base sm:text-lg text-slate-900 dark:text-white truncate max-w-full">
+            <h3 className="font-bold text-base sm:text-lg md:text-xl capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
               {job.jobCardId}
-            </p>
+            </h3>
 
             {/* Metadata Badge Row */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
-              <p className="text-[11px] sm:text-[13px] font-bold text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-950 px-2 py-0.5 rounded-lg w-fit shrink-0 font-mono tracking-wider">
+              <p className="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-950 px-2 py-0.5 rounded-lg w-fit shrink-0 font-mono tracking-wider">
                 {job.licensePlate}
               </p>
-
               {/* Mobile Backup Date (Visible ONLY on small mobile screens) */}
               <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 sm:hidden flex items-center gap-1 shrink-0">
                 {new Date(job.createdAt).toLocaleDateString("en-IN", {
                   day: "2-digit",
                   month: "short",
-                  year:"2-digit"
+                  year: "2-digit",
                 })}
               </span>
             </div>

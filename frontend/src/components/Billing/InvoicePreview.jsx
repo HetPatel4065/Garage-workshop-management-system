@@ -58,7 +58,7 @@ export default memo(function InvoicePreview({
         <div className="relative shrink-0">
           {garageSettings?.logo ? (
             <img
-              src={`${import.meta.env.VITE_BASE_URL}/${garageSettings.logo}`}
+              src={garageSettings.logo.startsWith("http") ? garageSettings.logo : `${import.meta.env.VITE_BASE_URL}/${garageSettings.logo}`}
               alt="Logo"
               className="w-14 h-14 rounded-2xl object-cover border border-white shadow-md"
             />
@@ -389,7 +389,7 @@ export default memo(function InvoicePreview({
           <button
             onClick={async () => {
               try {
-                addToast("Generating your premium invoice...", "info");
+                addToast("Generating your invoice...", "info");
 
                 const response = await fetch(
                   `/api/billing/${invoice._id}/generate-pdf`,
@@ -402,28 +402,37 @@ export default memo(function InvoicePreview({
                   },
                 );
 
-                // 1. If your API returns a JSON with a URL, we need that data first
+                // 1. Ensure the PDF has been generated first
                 const data = await response.json();
                 if (!response.ok)
                   throw new Error(data.error || "Failed to generate PDF");
 
-                // 2. Fetch the actual PDF file from the returned URL as a blob
-                const pdfResponse = await fetch(data.pdfUrl);
+                // 2. Fetch the PDF through the secure backend proxy endpoint
+                const downloadUrl = `/api/billing/${invoice._id}/download-pdf`;
+                const pdfResponse = await fetch(downloadUrl, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                });
+                if (!pdfResponse.ok) {
+                  const errText = await pdfResponse.text().catch(() => "");
+                  throw new Error(
+                    `PDF download failed: ${pdfResponse.status} ${pdfResponse.statusText} ${errText}`,
+                  );
+                }
                 const blob = await pdfResponse.blob();
 
-                // 3. Create a temporary local URL for the blob
-                const downloadUrl = window.URL.createObjectURL(blob);
-
-                // 4. Create a hidden <a> tag and programmatically click it to force download
+                // 3. Create a temporary local URL for the blob and trigger download
+                const localDownloadUrl = window.URL.createObjectURL(blob);
                 const link = document.createElement("a");
-                link.href = downloadUrl;
-                link.download = `Invoice-${invoice._id}.pdf`; // You can name the file here
+                link.href = localDownloadUrl;
+                link.download = `Invoice-${invoice.invoiceNumber || invoice._id}.pdf`;
                 document.body.appendChild(link);
                 link.click();
 
-                // 5. Clean up the DOM and memory
+                // 4. Clean up the DOM and memory
                 document.body.removeChild(link);
-                window.URL.revokeObjectURL(downloadUrl);
+                window.URL.revokeObjectURL(localDownloadUrl);
 
                 addToast("Invoice ready!", "success");
               } catch (err) {

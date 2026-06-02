@@ -81,10 +81,14 @@ export default function CustomerCard({
           className="col-span-1"
         />
         <MetaField
-          label="Joined"
+          label="Joined Date"
           primary={
             customer.createdAt
-              ? new Date(customer.createdAt).toLocaleDateString("en-GB")
+              ? new Date(customer.createdAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
               : "—"
           }
         />

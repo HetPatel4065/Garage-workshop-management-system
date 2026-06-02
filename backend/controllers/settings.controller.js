@@ -10,6 +10,8 @@ import Advisor from "../models/Advisor.js";
 import Mechanic from "../models/Mechanic.js";
 import bcrypt from "bcryptjs";
 import { sendEmail, buildDailyReportEmail } from "../utils/notifications.js";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs/promises";
 
 // 📊 EXPORT DATA
 export const exportData = async (req, res) => {
@@ -27,18 +29,26 @@ export const exportData = async (req, res) => {
       serviceInvoiceFilter.createdAt = { $gte: startDate };
       jobCardFilter.$or = [
         { serviceDate: { $gte: startDate } },
-        { createdAt: { $gte: startDate } }
+        { createdAt: { $gte: startDate } },
       ];
     }
 
     const [customers, services, invoices, inventory, vehicles, jobCards] =
       await Promise.all([
         Customer.find({ ownerId }),
-        Service.find(serviceInvoiceFilter).populate("customerId").populate("vehicleId").populate("advisorId"),
-        Invoice.find(serviceInvoiceFilter).populate("customerId").populate("serviceId"),
+        Service.find(serviceInvoiceFilter)
+          .populate("customerId")
+          .populate("vehicleId")
+          .populate("advisorId"),
+        Invoice.find(serviceInvoiceFilter)
+          .populate("customerId")
+          .populate("serviceId"),
         Inventory.find({ ownerId }),
         Vehicle.find({ garageId: ownerId }).populate("customerId"),
-        JobCard.find(jobCardFilter).populate("customerId").populate("vehicleId").populate("advisorId"),
+        JobCard.find(jobCardFilter)
+          .populate("customerId")
+          .populate("vehicleId")
+          .populate("advisorId"),
       ]);
 
     if (req.query.format === "json") {
@@ -236,21 +246,57 @@ export const updateSettings = async (req, res) => {
     // Handle SMTP config if sent
     if (req.body.smtp) {
       try {
-        settingsUpdate.smtp = typeof req.body.smtp === "string" ? JSON.parse(req.body.smtp) : req.body.smtp;
+        settingsUpdate.smtp =
+          typeof req.body.smtp === "string"
+            ? JSON.parse(req.body.smtp)
+            : req.body.smtp;
       } catch (err) {
         console.error("SMTP Parse Error:", err);
       }
     }
 
     if (req.files) {
+      if (process.env.CLOUDINARY_URL) {
+        cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+      } else {
+        cloudinary.config({
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+      }
+
       if (req.files.logo && req.files.logo[0]) {
-        settingsUpdate.logo = req.files.logo[0].path.replace(/\\/g, "/");
+        const filePath = req.files.logo[0].path;
+        try {
+          const uploaded = await cloudinary.uploader.upload(filePath, {
+            folder: `garage_logos/${ownerId}`,
+          });
+          settingsUpdate.logo =
+            uploaded?.secure_url || filePath.replace(/\\/g, "/");
+        } catch (err) {
+          console.error("Cloudinary upload failed for settings logo:", err);
+          settingsUpdate.logo = filePath.replace(/\\/g, "/");
+        }
+        try {
+          await fs.unlink(filePath);
+        } catch (e) {}
       }
       if (req.files.invoiceLogo && req.files.invoiceLogo[0]) {
-        settingsUpdate.invoiceLogo = req.files.invoiceLogo[0].path.replace(
-          /\\/g,
-          "/",
-        );
+        const filePath = req.files.invoiceLogo[0].path;
+        try {
+          const uploaded = await cloudinary.uploader.upload(filePath, {
+            folder: `garage_logos/${ownerId}`,
+          });
+          settingsUpdate.invoiceLogo =
+            uploaded?.secure_url || filePath.replace(/\\/g, "/");
+        } catch (err) {
+          console.error("Cloudinary upload failed for invoice logo:", err);
+          settingsUpdate.invoiceLogo = filePath.replace(/\\/g, "/");
+        }
+        try {
+          await fs.unlink(filePath);
+        } catch (e) {}
       }
     }
 
@@ -372,7 +418,7 @@ export const sendTestNotification = async (req, res) => {
         Vehicle.countDocuments({ garageId: ownerId }),
         JobCard.countDocuments({ garageId: ownerId }),
         Advisor.countDocuments({ ownerId }),
-        Mechanic.countDocuments({ ownerId })
+        Mechanic.countDocuments({ ownerId }),
       ]);
 
       let billingToday = 0;
@@ -396,7 +442,9 @@ export const sendTestNotification = async (req, res) => {
           totalVehicles,
           totalJobCards,
           totalStaff: totalAdvisors + totalMechanics,
-          lowStockItems: lowStockItems.map((i) => `${i.name} (Qty: ${i.stock})`),
+          lowStockItems: lowStockItems.map(
+            (i) => `${i.name} (Qty: ${i.stock})`,
+          ),
         },
       });
 
@@ -686,15 +734,17 @@ export const sendLiveBackup = async (req, res) => {
                 </tr>
               </table>
 
-             ${lowStockItems && lowStockItems.length > 0 ? `
+             ${
+               lowStockItems && lowStockItems.length > 0
+                 ? `
               <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px 16px; font-size:13px; color:#92400e; margin-bottom:24px;">
                   &#9888;&#65039; <strong>Low Stock Alert:</strong> 
                       <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-                          ${lowStockItems.map((item) => `<li>${item.name} (Only ${item.stock} left)</li>`,).join("")}
+                          ${lowStockItems.map((item) => `<li>${item.name} (Only ${item.stock} left)</li>`).join("")}
                       </ul>
               </div>`
-        : ""
-      }
+                 : ""
+             }
               <p style="margin:0 0 24px;font-size:12px;color:#94a3b8;line-height:1.6;text-align:center;">
                 Attached is the full database export in CSV format. You can open this file in Excel or Google Sheets to view your complete records.
               </p>

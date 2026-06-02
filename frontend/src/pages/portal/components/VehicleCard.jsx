@@ -33,7 +33,7 @@ const VehicleCard = ({ vehicle, isOpen, toggleExpand }) => {
           <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
             {/* Row 1: Make & Model */}
             <div className="flex items-baseline gap-2 min-w-0">
-              <h3 className="text-base sm:text-2xl font-bold capitalize tracking-tight text-black dark:text-white truncate max-w-37.5 sm:max-w-none">
+            <h3 className="font-bold text-base sm:text-lg md:text-xl capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
                 {vehicle.make} {vehicle.model}
               </h3>
             </div>
@@ -42,19 +42,19 @@ const VehicleCard = ({ vehicle, isOpen, toggleExpand }) => {
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
               {/* High-Contrast License Plate Style */}
               <div className="flex items-center bg-slate-600 dark:bg-zinc-800 rounded-md overflow-hidden shadow-sm border border-slate-800 dark:border-zinc-700 shrink-0">
-                <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-widest font-mono">
+                <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold text-white uppercase tracking-widest font-mono">
                   {vehicle.licensePlate}
                 </span>
               </div>
 
               {/* Year Badge */}
               <span className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-100 dark:bg-zinc-950 text-slate-600 dark:text-zinc-400 rounded-md border border-slate-200 dark:border-zinc-850 text-[10px] sm:text-[11px] font-bold shrink-0">
-                <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                <Calendar className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
                 {vehicle.year}
               </span>
 
               {/* Status Badge */}
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md border border-blue-100 dark:border-blue-900/40 shrink-0">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md border border-blue-100 dark:border-blue-900/40 shrink-0">
                 {vehicle.status}
               </span>
             </div>

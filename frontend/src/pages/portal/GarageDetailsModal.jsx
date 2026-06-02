@@ -105,7 +105,7 @@ const GarageDetailsModal = ({ isOpen, onClose, garage, onRegister }) => {
           <div className="w-32 h-32 rounded-3xl bg-white dark:bg-slate-900 flex items-center justify-center mb-6 border border-slate-100 dark:border-slate-800 p-4 shadow-sm">
             {garage.logo ? (
               <img
-                src={`${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${String(garage.logo).replace(/^\//, "")}`}
+                src={String(garage.logo).startsWith("http") ? garage.logo : `${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${String(garage.logo).replace(/^\//, "")}`}
                 alt={garage.garageName}
                 className="w-full h-full object-contain dark:invert dark:brightness-200"
               />

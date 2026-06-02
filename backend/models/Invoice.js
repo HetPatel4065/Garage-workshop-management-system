@@ -80,6 +80,11 @@ const invoiceSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    // Cloudinary public_id for the stored PDF (used for deletion)
+    publicId: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

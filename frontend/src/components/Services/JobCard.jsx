@@ -23,7 +23,6 @@ export default function JobCard({
   onView,
   role,
   userId,
-  formatDate,
 }) {
   const isAssignedToMe =
     (jc.mechanicId?._id || jc.mechanicId) === userId ||
@@ -65,8 +64,16 @@ export default function JobCard({
         />
         <MetaField
           label="Registered Date"
-          value={jc.createdAt ? formatDate(jc.createdAt) : "—"}
-        />
+          value={
+            jc.createdAt
+              ? new Date(jc.createdAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "—"
+          }
+        />{" "}
       </div>
 
       {/* ── BOTTOM ROW ── */}

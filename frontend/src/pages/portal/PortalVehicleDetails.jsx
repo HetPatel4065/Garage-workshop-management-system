@@ -5,8 +5,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   Building,
-  Calendar,
-  CarFront,
+  Tag,
   CheckCircle,
   ChevronDown,
   ChevronLeft,
@@ -33,7 +32,6 @@ import {
   Share2,
   ShieldCheck,
   Star,
-  Tag,
   TrendingUp,
   User,
   Users,
@@ -43,6 +41,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
+import { FaCar } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import ThemeToggle from "../../components/theme/ThemeToggle";
@@ -236,18 +235,93 @@ const ContactRow = ({
 /* LIGHTBOX */
 const Lightbox = ({ photos, activeIdx, onClose, onNext, onPrev }) => {
   const [zoom, setZoom] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [constraints, setConstraints] = useState({
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  });
+  const containerRef = useRef(null);
+  const lastTap = useRef(0);
+
   useEffect(() => {
     setZoom(1);
   }, [activeIdx]);
+
+  const updateConstraints = useCallback(() => {
+    if (!containerRef.current) return;
+    const container = containerRef.current.getBoundingClientRect();
+    const imgEl = containerRef.current.querySelector("img");
+    if (!imgEl) return;
+    const img = imgEl.getBoundingClientRect();
+
+    const xMax = Math.max(0, (img.width - container.width) / 2);
+    const yMax = Math.max(0, (img.height - container.height) / 2);
+
+    setConstraints({
+      left: -xMax,
+      right: xMax,
+      top: -yMax,
+      bottom: yMax,
+    });
+  }, []);
+
+  // Update bounds when zoom, activeIdx, or photo changes
+  useEffect(() => {
+    const timer = setTimeout(updateConstraints, 60);
+    return () => clearTimeout(timer);
+  }, [zoom, activeIdx, updateConstraints]);
+
+  // Update bounds on window resize
+  useEffect(() => {
+    window.addEventListener("resize", updateConstraints);
+    return () => window.removeEventListener("resize", updateConstraints);
+  }, [updateConstraints]);
+
   useEffect(() => {
     const handler = (e) => {
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") onNext();
       if (e.key === "ArrowLeft") onPrev();
+      if (e.key === "+" || e.key === "=" || e.code === "KeyZ") {
+        setZoom((z) => Math.min(z + 0.25, 4));
+      }
+      if (e.key === "-" || e.key === "_" || e.code === "KeyX") {
+        setZoom((z) => Math.max(z - 0.25, 1));
+      }
+      if (e.key === "0" || e.key === "r" || e.code === "KeyR") {
+        setZoom(1);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose, onNext, onPrev]);
+
+  const handleWheel = (e) => {
+    e.stopPropagation();
+    if (e.deltaY < 0) {
+      setZoom((z) => Math.min(z + 0.25, 4));
+    } else {
+      setZoom((z) => Math.max(z - 0.25, 1));
+    }
+  };
+
+  const handleImageTap = useCallback(() => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTap.current < DOUBLE_TAP_DELAY) {
+      setZoom((z) => (z > 1 ? 1 : 2.5));
+    }
+    lastTap.current = now;
+  }, []);
+
+  const cursorStyle = React.useMemo(() => {
+    if (zoom > 1) {
+      return isDragging ? "grabbing" : "grab";
+    }
+    return "zoom-in";
+  }, [zoom, isDragging]);
 
   return (
     <AnimatePresence>
@@ -255,58 +329,161 @@ const Lightbox = ({ photos, activeIdx, onClose, onNext, onPrev }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-100 bg-black/95 backdrop-blur-sm flex flex-col"
+        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col"
         onClick={onClose}
       >
+        {/* Top Bar */}
         <div
-          className="absolute top-0 inset-x-0 z-10 flex items-center justify-between px-4 py-3 bg-linear-to-b from-black/60 to-transparent"
+          className="
+        absolute top-0 inset-x-0 z-20
+        flex flex-wrap items-center justify-between
+        gap-3
+        px-3 sm:px-4 md:px-6
+        py-3
+        bg-linear-to-b from-black/70 to-transparent
+      "
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="text-white/70 text-xs font-bold">
-            {activeIdx + 1} / {photos.length}
-          </span>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setZoom((z) => Math.min(z + 0.5, 3))}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            <span className="text-white/70 text-sm sm:text-base font-bold">
+              {activeIdx + 1} / {photos.length}
+            </span>
+
+            <span
+              className="
+            text-white/90
+            bg-white/10
+            px-2 py-1
+            rounded-lg
+            text-[10px] sm:text-xs
+            font-black
+            uppercase
+          "
             >
-              <ZoomIn className="w-4 h-4" />
+              Zoom: {Math.round(zoom * 100)}%
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setZoom((z) => Math.min(z + 0.5, 4))}
+              className="
+            w-9 h-9
+            sm:w-10 sm:h-10
+            rounded-full
+            bg-white/10
+            hover:bg-white/20
+            text-white
+            flex items-center justify-center
+            transition-colors
+          "
+              title="Zoom In (+)"
+            >
+              <ZoomIn className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
+
             <button
               onClick={() => setZoom((z) => Math.max(z - 0.5, 1))}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              className="
+            w-9 h-9
+            sm:w-10 sm:h-10
+            rounded-full
+            bg-white/10
+            hover:bg-white/20
+            text-white
+            flex items-center justify-center
+            transition-colors
+          "
+              title="Zoom Out (-)"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
+
             <button
               onClick={() => setZoom(1)}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              className="
+            w-9 h-9
+            sm:w-10 sm:h-10
+            rounded-full
+            bg-white/10
+            hover:bg-white/20
+            text-white
+            flex items-center justify-center
+            transition-colors
+          "
+              title="Reset Zoom"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
+
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              className="
+            w-9 h-9
+            sm:w-10 sm:h-10
+            rounded-full
+            bg-white/10
+            hover:bg-white/20
+            text-white
+            flex items-center justify-center
+            transition-colors
+          "
+              title="Close"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
+        {/* Image Area */}
         <div
-          className="flex-1 flex items-center justify-center overflow-hidden"
+          ref={containerRef}
+          className="
+        flex-1
+        flex
+        items-center
+        justify-center
+        overflow-hidden
+        relative
+        w-full
+        h-full
+        px-2 sm:px-4
+      "
           onClick={(e) => e.stopPropagation()}
+          onWheel={handleWheel}
         >
           <AnimatePresence mode="wait">
             <motion.img
               key={activeIdx}
               initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: zoom }}
+              animate={{
+                opacity: 1,
+                scale: zoom,
+                ...(zoom === 1 ? { x: 0, y: 0 } : {}),
+              }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               src={photoUrl(photos[activeIdx]) || FALLBACK}
-              className="max-w-full max-h-full object-contain select-none"
-              style={{ cursor: zoom > 1 ? "move" : "default" }}
+              className="
+            max-w-full
+            max-h-[80vh]
+            sm:max-h-[85vh]
+            md:max-h-[90vh]
+            object-contain
+            select-none
+          "
+              style={{ cursor: cursorStyle }}
+              drag={zoom > 1}
+              dragConstraints={constraints}
+              dragElastic={0.15}
+              dragMomentum={false}
+              onLoad={updateConstraints}
+              onDragStart={() => {
+                updateConstraints();
+                setIsDragging(true);
+              }}
+              onDragEnd={() => setIsDragging(false)}
+              onTap={handleImageTap}
               onError={(e) => {
                 e.currentTarget.src = FALLBACK;
               }}
@@ -314,6 +491,7 @@ const Lightbox = ({ photos, activeIdx, onClose, onNext, onPrev }) => {
           </AnimatePresence>
         </div>
 
+        {/* Prev Button */}
         {photos.length > 1 && (
           <>
             <button
@@ -321,25 +499,61 @@ const Lightbox = ({ photos, activeIdx, onClose, onNext, onPrev }) => {
                 e.stopPropagation();
                 onPrev();
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+              className="
+            absolute
+            left-2 sm:left-4 md:left-6
+            top-1/2
+            -translate-y-1/2
+            w-9 h-9
+            sm:w-11 sm:h-11
+            rounded-full
+            bg-white/10
+            hover:bg-white/20
+            backdrop-blur-sm
+            text-white
+            flex items-center justify-center
+            transition-all
+          "
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onNext();
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+              className="
+            absolute
+            right-2 sm:right-4 md:right-6
+            top-1/2
+            -translate-y-1/2
+            w-9 h-9
+            sm:w-11 sm:h-11
+            rounded-full
+            bg-white/10
+            hover:bg-white/20
+            backdrop-blur-sm
+            text-white
+            flex items-center justify-center
+            transition-all
+          "
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </>
         )}
 
+        {/* Bottom Indicators */}
         {photos.length > 1 && (
           <div
-            className="absolute bottom-0 inset-x-0 flex justify-center gap-2 px-4 py-4 bg-linear-to-t from-black/60 to-transparent"
+            className="
+          absolute bottom-0 inset-x-0
+          flex justify-center flex-wrap
+          gap-2
+          px-4 py-4
+          bg-linear-to-t from-black/70 to-transparent
+        "
             onClick={(e) => e.stopPropagation()}
           >
             {photos.map((_, i) => (
@@ -347,10 +561,18 @@ const Lightbox = ({ photos, activeIdx, onClose, onNext, onPrev }) => {
                 key={i}
                 onClick={() => {
                   const diff = i - activeIdx;
-                  if (diff > 0) for (let j = 0; j < diff; j++) onNext();
-                  else if (diff < 0) for (let j = 0; j < -diff; j++) onPrev();
+
+                  if (diff > 0) {
+                    for (let j = 0; j < diff; j++) onNext();
+                  } else if (diff < 0) {
+                    for (let j = 0; j < -diff; j++) onPrev();
+                  }
                 }}
-                className={`h-1 rounded-full transition-all ${i === activeIdx ? "w-6 bg-white" : "w-2 bg-white/30 hover:bg-white/60"}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIdx
+                    ? "w-8 bg-white"
+                    : "w-2.5 bg-white/30 hover:bg-white/60"
+                }`}
               />
             ))}
           </div>
@@ -690,7 +912,7 @@ const PortalVehicleDetails = () => {
           <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-blue-900/40" />
           <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
           <div className="absolute inset-3 rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
-            <CarFront className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <FaCar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
         <div className="text-center">
@@ -1168,14 +1390,14 @@ const PortalVehicleDetails = () => {
             </motion.div>
 
             {/* ── OVERVIEW ── */}
-            <CollapsibleCard title="Overview" icon={CarFront}>
+            <CollapsibleCard title="Overview" icon={FaCar}>
               <div className="grid grid-cols-2 gap-2.5">
                 <StatCard
-                  icon={Calendar}
-                  label="Brand / Make"
+                  icon={Tag}
+                  label="Brand"
                   value={vehicle.brand}
                 />
-                <StatCard icon={CarFront} label="Model" value={vehicle.model} />
+                <StatCard icon={FaCar} label="Model" value={vehicle.model} />
                 {vehicle.variant && (
                   <StatCard
                     icon={TrendingUp}
@@ -1184,13 +1406,13 @@ const PortalVehicleDetails = () => {
                   />
                 )}
                 <StatCard
-                  icon={Calendar}
+                  icon={Tag}
                   label="Mfg Year"
                   value={vehicle.year}
                 />
                 {vehicle.regYear && (
                   <StatCard
-                    icon={Calendar}
+                    icon={Tag}
                     label="Reg Year"
                     value={vehicle.regYear}
                   />

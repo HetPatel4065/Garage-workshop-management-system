@@ -862,7 +862,7 @@ export default function StaffMembers() {
                             <span className="text-xs font-bold text-slate-600 dark:text-slate-300 tabular-nums whitespace-nowrap">
                               {member.createdAt
                                 ? new Date(member.createdAt).toLocaleDateString(
-                                    "en-IN",
+                                    "en-GB",
                                     {
                                       day: "2-digit",
                                       month: "short",

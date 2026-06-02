@@ -281,7 +281,7 @@ export default function PortalHome() {
                         <div className="w-11 h-11 rounded-xl border border-slate-100 bg-slate-50 group-hover:bg-blue-50 group-hover:border-blue-100 flex items-center justify-center transition-all duration-300 shrink-0">
                           {garage.logo ? (
                             <img
-                              src={`${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${String(garage.logo).replace(/^\//, "")}`}
+                              src={String(garage.logo).startsWith("http") ? garage.logo : `${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${String(garage.logo).replace(/^\//, "")}`}
                               alt={garage.garageName}
                               className="w-7 h-7 object-contain"
                             />

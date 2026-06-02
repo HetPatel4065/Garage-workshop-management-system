@@ -52,24 +52,24 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-sm sm:text-base md:text-lg capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
+            <h3 className="font-bold text-base sm:text-lg md:text-xl capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
               {parsedServiceTitle}
             </h3>
 
             {/* Metadata Badges Block - Clean wrap layout for ultra-small screens */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-1.5">
               {svc.serviceId && (
-                <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 shrink-0">
+                <span className="text-xs font-bold text-slate-400 dark:text-zinc-500 shrink-0">
                   {svc.serviceId}
                 </span>
               )}
               {svc.licensePlate && (
-                <span className="text-[11px] font-bold font-mono text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
+                <span className="text-xs font-bold font-mono text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
                   {svc.licensePlate}
                 </span>
               )}
               {svc.jobCardId && (
-                <span className="text-[11px] font-bold text-blue-500 dark:text-blue-400 shrink-0">
+                <span className="text-xs font-bold text-blue-500 dark:text-blue-400 shrink-0">
                   {svc.jobCardId}
                 </span>
               )}
@@ -223,7 +223,6 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
                 </div>
               )}
 
-              {/* Parts Used Grid System Layout */}
               {/* ── Parts Used Section ── */}
               {hasParts && (
                 <div className="w-full">
@@ -246,9 +245,9 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
                           key={i}
                           className="hover:bg-slate-50/40 dark:hover:bg-zinc-850/20 transition-colors"
                         >
-                          {/* 📱 MOBILE VIEW: Stacked List Layout (Visible on ultra-small screens) */}
+                          {/*  MOBILE VIEW: Stacked List Layout (Visible on ultra-small screens) */}
                           <div className="block sm:hidden p-3 space-y-2">
-                            <div className="font-bold text-slate-700 dark:text-zinc-300 text-xs capitalize break-words">
+                            <div className="font-bold text-slate-700 dark:text-zinc-300 text-xs capitalize wrap-break-words">
                               {p.name}
                             </div>
                             <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
@@ -269,9 +268,9 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
                             </div>
                           </div>
 
-                          {/* 💻 DESKTOP/TABLET VIEW: Clean Column Grid (Hidden on mobile) */}
+                          {/* DESKTOP/TABLET VIEW: Clean Column Grid (Hidden on mobile) */}
                           <div className="hidden sm:grid grid-cols-12 gap-2 items-center px-4 py-2.5 text-xs sm:text-sm">
-                            <span className="col-span-6 capitalize font-bold text-slate-700 dark:text-zinc-300 break-words pr-1">
+                            <span className="col-span-6 capitalize font-bold text-slate-700 dark:text-zinc-300 wrap-break-words pr-1">
                               {p.name}
                             </span>
                             <span className="col-span-2 font-bold text-slate-600 dark:text-zinc-400 text-center whitespace-nowrap">
@@ -312,7 +311,7 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
                           key={i}
                           className="flex items-center justify-between px-4 py-2.5 text-xs sm:text-sm hover:bg-slate-50/40 dark:hover:bg-zinc-850/20 transition-colors"
                         >
-                          <span className="w-2/3 capitalize font-bold text-slate-700 dark:text-zinc-300 wrap-wrap-break-words pr-2">
+                          <span className="w-2/3 capitalize font-bold text-slate-700 dark:text-zinc-300 wrap-break-words pr-2">
                             {l.description}
                           </span>
                           <span className="w-1/3 font-black text-slate-800 dark:text-zinc-200 text-right whitespace-nowrap">
@@ -332,7 +331,7 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
                     <StickyNote className="w-3 h-3 text-amber-500" /> Notes /
                     Remarks
                   </h4>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-350 font-medium bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 rounded-xl px-4 py-3 leading-relaxed shadow-sm wrap-wrap-break-words">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-350 font-medium bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/80 rounded-xl px-4 py-3 leading-relaxed shadow-sm wrap-break-words">
                     {svc.notes}
                   </p>
                 </div>
