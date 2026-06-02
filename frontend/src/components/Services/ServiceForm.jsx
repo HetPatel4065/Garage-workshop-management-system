@@ -45,6 +45,29 @@ const cleanServiceItem = (str) => {
   return str.replace(/^[\s\d\.\-\)\*]+/, "").trim();
 };
 
+const parseServiceDate = (dateStr) => {
+  if (!dateStr) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const date = new Date(dateStr);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+    const [day, month, year] = dateStr.split("-");
+    const date = new Date(`${year}-${month}-${day}`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const date = new Date(dateStr);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const calculateNextServiceDate = (serviceDateStr, intervalMonths = 6) => {
+  const date = parseServiceDate(serviceDateStr);
+  if (!date) return "";
+  const next = new Date(date);
+  next.setMonth(next.getMonth() + Number(intervalMonths || 6));
+  return next.toISOString().split("T")[0];
+};
+
 /* ─── Shared primitives ───────────────────────────────────── */
 const Label = ({ children, required, hint, error }) => (
   <label
@@ -188,6 +211,32 @@ export default function ServiceForm({
     year: "",
     fuelType: "",
   });
+
+  useEffect(() => {
+    if (!serviceDate) return;
+
+    const interval = Number(garageSettings.reminderInterval || 6);
+    const calculatedNext = calculateNextServiceDate(serviceDate, interval);
+
+    if (!calculatedNext) return;
+
+    if (!nextServiceDate) {
+      setNextServiceDate(calculatedNext);
+      return;
+    }
+
+    const currentNext = parseServiceDate(nextServiceDate);
+    const currentService = parseServiceDate(serviceDate);
+
+    if (!currentNext || !currentService) {
+      setNextServiceDate(calculatedNext);
+      return;
+    }
+
+    if (currentNext.getTime() <= currentService.getTime()) {
+      setNextServiceDate(calculatedNext);
+    }
+  }, [serviceDate, garageSettings.reminderInterval, nextServiceDate]);
 
   /* ── Active tab ── */
   const [activeTab, setActiveTab] = useState("info");
@@ -506,7 +555,7 @@ export default function ServiceForm({
         ? new Date(serviceData.vehicleId.serviceDate)
             .toISOString()
             .split("T")[0]
-        : new Date().toISOString().split("T")[0],
+        : "",
     );
     setNextServiceDate(
       serviceData.vehicleId?.nextServiceDate
@@ -641,7 +690,7 @@ export default function ServiceForm({
       setServiceDate(
         v.serviceDate
           ? new Date(v.serviceDate).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
+          : "",
       );
       setNextServiceDate(
         v.nextServiceDate
@@ -939,6 +988,26 @@ export default function ServiceForm({
       return;
     }
 
+    // Ensure nextServiceDate is calculated if serviceDate exists
+    let finalNextServiceDate = nextServiceDate;
+    if (serviceDate && !nextServiceDate) {
+      const interval = Number(garageSettings?.reminderInterval || 6);
+      console.log("Calculating nextServiceDate:", {
+        serviceDate,
+        interval,
+        garageSettings,
+      });
+      finalNextServiceDate = calculateNextServiceDate(serviceDate, interval);
+
+      // Fallback: if calculation failed, do manual calculation
+      if (!finalNextServiceDate) {
+        const d = new Date(serviceDate);
+        d.setMonth(d.getMonth() + interval);
+        finalNextServiceDate = d.toISOString().split("T")[0];
+      }
+      console.log("Calculated nextServiceDate:", finalNextServiceDate);
+    }
+
     const payload = {
       serviceName,
       customerId,
@@ -973,7 +1042,7 @@ export default function ServiceForm({
       advisorId: advisorId || null,
       jobId: jobId || null,
       serviceDate,
-      nextServiceDate,
+      nextServiceDate: finalNextServiceDate,
     };
     if (serviceData?._id) payload._id = serviceData._id;
     onSubmit(payload);
@@ -1330,17 +1399,6 @@ export default function ServiceForm({
                 }`}
               >
                 {tab.label}
-                {tab.badge && (
-                  <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                      isActive
-                        ? "bg-gray-900 text-white"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
                 {tab.hasError && (
                   <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white shadow-sm" />
                 )}
@@ -1537,7 +1595,31 @@ export default function ServiceForm({
                               }
                               onChange={(e) => {
                                 if (field === "serviceDate") {
-                                  setServiceDate(e.target.value);
+                                  const newServiceDate = e.target.value;
+                                  setServiceDate(newServiceDate);
+
+                                  const interval = Number(
+                                    garageSettings.reminderInterval || 6,
+                                  );
+                                  const calculatedNext =
+                                    calculateNextServiceDate(
+                                      newServiceDate,
+                                      interval,
+                                    );
+
+                                  const currentNext =
+                                    parseServiceDate(nextServiceDate);
+                                  const currentService =
+                                    parseServiceDate(newServiceDate);
+                                  if (
+                                    !nextServiceDate ||
+                                    !currentNext ||
+                                    !currentService ||
+                                    currentNext.getTime() <=
+                                      currentService.getTime()
+                                  ) {
+                                    setNextServiceDate(calculatedNext);
+                                  }
                                 } else if (field === "nextServiceDate") {
                                   setNextServiceDate(e.target.value);
                                 } else if (!isMechanic) {
@@ -1584,7 +1666,7 @@ export default function ServiceForm({
                       <div>
                         <Label>Assigned Advisor</Label>
                         {jobId ? (
-                          <div className="px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-sm font-bold text-indigo-600 flex items-center gap-2">
+                          <div className="px-4 py-2.5 bg-white capitalize border border-gray-100 rounded-xl text-sm font-bold text-indigo-600 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                             {availableAdvisors.find((a) => a._id === advisorId)
                               ?.name || "Not Assigned"}
@@ -1612,7 +1694,7 @@ export default function ServiceForm({
                       <div>
                         <Label>Assigned Mechanic</Label>
                         {jobId ? (
-                          <div className="px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2">
+                          <div className="px-4 py-2.5 bg-white border capitalize border-gray-100 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                             {availableMechanics.find(
                               (m) => m._id === mechanicId,
@@ -1909,7 +1991,7 @@ export default function ServiceForm({
                               selectedServices.filter((_, i) => i !== idx),
                             )
                           }
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white active:scale-90 transition-all border border-transparent hover:border-red-100 shrink-0"
+                          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800 active:scale-90 transition-all duration-200"
                           title="Remove service"
                         >
                           <svg
@@ -2079,7 +2161,7 @@ export default function ServiceForm({
                               labourCharges.filter((_, i) => i !== idx),
                             )
                           }
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white active:scale-90 transition-all border border-transparent hover:border-red-100 shrink-0"
+                          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800 active:scale-90 transition-all duration-200"
                           title="Remove labour"
                         >
                           <svg
@@ -2330,7 +2412,15 @@ export default function ServiceForm({
                                 partsUsed.filter((_, i) => i !== idx),
                               )
                             }
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 active:scale-90 transition-all border border-transparent hover:border-red-100 shrink-0"
+                            className="
+                             w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                             text-gray-500 dark:text-gray-400
+                             hover:text-red-600 dark:hover:text-red-400
+                             hover:bg-red-50 dark:hover:bg-red-900/20
+                              border border-transparent
+                             hover:border-red-200 dark:hover:border-red-800
+                              active:scale-90
+                              transition-all duration-200"
                             title="Remove part"
                           >
                             <svg

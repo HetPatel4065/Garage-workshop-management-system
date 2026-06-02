@@ -631,20 +631,6 @@ export default function JobCards() {
       accessor: (row) => new Date(row.createdAt).toLocaleDateString(),
     },
     { header: "Instructions", accessor: "serviceInstructions" },
-    {
-      header: "Service Date",
-      accessor: (row) =>
-        row.serviceDate
-          ? new Date(row.serviceDate).toLocaleDateString()
-          : "N/A",
-    },
-    {
-      header: "Next Service Date",
-      accessor: (row) =>
-        row.nextServiceDate
-          ? new Date(row.nextServiceDate).toLocaleDateString()
-          : "N/A",
-    },
   ];
 
   const availableCarsForCustomer = vehicles.filter(
@@ -1224,7 +1210,7 @@ export default function JobCards() {
                               ),
                             );
                           }}
-                          className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 disabled:bg-gray-100"
+                          className="w-full bg-white border capitalize border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 disabled:bg-gray-100"
                         >
                           <option value="">-- Choose Advisor --</option>
                           {advisors.map((s) => (
@@ -1254,7 +1240,7 @@ export default function JobCards() {
                               ),
                             );
                           }}
-                          className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 disabled:bg-gray-100"
+                          className="w-full bg-white border capitalize border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 disabled:bg-gray-100"
                         >
                           <option value="">-- Choose Mechanic --</option>
                           {mechanics.map((s) => (

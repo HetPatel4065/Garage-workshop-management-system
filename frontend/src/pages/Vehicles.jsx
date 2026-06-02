@@ -235,19 +235,12 @@ export default function Vehicles() {
 
       if (isNew) {
         for (const v of vehiclesToCreate) {
+          const { serviceDate, nextServiceDate, ...vehiclePayload } = v;
           const payload = {
-            ...v,
+            ...vehiclePayload,
             licensePlate: (v.licensePlate || "").trim().toUpperCase(),
             customerId: targetCustomerId,
           };
-
-          // If customer has a serviceDate, default the vehicle's serviceDate if not set
-          const targetCustomer = customers.find(
-            (c) => c._id === targetCustomerId,
-          );
-          if (targetCustomer?.serviceDate && !payload.serviceDate) {
-            payload.serviceDate = targetCustomer.serviceDate;
-          }
 
           const res = await fetch(`${import.meta.env.VITE_API_URL}/vehicles`, {
             method: "POST",
@@ -259,27 +252,13 @@ export default function Vehicles() {
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Creation failed");
-
-          // Sync back to customer if serviceDate was provided
-          if (payload.serviceDate) {
-            await fetch(
-              `${import.meta.env.VITE_API_URL}/customers/${targetCustomerId}`,
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ serviceDate: payload.serviceDate }),
-              },
-            );
-          }
         }
         addToast("Vehicles added successfully", "success");
       } else {
         const v = vehiclesToCreate[0];
+        const { serviceDate, nextServiceDate, ...vehiclePayload } = v;
         const payload = {
-          ...v,
+          ...vehiclePayload,
           licensePlate: (v.licensePlate || "").trim().toUpperCase(),
           customerId: targetCustomerId,
         };
@@ -296,21 +275,6 @@ export default function Vehicles() {
         );
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Update failed");
-
-        // Sync back to customer if serviceDate was provided in update
-        if (payload.serviceDate) {
-          await fetch(
-            `${import.meta.env.VITE_API_URL}/customers/${targetCustomerId}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ serviceDate: payload.serviceDate }),
-            },
-          );
-        }
 
         addToast("Vehicle profile updated", "success");
       }
@@ -548,7 +512,7 @@ export default function Vehicles() {
                   <div>
                     <h3 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                       <span className="w-8.5 h-8.5 rounded-full bg-blue-100 text-blue-600 dark:text-black flex items-center justify-center text-sm">
-                        <FaUser className="w-4.5 h-4.5"/>
+                        <FaUser className="w-4.5 h-4.5" />
                       </span>
                       {group.customerName}
                     </h3>

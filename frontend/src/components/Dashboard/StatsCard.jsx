@@ -56,7 +56,7 @@ export default function StatsCard({
   const isPositiveTrend = trend && !trend.startsWith("-");
 
   return (
-    <div className="group relative bg-white dark:bg-[#16161a] rounded-2xl p-6 shadow-md dark:shadow-xl border border-zinc-200 dark:border-zinc-800/40 flex flex-col min-w-0 h-full overflow-hidden transition-all duration-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 hover:-translate-y-0.5">
+    <div className="group relative bg-white dark:bg-[#16161a] rounded-2xl p-6 shadow-md dark:shadow-xl border border-zinc-200 dark:border-zinc-800/40 flex flex-col min-w-0 h-full overflow-hidden transition-all duration-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 hover:-translate-y-1.5 hover:-translate-x-1.5">
       {/* Top Section: Icon & Optional Trend */}
       <div className="flex justify-between items-start mb-5 z-10">
         <div

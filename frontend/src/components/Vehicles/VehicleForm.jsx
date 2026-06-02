@@ -169,8 +169,6 @@ export default function VehicleForm({
       "Plate must be at least 10 characters (e.g., GJ01AB123)";
   }
 
-  const today = new Date().toISOString().split("T")[0];
-
   const isInvalid = Object.keys(errors).length > 0;
 
   return (
@@ -357,28 +355,6 @@ export default function VehicleForm({
                   <option key={s}>{s}</option>
                 ))}
               </StyledSelect>
-            </div>
-            <div>
-              <Label>Service Date</Label>
-              <FieldInput
-                type="date"
-                value={formatDateForInput(vehicle.serviceDate)}
-                onChange={(e) => handleChange("serviceDate", e.target.value)}
-                disabled={isReadOnly}
-                min={today}
-              />
-            </div>
-            <div>
-              <Label>Next Service Date</Label>
-              <FieldInput
-                type="date"
-                value={formatDateForInput(vehicle.nextServiceDate)}
-                onChange={(e) =>
-                  handleChange("nextServiceDate", e.target.value)
-                }
-                disabled={isReadOnly}
-                min={today}
-              />
             </div>
           </div>
         </div>

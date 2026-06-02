@@ -64,7 +64,12 @@ export default function GarageLayout({ children }) {
         today.setHours(0, 0, 0, 0);
 
         const urgent = res.data.filter((v) => {
-          if (!v.nextServiceDate || v.reminderStatus === "Completed") {
+          // Only show reminders for vehicles that have completed a service
+          if (
+            !v.serviceDate ||
+            !v.nextServiceDate ||
+            v.reminderStatus === "Completed"
+          ) {
             return false;
           }
 

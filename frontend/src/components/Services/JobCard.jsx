@@ -25,26 +25,6 @@ export default function JobCard({
   userId,
   formatDate,
 }) {
-  const displayDate = formatDate
-    ? formatDate(v.serviceDate || jc.createdAt)
-    : v.serviceDate || jc.createdAt
-      ? new Date(v.serviceDate || jc.createdAt).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      : "—";
-
-  const displayNextDate = formatDate
-    ? formatDate(v.nextServiceDate)
-    : v.nextServiceDate
-      ? new Date(v.nextServiceDate).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      : "—";
-
   const isAssignedToMe =
     (jc.mechanicId?._id || jc.mechanicId) === userId ||
     (jc.advisorId?._id || jc.advisorId) === userId;
@@ -79,11 +59,13 @@ export default function JobCard({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-6.5 mb-4">
         <MetaField label="Customer" value={ownerName} />
         <MetaField label="Plate Number" value={v.licensePlate || "NO PLATE"} />
-        <MetaField label="Service Date" value={displayDate} />
-        <MetaField label="Next Service" value={displayNextDate} />
         <MetaField
           label="Instructions"
           value={jc.serviceInstructions || "General Maintenance"}
+        />
+        <MetaField
+          label="Registered Date"
+          value={jc.createdAt ? formatDate(jc.createdAt) : "—"}
         />
       </div>
 

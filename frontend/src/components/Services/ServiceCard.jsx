@@ -58,9 +58,11 @@ export default function ServiceCard({
   );
 
   const displayDate =
-    service.vehicleId?.serviceDate || service.createdAt
+    service.vehicleId?.serviceDate || service.serviceDate || service.createdAt
       ? new Date(
-          service.vehicleId?.serviceDate || service.createdAt,
+          service.vehicleId?.serviceDate ||
+            service.serviceDate ||
+            service.createdAt,
         ).toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
@@ -68,13 +70,16 @@ export default function ServiceCard({
         })
       : "—";
 
-  const displayNextDate = service.vehicleId?.nextServiceDate
-    ? new Date(service.vehicleId.nextServiceDate).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "—";
+  const displayNextDate =
+    service.vehicleId?.nextServiceDate || service.nextServiceDate
+      ? new Date(
+          service.vehicleId?.nextServiceDate || service.nextServiceDate,
+        ).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : "—";
 
   return (
     <div className="bg-white rounded-3xl p-5 mb-4 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group cursor-auto">

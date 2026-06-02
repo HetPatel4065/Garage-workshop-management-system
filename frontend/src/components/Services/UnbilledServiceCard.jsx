@@ -16,9 +16,11 @@ export default function UnbilledServiceCard({ service, onGenerate }) {
   const total = labour + parts + catalog;
 
   const displayDate =
-    service.vehicleId?.serviceDate || service.createdAt
+    service.vehicleId?.serviceDate || service.serviceDate || service.createdAt
       ? new Date(
-          service.vehicleId?.serviceDate || service.createdAt,
+          service.vehicleId?.serviceDate ||
+            service.serviceDate ||
+            service.createdAt,
         ).toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
@@ -26,13 +28,16 @@ export default function UnbilledServiceCard({ service, onGenerate }) {
         })
       : "N/A";
 
-  const nextServiceDisplay = service.vehicleId?.nextServiceDate
-    ? new Date(service.vehicleId.nextServiceDate).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : null;
+  const nextServiceDisplay =
+    service.vehicleId?.nextServiceDate || service.nextServiceDate
+      ? new Date(
+          service.vehicleId?.nextServiceDate || service.nextServiceDate,
+        ).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : null;
 
   return (
     <div className="w-full bg-white border border-gray-100 p-5 sm:p-6 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-auto h-full">
