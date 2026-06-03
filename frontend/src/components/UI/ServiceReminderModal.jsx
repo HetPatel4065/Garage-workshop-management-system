@@ -117,18 +117,47 @@ export default function ServiceReminderModal({ isOpen, onClose, reminders = [] }
                            </div>
                            <div className="min-w-0">
                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Due Status</p>
-                             <p className={`text-sm font-bold ${
-                               differenceInDays(new Date(r.nextServiceDate), new Date()) <= 3 
-                                 ? "text-rose-600" 
-                                 : "text-blue-600"
-                             }`}>
-                               {(() => {
-                                 const days = differenceInDays(new Date(r.nextServiceDate), new Date());
-                                 if (isToday(new Date(r.nextServiceDate))) return "Due Today";
-                                 if (isPast(new Date(r.nextServiceDate))) return `Overdue by ${Math.abs(days)} days`;
-                                 return `${days} Days Left`;
-                               })()}
-                             </p>
+                             {(() => {
+                               const today = new Date();
+                               today.setHours(0, 0, 0, 0);
+                               const due = new Date(r.nextServiceDate);
+                               due.setHours(0, 0, 0, 0);
+                               const days = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                               
+                               let badgeLabel = "";
+                               let badgeClass = "";
+                               let dotClass = "";
+                               let countdownText = "";
+                               
+                               if (days < 0) {
+                                 badgeLabel = "Action Required";
+                                 badgeClass = "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50";
+                                 dotClass = "bg-rose-500 animate-pulse";
+                                 countdownText = `Overdue by ${Math.abs(days)} ${Math.abs(days) === 1 ? "day" : "days"}`;
+                               } else if (days <= 7) {
+                                 badgeLabel = "Due Soon";
+                                 badgeClass = "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50";
+                                 dotClass = "bg-amber-400 animate-pulse";
+                                 countdownText = days === 0 ? "Due Today" : `In ${days} ${days === 1 ? "day" : "days"}`;
+                               } else {
+                                 badgeLabel = "Stable";
+                                 badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50";
+                                 dotClass = "bg-emerald-500";
+                                 countdownText = `In ${days} ${days === 1 ? "day" : "days"}`;
+                               }
+
+                               return (
+                                 <div className="flex flex-col items-start gap-1">
+                                   <span className={`inline-flex items-center gap-1.5 text-[9px] font-black px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${badgeClass}`}>
+                                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
+                                     {badgeLabel}
+                                   </span>
+                                   <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                                     {countdownText}
+                                   </span>
+                                 </div>
+                               );
+                             })()}
                            </div>
                         </div>
                     </div>

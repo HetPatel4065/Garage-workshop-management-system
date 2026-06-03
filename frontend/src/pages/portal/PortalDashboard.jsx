@@ -558,32 +558,34 @@ const PortalDashboard = ({ garageSettings }) => {
 
                           let statusText = "";
                           let statusClass = "";
+                          let statusDotClass = "";
+                          let statusBadgeLabel = "";
                           let containerBorder = "";
 
                           if (daysLeft < 0) {
-                            statusText = `Overdue ${Math.abs(daysLeft)}d`;
+                            statusText = `Overdue by ${Math.abs(daysLeft)} ${Math.abs(daysLeft) === 1 ? "day" : "days"}`;
+                            statusBadgeLabel = "Action Required";
                             statusClass =
-                              "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50";
+                              "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-450 dark:border-rose-900/50";
+                            statusDotClass = "bg-rose-500 animate-pulse";
                             containerBorder =
                               "border-rose-250 dark:border-rose-900/50";
-                          } else if (daysLeft === 0) {
-                            statusText = "Due Today!";
+                          } else if (daysLeft <= 7) {
+                            statusText = daysLeft === 0 ? "Due Today" : daysLeft === 1 ? "Due Tomorrow" : `In ${daysLeft} days`;
+                            statusBadgeLabel = "Due Soon";
                             statusClass =
-                              "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50 animate-pulse";
+                              "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/50";
+                            statusDotClass = "bg-amber-400 animate-pulse";
                             containerBorder =
                               "border-amber-250 dark:border-amber-900/50";
-                          } else if (daysLeft === 1) {
-                            statusText = "Due Tomorrow";
-                            statusClass =
-                              "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50";
-                            containerBorder =
-                              "border-blue-150 dark:border-blue-900/30";
                           } else {
                             statusText = `In ${daysLeft} days`;
+                            statusBadgeLabel = "Stable";
                             statusClass =
-                              "bg-slate-50 text-slate-600 border-slate-100 dark:bg-zinc-800/40 dark:text-zinc-400 dark:border-zinc-700/50";
+                              "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-450 dark:border-emerald-900/50";
+                            statusDotClass = "bg-emerald-500";
                             containerBorder =
-                              "border-slate-200 dark:border-zinc-800";
+                              "border-emerald-250 dark:border-emerald-900/50";
                           }
 
                           return (
@@ -620,11 +622,17 @@ const PortalDashboard = ({ garageSettings }) => {
                                     })}
                                   </span>
                                 </div>
-                                <span
-                                  className={`text-[11px] font-bold px-2 py-1 rounded-lg border ${statusClass}`}
-                                >
-                                  {statusText}
-                                </span>
+                                <div className="flex flex-col items-end gap-1">
+                                  <span
+                                    className={`inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${statusClass}`}
+                                  >
+                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDotClass}`} />
+                                    {statusBadgeLabel}
+                                  </span>
+                                  <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
+                                    {statusText}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           );
@@ -849,26 +857,6 @@ const PortalDashboard = ({ garageSettings }) => {
                   </div>
                 )}
               </div>
-            </motion.div>
-          )}
-
-          {/* ── SELL CAR TAB ── */}
-          {activeTab === "sell" && (
-            <motion.div
-              key="sell"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-xs overflow-hidden"
-            >
-              <MarketplaceListings
-                token={token}
-                isCustomer={true}
-                currentUser={user}
-                portalPreviewCustomerId={
-                  isStaffPortalSession ? selectedCustomerId : ""
-                }
-              />
             </motion.div>
           )}
         </AnimatePresence>

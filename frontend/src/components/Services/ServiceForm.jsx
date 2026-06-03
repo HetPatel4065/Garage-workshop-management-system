@@ -60,12 +60,12 @@ const parseServiceDate = (dateStr) => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const calculateNextServiceDate = (serviceDateStr, intervalMonths = 6) => {
-  const date = parseServiceDate(serviceDateStr);
-  if (!date) return "";
-  const next = new Date(date);
-  next.setMonth(next.getMonth() + Number(intervalMonths || 6));
-  return next.toISOString().split("T")[0];
+const calculateNextServiceDate = (serviceDateStr) => {
+  if (!serviceDateStr) return "";
+  const date = new Date(serviceDateStr);
+  if (isNaN(date.getTime())) return "";
+  date.setMonth(date.getMonth() + 6);
+  return date.toISOString().split("T")[0];
 };
 
 /* ─── Shared primitives ───────────────────────────────────── */
@@ -214,29 +214,12 @@ export default function ServiceForm({
 
   useEffect(() => {
     if (!serviceDate) return;
-
-    const interval = Number(garageSettings.reminderInterval || 6);
-    const calculatedNext = calculateNextServiceDate(serviceDate, interval);
-
-    if (!calculatedNext) return;
-
-    if (!nextServiceDate) {
-      setNextServiceDate(calculatedNext);
-      return;
-    }
-
-    const currentNext = parseServiceDate(nextServiceDate);
-    const currentService = parseServiceDate(serviceDate);
-
-    if (!currentNext || !currentService) {
-      setNextServiceDate(calculatedNext);
-      return;
-    }
-
-    if (currentNext.getTime() <= currentService.getTime()) {
+    // Always recalculate nextServiceDate = serviceDate + 6 months
+    const calculatedNext = calculateNextServiceDate(serviceDate);
+    if (calculatedNext) {
       setNextServiceDate(calculatedNext);
     }
-  }, [serviceDate, garageSettings.reminderInterval, nextServiceDate]);
+  }, [serviceDate]);
 
   /* ── Active tab ── */
   const [activeTab, setActiveTab] = useState("info");
@@ -551,18 +534,18 @@ export default function ServiceForm({
     });
 
     setServiceDate(
-      serviceData.vehicleId?.serviceDate
-        ? new Date(serviceData.vehicleId.serviceDate)
-            .toISOString()
-            .split("T")[0]
-        : "",
+      serviceData.serviceDate
+        ? new Date(serviceData.serviceDate).toISOString().split("T")[0]
+        : serviceData.vehicleId?.serviceDate
+          ? new Date(serviceData.vehicleId.serviceDate).toISOString().split("T")[0]
+          : "",
     );
     setNextServiceDate(
-      serviceData.vehicleId?.nextServiceDate
-        ? new Date(serviceData.vehicleId.nextServiceDate)
-            .toISOString()
-            .split("T")[0]
-        : "",
+      serviceData.nextServiceDate
+        ? new Date(serviceData.nextServiceDate).toISOString().split("T")[0]
+        : serviceData.vehicleId?.nextServiceDate
+          ? new Date(serviceData.vehicleId.nextServiceDate).toISOString().split("T")[0]
+          : "",
     );
 
     if (inventory.length) {
@@ -988,24 +971,16 @@ export default function ServiceForm({
       return;
     }
 
-    // Ensure nextServiceDate is calculated if serviceDate exists
-    let finalNextServiceDate = nextServiceDate;
-    if (serviceDate && !nextServiceDate) {
-      const interval = Number(garageSettings?.reminderInterval || 6);
-      console.log("Calculating nextServiceDate:", {
-        serviceDate,
-        interval,
-        garageSettings,
-      });
-      finalNextServiceDate = calculateNextServiceDate(serviceDate, interval);
-
-      // Fallback: if calculation failed, do manual calculation
+    // Always recalculate nextServiceDate from serviceDate (fixed 6-month rule)
+    let finalNextServiceDate = "";
+    if (serviceDate) {
+      finalNextServiceDate = calculateNextServiceDate(serviceDate);
+      // Fallback in case helper returns empty
       if (!finalNextServiceDate) {
         const d = new Date(serviceDate);
-        d.setMonth(d.getMonth() + interval);
+        d.setMonth(d.getMonth() + 6);
         finalNextServiceDate = d.toISOString().split("T")[0];
       }
-      console.log("Calculated nextServiceDate:", finalNextServiceDate);
     }
 
     const payload = {
@@ -1597,31 +1572,7 @@ export default function ServiceForm({
                                 if (field === "serviceDate") {
                                   const newServiceDate = e.target.value;
                                   setServiceDate(newServiceDate);
-
-                                  const interval = Number(
-                                    garageSettings.reminderInterval || 6,
-                                  );
-                                  const calculatedNext =
-                                    calculateNextServiceDate(
-                                      newServiceDate,
-                                      interval,
-                                    );
-
-                                  const currentNext =
-                                    parseServiceDate(nextServiceDate);
-                                  const currentService =
-                                    parseServiceDate(newServiceDate);
-                                  if (
-                                    !nextServiceDate ||
-                                    !currentNext ||
-                                    !currentService ||
-                                    currentNext.getTime() <=
-                                      currentService.getTime()
-                                  ) {
-                                    setNextServiceDate(calculatedNext);
-                                  }
-                                } else if (field === "nextServiceDate") {
-                                  setNextServiceDate(e.target.value);
+                                  // nextServiceDate is auto-calculated via useEffect
                                 } else if (!isMechanic) {
                                   handleVehicleField(field, e.target.value);
                                   if (errors[field])
@@ -1632,13 +1583,11 @@ export default function ServiceForm({
                                 }
                               }}
                               disabled={
-                                field === "serviceDate" ||
-                                field === "nextServiceDate"
-                                  ? !(
-                                      user?.role === "owner" ||
-                                      user?.role === "admin"
-                                    )
-                                  : isMechanic
+                                field === "serviceDate"
+                                  ? false
+                                  : field === "nextServiceDate"
+                                    ? true
+                                    : isMechanic
                               }
                               error={errors[field]}
                               maxLength={

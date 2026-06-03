@@ -57,32 +57,37 @@ function getStatusMeta(reminderStatus, nextServiceDate) {
   today.setHours(0, 0, 0, 0);
   const nextDateNorm = new Date(nextServiceDate);
   nextDateNorm.setHours(0, 0, 0, 0);
+  const diffTime = nextDateNorm.getTime() - today.getTime();
+  const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   const isPastOrToday = nextDateNorm <= today;
   const isCompleted = reminderStatus === "Completed" && isPastOrToday;
 
-  if (isCompleted)
+  if (isCompleted) {
     return {
       label: "Completed",
       style: "text-emerald-700 bg-emerald-50 border-emerald-200",
       dot: "bg-emerald-500",
     };
-  if (nextDateNorm < today)
+  }
+  if (days < 0) {
     return {
-      label: "Overdue",
+      label: "Action Required",
       style: "text-rose-700 bg-rose-50 border-rose-200",
       dot: "bg-rose-500 animate-pulse",
     };
-  if (nextDateNorm.toDateString() === today.toDateString())
+  }
+  if (days <= 7) {
     return {
-      label: "Due Today",
+      label: "Due Soon",
       style: "text-amber-700 bg-amber-50 border-amber-200",
       dot: "bg-amber-400 animate-pulse",
     };
+  }
   return {
-    label: "Upcoming",
-    style: "text-blue-700 bg-blue-50 border-blue-200",
-    dot: "bg-blue-500",
+    label: "Stable",
+    style: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    dot: "bg-emerald-500",
   };
 }
 
@@ -192,6 +197,32 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
   // Consistent with filter: completed only when flag set AND date has passed
   const isCompleted = r.reminderStatus === "Completed" && nextDateNorm <= today;
   const isOverdue = nextDateNorm < today && !isCompleted;
+  
+  const diffTime = nextDateNorm.getTime() - today.getTime();
+  const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  const getDueStatusText = () => {
+    if (isCompleted) return "Completed";
+    if (days < 0) {
+      return (
+        <span className="text-rose-600 dark:text-rose-400 font-bold">
+          Overdue by {Math.abs(days)} {Math.abs(days) === 1 ? "day" : "days"}
+        </span>
+      );
+    }
+    if (days <= 7) {
+      return (
+        <span className="text-amber-600 dark:text-amber-400 font-bold">
+          {days === 0 ? "Due Today" : `In ${days} ${days === 1 ? "day" : "days"}`}
+        </span>
+      );
+    }
+    return (
+      <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+        In {days} {days === 1 ? "day" : "days"}
+      </span>
+    );
+  };
 
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-5 mb-4 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -234,7 +265,7 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
         })
               : "—"
           }
-          secondary={isOverdue ? "Overdue" : ""}
+          secondary={getDueStatusText()}
         />
       </div>
 

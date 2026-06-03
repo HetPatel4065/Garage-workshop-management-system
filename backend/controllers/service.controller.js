@@ -1,7 +1,6 @@
 import Service from "../models/Service.js";
 import Inventory from "../models/Inventory.js";
 import { notifyLowStock } from "../utils/inventoryUtils.js";
-import { calculateNextServiceDate } from "../utils/dateHelper.js";
 
 // 📋 GET SERVICES
 export const getAllServices = async (req, res) => {
@@ -163,12 +162,11 @@ export const createService = async (req, res) => {
     const newService = new Service(serviceData);
     await newService.save();
 
-    // Sync vehicle dates if provided
-    if (serviceData.vehicleId && (req.body.serviceDate || req.body.nextServiceDate)) {
+    // Update vehicle reminderStatus if serviceDate is provided
+    if (serviceData.vehicleId && serviceData.serviceDate) {
       const { default: Vehicle } = await import("../models/Vehicle.js");
       await Vehicle.findByIdAndUpdate(serviceData.vehicleId, {
-        serviceDate: req.body.serviceDate,
-        nextServiceDate: req.body.nextServiceDate,
+        reminderStatus: "Pending",
       });
     }
 
@@ -266,46 +264,34 @@ export const updateService = async (req, res) => {
 
     if (updateData.status === "Completed") {
       service.endTime = new Date();
+      // If status is Completed but no serviceDate was provided, default to today
+      if (!service.serviceDate) {
+        service.serviceDate = new Date();
+      }
+    }
+
+    // Always recalculate nextServiceDate from serviceDate (fixed 6-month rule)
+    if (service.serviceDate) {
+      const next = new Date(service.serviceDate);
+      next.setMonth(next.getMonth() + 6);
+      service.nextServiceDate = next;
     }
 
     await service.save();
 
-    // Sync vehicle dates
-    if (service.vehicleId) {
+    // Update vehicle reminderStatus if serviceDate is provided
+    if (service.vehicleId && service.serviceDate) {
       const { default: Vehicle } = await import("../models/Vehicle.js");
-      const vehicle = await Vehicle.findById(service.vehicleId);
 
-      if (vehicle) {
-        let updateVehicleData = {};
+      const nextNorm = service.nextServiceDate ? new Date(service.nextServiceDate) : null;
+      if (nextNorm) nextNorm.setHours(0, 0, 0, 0);
+      const todayNorm = new Date();
+      todayNorm.setHours(0, 0, 0, 0);
 
-        // If status just changed to Completed, or if dates are explicitly provided
-        if (updateData.status === "Completed" || updateData.serviceDate || updateData.nextServiceDate) {
-          const completedDate = updateData.serviceDate || new Date();
-          const newNextServiceDate =
-            updateData.nextServiceDate ||
-            calculateNextServiceDate(completedDate, vehicle.reminderInterval || 6);
-
-          updateVehicleData.serviceDate = completedDate;
-          updateVehicleData.nextServiceDate = newNextServiceDate;
-
-          const nextNorm = new Date(newNextServiceDate);
-          nextNorm.setHours(0, 0, 0, 0);
-          const todayNorm = new Date();
-          todayNorm.setHours(0, 0, 0, 0);
-
-          if (newNextServiceDate && nextNorm > todayNorm) {
-            // New cycle is upcoming → reset reminder workflow to Pending
-            updateVehicleData.reminderStatus = "Pending";
-          } else {
-            // No future cycle (or edge-case past date) → mark as Completed
-            updateVehicleData.reminderStatus = "Completed";
-          }
-        }
-
-        if (Object.keys(updateVehicleData).length > 0) {
-          await Vehicle.findByIdAndUpdate(service.vehicleId, updateVehicleData);
-        }
-      }
+      await Vehicle.findByIdAndUpdate(service.vehicleId, {
+        reminderStatus:
+          nextNorm && nextNorm > todayNorm ? "Pending" : "Completed",
+      });
     }
 
     res.status(200).json(service);

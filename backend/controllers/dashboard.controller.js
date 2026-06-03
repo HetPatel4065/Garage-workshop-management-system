@@ -243,13 +243,62 @@ export const getDashboardStats = async (req, res, next) => {
     // 7. Reminder Statistics
     const weekEnd = new Date(now);
     weekEnd.setDate(now.getDate() + 7);
+    const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
 
-    const [dueToday, dueThisWeek, overdueReminders, remindersSent] = await Promise.all([
-      Vehicle.countDocuments({ garageId: ownerId, nextServiceDate: { $gte: startOfToday, $lte: new Date(new Date().setHours(23, 59, 59, 999)) } }),
-      Vehicle.countDocuments({ garageId: ownerId, nextServiceDate: { $gte: startOfToday, $lte: weekEnd } }),
-      Vehicle.countDocuments({ garageId: ownerId, nextServiceDate: { $lt: startOfToday }, reminderStatus: { $ne: "Completed" } }),
-      Vehicle.countDocuments({ garageId: ownerId, reminderStatus: "Reminder Sent" }),
+    const latestServices = await Service.aggregate([
+      {
+        $match: {
+          ownerId: new mongoose.Types.ObjectId(ownerId),
+          status: "Completed",
+          nextServiceDate: { $ne: null }
+        }
+      },
+      { $sort: { serviceDate: -1, createdAt: -1 } },
+      {
+        $group: {
+          _id: "$vehicleId",
+          nextServiceDate: { $first: "$nextServiceDate" },
+        }
+      },
+      {
+        $lookup: {
+          from: "vehicles",
+          localField: "_id",
+          foreignField: "_id",
+          as: "vehicleInfo"
+        }
+      },
+      {
+        $unwind: {
+          path: "$vehicleInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      }
     ]);
+
+    let dueToday = 0;
+    let dueThisWeek = 0;
+    let overdueReminders = 0;
+
+    latestServices.forEach((s) => {
+      const nextDate = new Date(s.nextServiceDate);
+      const isCompleted = s.vehicleInfo?.reminderStatus === "Completed";
+
+      if (nextDate >= startOfToday && nextDate <= endOfToday) {
+        dueToday++;
+      }
+      if (nextDate >= startOfToday && nextDate <= weekEnd) {
+        dueThisWeek++;
+      }
+      if (nextDate < startOfToday && !isCompleted) {
+        overdueReminders++;
+      }
+    });
+
+    const remindersSent = await Vehicle.countDocuments({
+      garageId: ownerId,
+      reminderStatus: "Reminder Sent",
+    });
 
     // 8. Send the enhanced dashboard data
     res.status(200).json({

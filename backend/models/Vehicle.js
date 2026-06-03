@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { calculateNextServiceDate } from "../utils/dateHelper.js";
 
 const vehicleSchema = new mongoose.Schema(
   {
@@ -49,12 +48,6 @@ const vehicleSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    serviceDate: {
-      type: Date,
-    },
-    nextServiceDate: {
-      type: Date,
-    },
     reminderInterval: {
       type: Number,
       default: 6, // Default 6 months
@@ -98,17 +91,6 @@ vehicleSchema.virtual("daysSinceLastService").get(function () {
 });
 
 vehicleSchema.pre("save", async function (next) {
-  if (this.isModified("serviceDate") || this.isModified("reminderInterval")) {
-    if (this.serviceDate) {
-      this.nextServiceDate = calculateNextServiceDate(this.serviceDate, this.reminderInterval || 6);
-    }
-  }
-
-  // Validate nextServiceDate is not earlier than serviceDate
-  if (this.nextServiceDate && this.serviceDate && this.nextServiceDate < this.serviceDate) {
-    return next(new Error("Next service date cannot be earlier than service date"));
-  }
-
   if (this.isNew && !this.vehicleId) {
     try {
       const lastVehicle = await this.constructor

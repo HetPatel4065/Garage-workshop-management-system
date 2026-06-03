@@ -140,20 +140,80 @@ export const initServiceReminderCron = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // 1. Get all vehicles that have a nextServiceDate
-      const vehicles = await Vehicle.find({
-        nextServiceDate: { $exists: true, $ne: null },
-        status: "With Owner", // Only remind if not in garage
-      }).populate("customerId garageId");
+      // 1. Get the latest service for each vehicle that is "With Owner"
+      const latestServices = await Service.aggregate([
+        {
+          $match: {
+            status: "Completed",
+            nextServiceDate: { $exists: true, $ne: null }
+          }
+        },
+        { $sort: { serviceDate: -1, createdAt: -1 } },
+        {
+          $group: {
+            _id: "$vehicleId",
+            nextServiceDate: { $first: "$nextServiceDate" },
+            customerId: { $first: "$customerId" },
+            ownerId: { $first: "$ownerId" },
+          }
+        },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "_id",
+            foreignField: "_id",
+            as: "vehicleInfo"
+          }
+        },
+        {
+          $unwind: {
+            path: "$vehicleInfo",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $match: {
+            "vehicleInfo.status": "With Owner"
+          }
+        },
+        {
+          $lookup: {
+            from: "customers",
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customerInfo"
+          }
+        },
+        {
+          $unwind: {
+            path: "$customerInfo",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: "owners",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "garageInfo"
+          }
+        },
+        {
+          $unwind: {
+            path: "$garageInfo",
+            preserveNullAndEmptyArrays: true
+          }
+        }
+      ]);
 
-      for (const vehicle of vehicles) {
+      for (const service of latestServices) {
         try {
-          const owner = await Owner.findById(vehicle.garageId);
+          const owner = service.garageInfo;
           if (!owner) continue;
 
           // Fetch settings or use defaults
           let settings = await GarageSettings.findOne({
-            ownerId: vehicle.garageId,
+            ownerId: service.ownerId,
           });
 
           // If no settings exist, we still want to send reminders by default
@@ -165,7 +225,7 @@ export const initServiceReminderCron = () => {
           const schedule = settings?.notifications?.reminderSchedule || [
             -7, -3, 0, 3,
           ];
-          const nextServiceDate = new Date(vehicle.nextServiceDate);
+          const nextServiceDate = new Date(service.nextServiceDate);
           nextServiceDate.setHours(0, 0, 0, 0);
 
           // Calculate days difference
@@ -176,7 +236,7 @@ export const initServiceReminderCron = () => {
           if (schedule.includes(diffDays)) {
             // Avoid duplicate reminders on the same day for the same vehicle
             const alreadySentToday = await ReminderLog.findOne({
-              vehicleId: vehicle._id,
+              vehicleId: service._id,
               sentAt: {
                 $gte: new Date(new Date().setHours(0, 0, 0, 0)),
                 $lte: new Date(new Date().setHours(23, 59, 59, 999)),
@@ -185,8 +245,11 @@ export const initServiceReminderCron = () => {
 
             if (alreadySentToday) continue;
 
-            const customer = vehicle.customerId;
+            const customer = service.customerInfo;
             if (!customer) continue;
+
+            const vehicle = await Vehicle.findById(service._id);
+            if (!vehicle) continue;
 
             // Update Vehicle Reminder Status
             if (diffDays < 0) {

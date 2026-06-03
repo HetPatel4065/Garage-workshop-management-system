@@ -115,6 +115,11 @@ const serviceSchema = new mongoose.Schema(
 
     startTime: Date,
     endTime: Date,
+
+    // Service Date Tracking
+    serviceDate: { type: Date },
+    nextServiceDate: { type: Date },
+
     serviceId: {
       type: String,
       unique: true,
@@ -152,6 +157,13 @@ serviceSchema.pre("save", async function (next) {
     } catch (err) {
       console.error("Error generating serviceId:", err);
     }
+  }
+
+  // Auto-calculate nextServiceDate = serviceDate + 6 months
+  if (this.isModified("serviceDate") && this.serviceDate) {
+    const next = new Date(this.serviceDate);
+    next.setMonth(next.getMonth() + 6);
+    this.nextServiceDate = next;
   }
 
   if (this.labourCharges && this.labourCharges.length > 0) {

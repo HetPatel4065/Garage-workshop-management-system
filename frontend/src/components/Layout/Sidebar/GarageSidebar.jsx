@@ -13,8 +13,6 @@ import {
   Bell,
   UserPlus,
   ReceiptIndianRupeeIcon,
-  ChevronRight,
-  ChevronLeft,
   ChevronDown,
   Calendar,
   MapPin,
@@ -140,48 +138,57 @@ const NAV_SECTIONS = [
   },
 ];
 
-const SidebarNavLink = React.memo(({ to, icon: Icon, label, showBadge = false, isCollapsedDesktop, unreadCount }) => (
-  <NavLink
-    to={to}
-    title={isCollapsedDesktop ? label : undefined}
-    className={({ isActive }) =>
-      `relative flex w-full min-h-11 items-center rounded-xl text-sm font-semibold transition-colors duration-200 group ${
-        isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5"
-      } ${
-        isActive
-          ? "bg-blue-600 text-white"
-          : "text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        <div className="relative flex shrink-0 items-center justify-center">
-          <Icon
-            size={18}
-            className={`transition-colors duration-200 ${
-              isActive
-                ? "text-white"
-                : "text-slate-500 dark:text-gray-500 group-hover:text-slate-700 dark:group-hover:text-gray-300"
-            }`}
-          />
-          {showBadge && unreadCount > 0 && !isActive && (
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950 shadow-sm animate-pulse" />
-          )}
-        </div>
-        {!isCollapsedDesktop && <span className="truncate">{label}</span>}
-        {isCollapsedDesktop && (
-          <div className="absolute left-full ml-3 px-2 py-1 bg-slate-800 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-100 border border-slate-700 dark:border-white/10 shadow-xl">
-            {label}
+const SidebarNavLink = React.memo(
+  ({
+    to,
+    icon: Icon,
+    label,
+    showBadge = false,
+    isCollapsedDesktop,
+    unreadCount,
+  }) => (
+    <NavLink
+      to={to}
+      title={isCollapsedDesktop ? label : undefined}
+      className={({ isActive }) =>
+        `relative flex w-full min-h-11 items-center rounded-xl text-sm font-semibold transition-colors duration-200 group ${
+          isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5"
+        } ${
+          isActive
+            ? "bg-blue-600 text-white"
+            : "text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <div className="relative flex shrink-0 items-center justify-center">
+            <Icon
+              size={18}
+              className={`transition-colors duration-200 ${
+                isActive
+                  ? "text-white"
+                  : "text-slate-500 dark:text-gray-500 group-hover:text-slate-700 dark:group-hover:text-gray-300"
+              }`}
+            />
+            {showBadge && unreadCount > 0 && !isActive && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950 shadow-sm animate-pulse" />
+            )}
           </div>
-        )}
-      </>
-    )}
-  </NavLink>
-));
+          {!isCollapsedDesktop && <span className="truncate">{label}</span>}
+          {isCollapsedDesktop && (
+            <div className="absolute left-full ml-3 px-2 py-1 bg-slate-800 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-100 border border-slate-700 dark:border-white/10 shadow-xl">
+              {label}
+            </div>
+          )}
+        </>
+      )}
+    </NavLink>
+  ),
+);
 SidebarNavLink.displayName = "SidebarNavLink";
 
-const LogoEl = React.memo(({ size = "w-9 h-9" }) => {
+const LogoEl = React.memo(({ size = "w-9 h-9", iconSize = 18 }) => {
   const { user, selectedGarage } = useAuth();
   const role = user?.role?.toLowerCase() || "mechanic";
   const targetUser = role === "admin" && selectedGarage ? selectedGarage : user;
@@ -200,7 +207,7 @@ const LogoEl = React.memo(({ size = "w-9 h-9" }) => {
 
   return (
     <div
-      className={`${size} rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-gray-800 flex items-center justify-center shrink-0 shadow-lg`}
+      className={`${size} rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 flex items-center justify-center shrink-0 shadow-lg`}
     >
       {targetUser?.logo ? (
         <img
@@ -210,7 +217,7 @@ const LogoEl = React.memo(({ size = "w-9 h-9" }) => {
               : `${import.meta.env.VITE_BASE_URL}/${targetUser.logo}?${cacheBuster}`
           }
           alt="logo"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain p-1.5"
           loading="eager"
           onError={(e) => {
             e.currentTarget.onerror = null;
@@ -218,7 +225,7 @@ const LogoEl = React.memo(({ size = "w-9 h-9" }) => {
           }}
         />
       ) : (
-        <Wrench size={18} className="text-blue-400" />
+        <Wrench size={iconSize} className="text-blue-500 dark:text-blue-400" />
       )}
     </div>
   );
@@ -265,7 +272,7 @@ export default function GarageSidebar({
   // Persist collapsed state
   useEffect(() => {
     sessionStorage.setItem("sidebar_collapsed", collapsed);
-    const width = collapsed ? "80px" : "260px";
+    const width = collapsed ? "80px" : "280px";
     document.documentElement.style.setProperty("--sidebar-width", width);
   }, [collapsed]);
 
@@ -319,12 +326,16 @@ export default function GarageSidebar({
       ? selectedGarage.address
       : user?.address || user?.garageAddress || "";
 
+  const formattedAddress = useMemo(() => {
+    if (!address) return "";
+    return address.replace(/,([^\s])/g, ", $1");
+  }, [address]);
+
   const isCollapsedDesktop = collapsed && isDesktop;
   const isOwner = role === "owner";
 
   // Evaluates dynamically instead of using a broken mock false state
   const isProfileActive = isActive("/profile");
-
 
   const sidebarVariants = {
     open: {
@@ -342,7 +353,6 @@ export default function GarageSidebar({
       },
     },
   };
-
   return (
     <>
       {/* Mobile overlay */}
@@ -363,72 +373,65 @@ export default function GarageSidebar({
         animate={isOpen || isDesktop ? "open" : "closed"}
         variants={sidebarVariants}
         className={`fixed top-0 left-0 z-50 h-screen flex flex-col bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800 overflow-hidden transition-[width] duration-300 ease-in-out shadow-xl lg:shadow-none
-        ${isDesktop ? (collapsed ? "w-20" : "w-65") : "w-[85vw] max-w-[320px]"}
+        ${isDesktop ? (collapsed ? "w-20" : "w-70") : "w-[85vw] max-w-80"}
     `}
       >
         {/* HEADER */}
         <div className="flex flex-col shrink-0 border-b border-slate-200 dark:border-white/5">
-          <div
-            className={`flex items-center gap-3 py-3.5 ${
-              isCollapsedDesktop
-                ? "justify-center px-2"
-                : "justify-between px-4"
-            }`}
-          >
-            <div
-              className={`flex items-center gap-3 min-w-0 ${
-                isCollapsedDesktop ? "justify-center" : ""
-              }`}
-            >
+          {isCollapsedDesktop ? (
+            <div className="flex items-center justify-center py-4 px-2">
+              {/* Logo Container */}
               <div
                 onClick={() => isDesktop && setCollapsed(!collapsed)}
-                className="shrink-0 cursor-auto active:scale-95 transition-transform pb-2"
+                className="shrink-0 cursor-pointer active:scale-95 transition-transform"
               >
-                <LogoEl size={isCollapsedDesktop ? "w-10 h-10" : "w-12 h-12"} />
+                <LogoEl size="w-10 h-10" iconSize={20} />
               </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3.5 pt-6 pb-5 px-6">
+              {/* Top Row: Logo & Buttons */}
+              <div className="flex items-center justify-between">
+                <div
+                  onClick={() => isDesktop && setCollapsed(!collapsed)}
+                  className="shrink-0 cursor-pointer active:scale-95 transition-transform"
+                >
+                  <LogoEl size="w-16 h-16" iconSize={32} />
+                </div>
 
-              {!isCollapsedDesktop && (
-                <div className="min-w-0 flex-1">
-                  <p className="text-base font-bold text-slate-900 dark:text-white pt-3">
-                    {garageName}
-                  </p>
-
-                  {address && (
-                    <div className="flex items-start gap-1 mt-1">
-                      <MapPin
-                        size={12}
-                        className="mt-0.5 shrink-0 text-slate-400"
-                      />
-
-                      <p className="text-[11px] text-slate-500 dark:text-gray-400 line-clamp-2 leading-normal">
-                        {address}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-1">
+                  {/* Mobile Close Button */}
+                  {!isDesktop && (
+                    <button
+                      onClick={onClose}
+                      className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-gray-400 self-center"
+                    >
+                      <X size={18} />
+                    </button>
                   )}
                 </div>
-              )}
+              </div>
+
+              {/* Garage Info - Stacked below logo for maximum readability */}
+              <div className="min-w-0 flex flex-col">
+                <h2 className="text-[17px] font-bold text-slate-900 dark:text-white leading-snug tracking-tight wrap-break-words">
+                  {garageName}
+                </h2>
+
+                {formattedAddress && (
+                  <div className="flex items-start gap-1.5 mt-1.5">
+                    <MapPin
+                      size={14}
+                      className="mt-0.5 shrink-0 text-blue-500 dark:text-blue-400"
+                    />
+                    <p className="text-xs text-slate-500 dark:text-gray-400 leading-relaxed font-medium wrap-break-words">
+                      {formattedAddress}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-
-            {/* Desktop Collapse */}
-            {isDesktop && !isCollapsedDesktop && (
-              <button
-                onClick={() => setCollapsed(true)}
-                className="hidden lg:flex shrink-0 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-gray-400"
-              >
-                <ChevronLeft size={18} />
-              </button>
-            )}
-
-            {/* Mobile Close */}
-            {!isDesktop && (
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-gray-400"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         {/* QUICK LINKS */}

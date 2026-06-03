@@ -195,20 +195,25 @@ export default function Login() {
         </motion.div>
 
         {/* ── Footer ───────────────────────────────────────────── */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-xs text-slate-400 dark:text-slate-500 mt-8"
-        >
-          New here?{" "}
-          <Link
-            to="/owner/signup"
-            className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2 transition-colors"
-          >
-            Register your garage
-          </Link>
-        </motion.p>
+        <footer className="mt-8 text-center space-y-2.5">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            New to our system?{" "}
+            <Link
+              to="/signup"
+              className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-4 transition-colors"
+            >
+              Create an account
+            </Link>
+          </p>
+
+          <p className="text-xs text-slate-400 dark:text-slate-500 max-w-md mx-auto leading-normal">
+            <span className="font-medium text-slate-500 dark:text-slate-400">
+              Note:
+            </span>{" "}
+            For admin and customer accounts, sign up and registration is{" "}
+            <span className="font-bold underline">not required</span>.
+          </p>
+        </footer>
       </div>
     </div>
   );

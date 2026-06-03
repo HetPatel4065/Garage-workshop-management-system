@@ -145,7 +145,7 @@ export default function GarageLayout({ children }) {
     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300">
       <div
         className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out ${
-          collapsed ? "w-20" : "w-65"
+          collapsed ? "w-20" : "w-[280px]"
         }`}
       />
 

@@ -76,6 +76,7 @@ const InvoiceRow = ({
       setIsDownloading(false);
     }
   };
+  
 
   const getStatusIcon = (status) => {
     switch (status?.toLowerCase()) {
@@ -143,13 +144,13 @@ const InvoiceRow = ({
                 <span className="text-xs font-bold font-mono text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
                   {invoice.vehicleMake} {invoice.vehicleModel}
                 </span>
-              ) }
+              )}
               {invoice.licensePlate && (
                 <span className="text-xs font-bold font-mono text-slate-600 dark:text-zinc-300 bg-slate-100 dark:bg-zinc-950 px-1.5 py-0.5 rounded-md shrink-0">
                   {invoice.licensePlate}
                 </span>
               )}
-              
+
               {/* ✅ FIXED MOBILE VIEW STATUS BADGE */}
               <span
                 className={`sm:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 ${getStatusColor(invoice.status)}`}
@@ -157,6 +158,9 @@ const InvoiceRow = ({
                 {getStatusIcon(invoice.status)}
                 {invoice.status}
               </span>
+              <button onClick={handlePayment} className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-md transition-colors">
+                Pay Now
+              </button>
             </div>
           </div>
         </div>
