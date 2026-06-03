@@ -210,7 +210,7 @@ export default function Login() {
             <span className="font-medium text-slate-500 dark:text-slate-400">
               Note:
             </span>{" "}
-            For admin and customer accounts, sign up and registration is{" "}
+            For admin and customer accounts, sign up or registration is
             <span className="font-bold underline">not required</span>.
           </p>
         </footer>
