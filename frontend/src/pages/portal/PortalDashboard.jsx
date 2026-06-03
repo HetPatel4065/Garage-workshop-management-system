@@ -43,13 +43,17 @@ import ThemeToggle from "../../components/theme/ThemeToggle";
 import { useExpandableId } from "../../hooks/useExpandableId";
 
 const PortalDashboard = ({ garageSettings }) => {
-  const [data, setData] = useState({
+  const [overviewData, setOverviewData] = useState({
     vehicles: [],
-    jobCards: [],
-    invoices: [],
     services: [],
+    invoices: [],
   });
-  const [loading, setLoading] = useState(true);
+  const [vehicles, setVehicles] = useState([]);
+  const [jobCards, setJobCards] = useState([]);
+  const [services, setServices] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -92,7 +96,7 @@ const PortalDashboard = ({ garageSettings }) => {
   const [portalCustomers, setPortalCustomers] = useState([]);
   const [customersLoading, setCustomersLoading] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState(
-    getStoredPreviewCustomerId,
+    getStoredPreviewCustomerId(),
   );
 
   const isStaffPortalSession =
@@ -141,6 +145,7 @@ const PortalDashboard = ({ garageSettings }) => {
 
       await fetchUser(storedToken, previewId);
       await fetchDashboardData(storedToken, previewId);
+      setInitialLoading(false);
     };
     init();
   }, []);
@@ -161,7 +166,6 @@ const PortalDashboard = ({ garageSettings }) => {
   };
 
   const fetchDashboardData = async (authToken, customerId) => {
-    setLoading(true);
     setError("");
     try {
       const res = await axios.get(
@@ -173,7 +177,61 @@ const PortalDashboard = ({ garageSettings }) => {
       setError("Failed to load dashboard data.");
       console.error(err);
     } finally {
-      setLoading(false);
+    }
+  };
+
+  // Helper to normalize and set dashboard data into local state
+  const setData = (data = {}) => {
+    const {
+      vehicles: dv = [],
+      jobCards: dj = [],
+      invoices: di = [],
+      services: ds = [],
+    } = data;
+    setVehicles(dv || []);
+    setJobCards(dj || []);
+    setInvoices(di || []);
+    setServices(ds || []);
+
+    // Overview uses a smaller subset for summary panels
+    setOverviewData({
+      vehicles: (dv || []).slice(0, 12),
+      services: (ds || []).slice(0, 8),
+      invoices: (di || []).slice(0, 8),
+    });
+  };
+
+  const fetchInvoicesData = useCallback(async (authToken, customerId) => {
+    // The portal backend doesn't expose a dedicated invoices list endpoint
+    // for customers; refresh via the dashboard endpoint which returns invoices.
+    await fetchDashboardData(authToken, customerId);
+  }, []);
+
+  const fetchTabData = useCallback(
+    async (tabId, authToken, customerId) => {
+      // For simplicity, re-use the dashboard aggregate endpoint when data is missing
+      if (tabId === "invoices") {
+        await fetchInvoicesData(authToken, customerId);
+        return;
+      }
+
+      // If we already have data for the tab, avoid unnecessary refetch
+      if (tabId === "vehicles" && vehicles.length) return;
+      if (tabId === "jobcards" && jobCards.length) return;
+      if (tabId === "services" && services.length) return;
+
+      await fetchDashboardData(authToken, customerId);
+    },
+    [vehicles.length, jobCards.length, services.length],
+  );
+
+  const handleCustomerSelect = async (nextCustomerId) => {
+    setSelectedCustomerId(nextCustomerId);
+    setStoredPreviewCustomerId(nextCustomerId);
+    // When switching preview customer, refresh profile + dashboard
+    if (token) {
+      await fetchUser(token, nextCustomerId);
+      await fetchDashboardData(token, nextCustomerId);
     }
   };
 
@@ -214,17 +272,6 @@ const PortalDashboard = ({ garageSettings }) => {
     }
   };
 
-  const handleCustomerSelect = async (customerId) => {
-    setSelectedCustomerId(customerId);
-    setStoredPreviewCustomerId(customerId);
-    if (!token) return;
-    setLoading(true);
-    await Promise.all([
-      fetchUser(token, customerId),
-      fetchDashboardData(token, customerId),
-    ]);
-  };
-
   const handleLogout = () => {
     if (isStaffPortalSession) {
       setStoredPreviewCustomerId("");
@@ -253,7 +300,12 @@ const PortalDashboard = ({ garageSettings }) => {
     }
   };
 
-  if (loading) {
+  useEffect(() => {
+    if (!token) return;
+    fetchTabData(activeTab, token, selectedCustomerId);
+  }, [activeTab, selectedCustomerId, token, fetchTabData]);
+
+  if (initialLoading) {
     return (
       <div className="min-h-screen bg-[#f8faff] dark:bg-zinc-950 flex flex-col items-center justify-center p-4 transition-colors duration-300">
         <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 dark:text-blue-500 animate-spin mb-4" />
@@ -264,7 +316,11 @@ const PortalDashboard = ({ garageSettings }) => {
     );
   }
 
-  const { vehicles, jobCards, invoices, services } = data;
+  const {
+    vehicles: overviewVehicles,
+    services: overviewServices,
+    invoices: overviewInvoices,
+  } = overviewData;
 
   return (
     <div className="min-h-screen bg-[#f8faff] dark:bg-zinc-950 dark:text-zinc-100 font-sans selection:bg-blue-100 dark:selection:bg-blue-900/50 selection:text-blue-600 dark:selection:text-blue-400 flex flex-col transition-colors duration-300">
@@ -450,12 +506,12 @@ const PortalDashboard = ({ garageSettings }) => {
               className="space-y-6 sm:space-y-8"
             >
               <DashboardStats
-                vehicleCount={vehicles?.length || 0}
-                serviceCount={services?.length || 0}
-                invoiceCount={invoices?.length || 0}
+                vehicleCount={overviewVehicles?.length || 0}
+                serviceCount={overviewServices?.length || 0}
+                invoiceCount={overviewInvoices?.length || 0}
                 invoiceAmount={
-                  Array.isArray(invoices)
-                    ? invoices.reduce((sum, inv) => {
+                  Array.isArray(overviewInvoices)
+                    ? overviewInvoices.reduce((sum, inv) => {
                         // Invoice model stores the grand total in `total` (not `totalAmount`)
                         const amount = Number(inv?.total) || 0;
                         return sum + amount;
@@ -477,10 +533,11 @@ const PortalDashboard = ({ garageSettings }) => {
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  {vehicles &&
-                  vehicles.filter((v) => v.nextServiceDate).length > 0 ? (
+                  {overviewVehicles &&
+                  overviewVehicles.filter((v) => v.nextServiceDate).length >
+                    0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {vehicles
+                      {overviewVehicles
                         .filter((v) => v.nextServiceDate)
                         .sort(
                           (a, b) =>
@@ -598,9 +655,9 @@ const PortalDashboard = ({ garageSettings }) => {
                   </button>
                 </div>
                 <div className="p-4 sm:p-6">
-                  {services.length > 0 ? (
+                  {overviewServices.length > 0 ? (
                     <div className="space-y-3">
-                      {services.slice(0, 3).map((item) => (
+                      {overviewServices.slice(0, 3).map((item) => (
                         <RecentActivityItem
                           key={item._id}
                           item={item}
@@ -775,7 +832,7 @@ const PortalDashboard = ({ garageSettings }) => {
                       toggleExpand={invoiceExpand.toggle}
                       getStatusColor={getStatusColor}
                       onRefresh={() =>
-                        fetchDashboardData(token, selectedCustomerId)
+                        fetchInvoicesData(token, selectedCustomerId)
                       }
                       token={token}
                       portalPreviewCustomerId={

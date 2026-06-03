@@ -533,20 +533,15 @@ export const getCustomerDashboardData = async (req, res) => {
       priority: svc.priority,
       createdAt: svc.createdAt,
       updatedAt: svc.updatedAt,
-      // Staff
       mechanicName: svc.mechanicId?.name || null,
       advisorName: svc.advisorId?.name || null,
-      // Job Card reference
       jobCardId: svc.jobId?.jobCardId || null,
       licensePlate:
         svc.jobId?.licensePlate || svc.vehicle?.licensePlate || null,
-      // Vehicle snapshot stored on service
       vehicle: svc.vehicle || null,
-      // Cost
       cost: svc.cost || 0,
       labourCost: svc.labourCost || 0,
       totalCost: (svc.cost || 0) + (svc.labourCost || 0),
-      // Detail arrays
       parts: (svc.partsUsed || []).map((p) => ({
         name: p.name,
         quantity: p.quantity,

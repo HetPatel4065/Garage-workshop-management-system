@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -140,7 +140,98 @@ const NAV_SECTIONS = [
   },
 ];
 
-export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
+const SidebarNavLink = React.memo(({ to, icon: Icon, label, showBadge = false, isCollapsedDesktop, unreadCount }) => (
+  <NavLink
+    to={to}
+    title={isCollapsedDesktop ? label : undefined}
+    className={({ isActive }) =>
+      `relative flex w-full min-h-11 items-center rounded-xl text-sm font-semibold transition-colors duration-200 group ${
+        isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5"
+      } ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+      }`
+    }
+  >
+    {({ isActive }) => (
+      <>
+        <div className="relative flex shrink-0 items-center justify-center">
+          <Icon
+            size={18}
+            className={`transition-colors duration-200 ${
+              isActive
+                ? "text-white"
+                : "text-slate-500 dark:text-gray-500 group-hover:text-slate-700 dark:group-hover:text-gray-300"
+            }`}
+          />
+          {showBadge && unreadCount > 0 && !isActive && (
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950 shadow-sm animate-pulse" />
+          )}
+        </div>
+        {!isCollapsedDesktop && <span className="truncate">{label}</span>}
+        {isCollapsedDesktop && (
+          <div className="absolute left-full ml-3 px-2 py-1 bg-slate-800 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-100 border border-slate-700 dark:border-white/10 shadow-xl">
+            {label}
+          </div>
+        )}
+      </>
+    )}
+  </NavLink>
+));
+SidebarNavLink.displayName = "SidebarNavLink";
+
+const LogoEl = React.memo(({ size = "w-9 h-9" }) => {
+  const { user, selectedGarage } = useAuth();
+  const role = user?.role?.toLowerCase() || "mechanic";
+  const targetUser = role === "admin" && selectedGarage ? selectedGarage : user;
+
+  const cacheBuster = useMemo(() => {
+    if (targetUser?.updatedAt) {
+      return `t=${new Date(targetUser.updatedAt).getTime()}`;
+    }
+    if (typeof window !== "undefined") {
+      return `t_init=${window.__sidebar_mount_time || (window.__sidebar_mount_time = Date.now())}`;
+    }
+    return "t_init=0";
+  }, [targetUser?.updatedAt, targetUser?.logo]);
+
+  if (!targetUser) return null;
+
+  return (
+    <div
+      className={`${size} rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-gray-800 flex items-center justify-center shrink-0 shadow-lg`}
+    >
+      {targetUser?.logo ? (
+        <img
+          src={
+            targetUser.logo.startsWith("http")
+              ? `${targetUser.logo}${targetUser.logo.includes("?") ? "&" : "?"}${cacheBuster}`
+              : `${import.meta.env.VITE_BASE_URL}/${targetUser.logo}?${cacheBuster}`
+          }
+          alt="logo"
+          className="w-full h-full object-contain"
+          loading="eager"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "";
+          }}
+        />
+      ) : (
+        <Wrench size={18} className="text-blue-400" />
+      )}
+    </div>
+  );
+});
+LogoEl.displayName = "LogoEl";
+
+export default function GarageSidebar({
+  isOpen,
+  onClose,
+  showNotifications,
+  collapsed,
+  setCollapsed,
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, selectedGarage, logout } = useAuth();
@@ -151,16 +242,12 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
     location.pathname.startsWith("/dashboard") &&
     !selectedGarage;
 
-  const [collapsed, setCollapsed] = useState(() => {
-    return sessionStorage.getItem("sidebar_collapsed") === "true";
-  });
   const [openSections, setOpenSections] = useState(() => {
     const saved = sessionStorage.getItem("sidebar_open_sections");
     return saved ? JSON.parse(saved) : NAV_SECTIONS.map(() => true);
   });
 
-  const sidebarRef = React.useRef(null);
-  const memoizedSections = useMemo(() => NAV_SECTIONS, []);
+  const sidebarRef = useRef(null);
 
   // Robust desktop detection without re-render loops
   const [isDesktop, setIsDesktop] = useState(
@@ -213,8 +300,8 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
   }, [location.pathname, isDesktop]);
 
   const isActive = (path) => {
-    if (path === "/dashboard") return location.pathname === path;
-    return location.pathname.startsWith(path);
+    if (location.pathname === path) return true;
+    return location.pathname.startsWith(`${path}/`);
   };
 
   const toggleSection = (idx) =>
@@ -238,84 +325,6 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
   // Evaluates dynamically instead of using a broken mock false state
   const isProfileActive = isActive("/profile");
 
-  const SidebarNavLink = ({
-    to,
-    icon: Icon,
-    label,
-    active,
-    showBadge = false,
-  }) => (
-    <Link
-      to={to}
-      title={isCollapsedDesktop ? label : undefined}
-      className={`relative flex items-center rounded-xl text-sm font-semibold transition-colors duration-200 group ${
-        isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5"
-      } ${
-        active
-          ? "bg-blue-600 text-white"
-          : "text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-      }`}
-    >
-      <div className="relative flex shrink-0 items-center justify-center">
-        <Icon
-          size={18}
-          className={
-            active
-              ? "text-white"
-              : "text-slate-500 dark:text-gray-500 group-hover:text-slate-700 dark:group-hover:text-gray-300"
-          }
-        />
-        {showBadge && unreadCount > 0 && !active && (
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950 shadow-sm animate-pulse" />
-        )}
-      </div>
-      {!isCollapsedDesktop && <span className="truncate">{label}</span>}
-      {isCollapsedDesktop && (
-        <div className="absolute left-full ml-3 px-2 py-1 bg-slate-800 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-100 border border-slate-700 dark:border-white/10 shadow-xl">
-          {label}
-        </div>
-      )}
-    </Link>
-  );
-
-  const LogoEl = ({ size = "w-9 h-9" }) => {
-    const targetUser =
-      role === "admin" && selectedGarage ? selectedGarage : user;
-
-    const cacheBuster = useMemo(() => {
-      if (targetUser?.updatedAt) {
-        return `t=${new Date(targetUser.updatedAt).getTime()}`;
-      }
-      return `t_init=${window.__sidebar_mount_time || (window.__sidebar_mount_time = Date.now())}`;
-    }, [targetUser?.updatedAt, targetUser?.logo]);
-
-    if (!targetUser) return null;
-
-    return (
-      <div
-        className={`${size} rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-gray-800 flex items-center justify-center shrink-0 shadow-lg`}
-      >
-        {targetUser?.logo ? (
-          <img
-            src={
-              targetUser.logo.startsWith("http")
-                ? `${targetUser.logo}${targetUser.logo.includes("?") ? "&" : "?"}${cacheBuster}`
-                : `${import.meta.env.VITE_BASE_URL}/${targetUser.logo}?${cacheBuster}`
-            }
-            alt="logo"
-            className="w-full h-full object-contain"
-            loading="eager"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = "";
-            }}
-          />
-        ) : (
-          <Wrench size={18} className="text-blue-400" />
-        )}
-      </div>
-    );
-  };
 
   const sidebarVariants = {
     open: {
@@ -353,8 +362,8 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
         initial={false}
         animate={isOpen || isDesktop ? "open" : "closed"}
         variants={sidebarVariants}
-        className={`fixed top-0 left-0 z-50 h-screen flex flex-col bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800 overflow-hidden transition-all duration-300 ease-in-out shadow-xl lg:shadow-none
-        ${isDesktop ? (collapsed ? "w-22" : "w-65") : "w-[85vw] max-w-[320px]"}
+        className={`fixed top-0 left-0 z-50 h-screen flex flex-col bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800 overflow-hidden transition-[width] duration-300 ease-in-out shadow-xl lg:shadow-none
+        ${isDesktop ? (collapsed ? "w-20" : "w-65") : "w-[85vw] max-w-[320px]"}
     `}
       >
         {/* HEADER */}
@@ -429,7 +438,8 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
               to="/dashboard"
               icon={LayoutDashboard}
               label="Dashboard"
-              active={isActive("/dashboard")}
+              isCollapsedDesktop={isCollapsedDesktop}
+              unreadCount={unreadCount}
             />
 
             {role === "admin" && (
@@ -437,7 +447,8 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
                 to="/partnership-leads"
                 icon={Store}
                 label="Partnership Leads"
-                active={isActive("/partnership-leads")}
+                isCollapsedDesktop={isCollapsedDesktop}
+                unreadCount={unreadCount}
               />
             )}
           </div>
@@ -500,8 +511,9 @@ export default function GarageSidebar({ isOpen, onClose, showNotifications }) {
                         to={item.path}
                         icon={item.icon}
                         label={item.name}
-                        active={isActive(item.path)}
                         showBadge={item.name === "Notifications"}
+                        isCollapsedDesktop={isCollapsedDesktop}
+                        unreadCount={unreadCount}
                       />
                     ))}
                   </div>

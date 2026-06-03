@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import React, { useState, useEffect, Suspense } from "react";
+import { Outlet, useLocation, useOutlet } from "react-router-dom";
 import GarageNavbar from "./Navbar/GarageNavbar";
 import GarageSidebar from "./Sidebar/GarageSidebar";
 import { useAuth } from "../../context/AuthContext";
@@ -10,6 +10,7 @@ import ServiceReminderModal from "../UI/ServiceReminderModal";
 export default function GarageLayout({ children }) {
   const { user, token, selectedGarage, exitGaragePreview } = useAuth();
   const location = useLocation();
+  const outlet = useOutlet();
   const hideNavbar =
     user?.role?.toLowerCase() === "admin" &&
     !selectedGarage &&
@@ -140,28 +141,6 @@ export default function GarageLayout({ children }) {
     };
   }, []);
 
-  // =========================================================
-  // SYNC SIDEBAR COLLAPSE STATE
-  // =========================================================
-  useEffect(() => {
-    const syncSidebarState = () => {
-      const currentState =
-        sessionStorage.getItem("sidebar_collapsed") === "true";
-
-      setCollapsed(currentState);
-    };
-
-    // Initial sync
-    syncSidebarState();
-
-    // Polling for instant updates
-    const interval = setInterval(syncSidebarState, 50);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300">
       <div
@@ -174,6 +153,8 @@ export default function GarageLayout({ children }) {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         showNotifications={showNotifications}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
       />
 
       {/* ========================================================= */}
@@ -220,26 +201,29 @@ export default function GarageLayout({ children }) {
           </div>
         )}
 
-        {/* ========================================================= */}
         {/* PAGE CONTENT */}
-        {/* ========================================================= */}
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300 relative min-w-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{
-                duration: 0.25,
-                ease: "easeOut",
-              }}
-              className="h-full w-full min-w-0"
+          <div className="h-full w-full min-w-0 font-sans">
+            <Suspense
+              fallback={
+                <div className="h-full w-full flex flex-col items-center justify-center p-8 bg-slate-100 dark:bg-zinc-900 transition-colors">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-slate-300 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin" />
+                    <p className="mt-2 text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest animate-pulse">
+                      Loading View...
+                    </p>
+                  </div>
+                </div>
+              }
             >
-              {children || <Outlet />}
-            </motion.div>
-          </AnimatePresence>
+              <AnimatePresence mode="wait">
+                {outlet
+                  ? React.cloneElement(outlet, { key: location.pathname })
+                  : children}
+              </AnimatePresence>
+            </Suspense>
+          </div>
         </main>
       </div>
 

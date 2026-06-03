@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useId,
+  useMemo,
+} from "react";
 import axios from "axios";
 import {
   AlertCircle,
@@ -11,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  Calendar,
   Clock,
   Copy,
   Download,
@@ -35,11 +43,13 @@ import {
   TrendingUp,
   User,
   Users,
-  Wrench,
   X,
   Zap,
   ZoomIn,
   ZoomOut,
+  Milestone,
+  UserCheck,
+  Wrench,
 } from "lucide-react";
 import { FaCar } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
@@ -65,6 +75,14 @@ const photoUrl = (path) =>
 
 const FALLBACK =
   "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80";
+
+// Simple title-case helper for display values (e.g. "maharashtra" -> "Maharashtra")
+const upperCase = (val) => {
+  // Keeps your safe check for null/undefined while allowing 0
+  if (!val && val !== 0) return "";
+
+  return String(val).toUpperCase();
+};
 
 /* SECTION HEADER */
 const SectionHeader = ({ icon: Icon, title, accent = "blue", action }) => {
@@ -142,20 +160,28 @@ const CollapsibleCard = ({
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const contentId = useId();
+
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+    <div className="w-full bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+      {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-6 hover:bg-slate-50/50 dark:hover:bg-zinc-950/25 transition-colors cursor-auto text-left focus:outline-none"
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        className="w-full flex items-center justify-between p-6 hover:bg-slate-50/50 dark:hover:bg-zinc-950/25 transition-colors cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 flex items-center justify-center shrink-0">
-            <Icon className="w-4 h-4" />
-          </div>
-          <h3 className="font-black text-slate-900 dark:text-white text-base tracking-tight">
+          {Icon && (
+            <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 flex items-center justify-center shrink-0">
+              <Icon className="w-4 h-4" />
+            </div>
+          )}
+          <h3 className="font-bold text-slate-900 dark:text-white text-base tracking-tight">
             {title}
           </h3>
         </div>
+
         <div className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
           {isOpen ? (
             <ChevronUp className="w-4 h-4" />
@@ -165,17 +191,22 @@ const CollapsibleCard = ({
         </div>
       </button>
 
+      {/* Collapsible Content */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            id={contentId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="p-6 pt-0 border-t border-slate-100 dark:border-zinc-800/60">
-              <div className="pt-5">{children}</div>
+            {/* Kept padding inside an inner wrapper. 
+               Framer Motion struggles with height calculations if padding is on the motion.div itself.
+            */}
+            <div className="px-6 pb-6 border-t border-slate-100 dark:border-zinc-800/60 text-slate-600 dark:text-zinc-300">
+              <div className="pt-4">{children}</div>
             </div>
           </motion.div>
         )}
@@ -211,7 +242,7 @@ const ContactRow = ({
         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500">
           {label}
         </p>
-        <p className="text-sm font-bold text-slate-700 dark:text-zinc-300 truncate mt-0.5">
+        <p className="text-sm font-bold text-slate-700 dark:text-zinc-300 mt-0.5">
           {value}
         </p>
       </div>
@@ -219,7 +250,8 @@ const ContactRow = ({
         <button
           onClick={handleCopy}
           title="Copy to clipboard"
-          className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
+          className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-zinc-200 border border-slate-100 hover:border-slate-300 
+           transition-colors"
         >
           {copied ? (
             <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
@@ -665,25 +697,40 @@ const ShareModal = ({ vehicle, onClose }) => {
    PRICE INSIGHT BADGE
  */
 const PriceInsight = ({ price, year, kmDriven }) => {
-  const age = new Date().getFullYear() - year;
-  let tag = "Fair Price";
-  let color =
-    "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40";
-  if (age <= 3 && kmDriven < 40000) {
-    tag = "Excellent Value";
-    color =
-      "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40";
-  } else if (age >= 8 || kmDriven > 120000) {
-    tag = "High Usage";
-    color =
-      "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/40";
-  }
+  const insight = useMemo(() => {
+    // Dynamically tracks vehicle age safely based on current year
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - (year || currentYear);
+    const kilometers = kmDriven || 0;
+
+    // Default configuration: Fair Price
+    let tag = "Fair Price";
+    let colorClasses =
+      "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40";
+
+    if (age <= 3 && kilometers < 40000) {
+      tag = "Excellent Value";
+      colorClasses =
+        "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40";
+    } else if (age >= 8 || kilometers > 120000) {
+      tag = "High Usage";
+      colorClasses =
+        "bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/40";
+    }
+
+    return { tag, colorClasses };
+  }, [year, kmDriven]);
+
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${color}`}
-    >
-      <IndianRupee className="w-3 h-3" /> {tag}
-    </span>
+    <div className="flex items-center gap-2.5 shrink-0">
+      {/* Insight Badge */}
+      <span
+        className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${insight.colorClasses}`}
+        role="status"
+      >
+        {insight.tag}
+      </span>
+    </div>
   );
 };
 
@@ -1173,7 +1220,7 @@ const PortalVehicleDetails = () => {
 
             {/* ── ENGINE & PERFORMANCE ── */}
             <CollapsibleCard title="Engine & Performance" icon={Zap}>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full auto-rows-fr">
                 <StatCard
                   icon={Zap}
                   label="Engine Capacity"
@@ -1357,18 +1404,37 @@ const PortalVehicleDetails = () => {
                 </span>
               </div>
 
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
-                {vehicle.title}
-              </h1>
+              <div className="flex flex-col gap-3 w-full border-b border-slate-100 dark:border-zinc-800/60 pb-5">
+                {/* Row 1: Full-Width Title Area */}
+                <h1 className="text-3xl font-black text-slate-900 capitalize dark:text-white leading-tight tracking-tight">
+                  {vehicle.title}
+                </h1>
 
-              <div className="mt-2">
-                <PriceInsight
-                  price={vehicle.price}
-                  year={vehicle.year}
-                  kmDriven={vehicle.kmDriven}
-                />
+                {/* Row 2: Sub-Header Actions & Details Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
+                  {/* Left Side: Status / Availability Badges */}
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    {vehicle.testDriveAvailable && (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 shadow-xs">
+                        <CheckCircle
+                          className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0"
+                          aria-hidden="true"
+                        />
+                        <span>Available for Test Drive</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Side: Price Insight Block (Isolated completely from title boundaries) */}
+                  <div className="flex shrink-0 items-center justify-start sm:justify-end">
+                    <PriceInsight
+                      price={vehicle.price}
+                      year={vehicle.year}
+                      kmDriven={vehicle.kmDriven}
+                    />
+                  </div>
+                </div>
               </div>
-
               <div className="mt-4 pt-4 border-t border-slate-100 dark:border-zinc-800 flex items-end justify-between gap-3">
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-1">
@@ -1380,7 +1446,7 @@ const PortalVehicleDetails = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-1">
-                    Odometer
+                    Total KM Driven
                   </p>
                   <p className="text-base font-black text-slate-700 dark:text-zinc-300">
                     {(vehicle.kmDriven || 0).toLocaleString()} KM
@@ -1391,128 +1457,114 @@ const PortalVehicleDetails = () => {
 
             {/* ── OVERVIEW ── */}
             <CollapsibleCard title="Overview" icon={FaCar}>
-              <div className="grid grid-cols-2 gap-2.5">
-                <StatCard
-                  icon={Tag}
-                  label="Brand"
-                  value={vehicle.brand}
-                />
-                <StatCard icon={FaCar} label="Model" value={vehicle.model} />
-                {vehicle.variant && (
-                  <StatCard
-                    icon={TrendingUp}
-                    label="Variant"
-                    value={vehicle.variant}
-                  />
-                )}
-                <StatCard
-                  icon={Tag}
-                  label="Mfg Year"
-                  value={vehicle.year}
-                />
-                {vehicle.regYear && (
-                  <StatCard
-                    icon={Tag}
-                    label="Reg Year"
-                    value={vehicle.regYear}
-                  />
-                )}
-                {vehicle.regState && (
-                  <StatCard
-                    icon={MapPin}
-                    label="Reg State"
-                    value={vehicle.regState}
-                  />
-                )}
-                <StatCard
-                  icon={Fuel}
-                  label="Fuel Type"
-                  value={vehicle.fuelType}
-                />
-                <StatCard
-                  icon={Wrench}
-                  label="Transmission"
-                  value={vehicle.transmission}
-                />
-                {vehicle.ownership && (
-                  <StatCard
-                    icon={Tag}
-                    label="Ownership"
-                    value={vehicle.ownership}
-                    accent
-                  />
-                )}
-                <StatCard
-                  icon={Gauge}
-                  label="KM Driven"
-                  value={`${(vehicle.kmDriven || 0).toLocaleString()} km`}
-                />
-                <StatCard icon={Palette} label="Color" value={vehicle.color} />
-                {vehicle.bodyType && (
-                  <StatCard
-                    icon={TrendingUp}
-                    label="Body Type"
-                    value={vehicle.bodyType}
-                  />
-                )}
-                {vehicle.seats && (
-                  <StatCard
-                    icon={Users}
-                    label="Seating"
-                    value={`${vehicle.seats} Seats`}
-                  />
-                )}
-                {(vehicle.rtoCode || vehicle.rtoState) && (
-                  <StatCard
-                    icon={MapPin}
-                    label="RTO Info"
-                    wide
-                    value={[vehicle.rtoCode, vehicle.rtoState]
-                      .filter(Boolean)
-                      .join(" – ")}
-                  />
-                )}
-                {vehicle.insuranceValidity && (
-                  <StatCard
-                    icon={ShieldCheck}
-                    label="Insurance Valid"
-                    value={vehicle.insuranceValidity}
-                  />
-                )}
-                {vehicle.insuranceType && (
-                  <StatCard
-                    icon={ShieldCheck}
-                    label="Insurance Type"
-                    value={vehicle.insuranceType}
-                  />
-                )}
-                {vehicle.rcAvailability && (
-                  <StatCard
-                    icon={FileText}
-                    label="RC Availability"
-                    value={vehicle.rcAvailability}
-                  />
-                )}
+              {/* Standardized breakpoints for absolute responsiveness across all screen dimensions */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full auto-rows-fr">
+                {[
+                  { icon: Milestone, label: "Brand", value: vehicle.brand },
+                  { icon: FaCar, label: "Model", value: vehicle.model },
+                  vehicle.variant && {
+                    icon: TrendingUp,
+                    label: "Variant",
+                    value: vehicle.variant,
+                  },
+                  { icon: Calendar, label: "Mfg Year", value: vehicle.year },
+                  vehicle.regYear && {
+                    icon: Calendar,
+                    label: "Reg Year",
+                    value: vehicle.regYear,
+                  },
+                  vehicle.regState && {
+                    icon: MapPin,
+                    label: "Reg State",
+                    value: upperCase(vehicle.regState),
+                  },
+                  { icon: Fuel, label: "Fuel Type", value: vehicle.fuelType },
+                  {
+                    icon: Wrench,
+                    label: "Transmission",
+                    value: vehicle.transmission,
+                  },
+                  vehicle.ownership && {
+                    icon: UserCheck,
+                    label: "Ownership",
+                    value: vehicle.ownership,
+                    accent: true,
+                  },
+                  {
+                    icon: Gauge,
+                    label: "KM Driven",
+                    value: `${(vehicle.kmDriven || 0).toLocaleString()} km`,
+                  },
+                  { icon: Palette, label: "Color", value: vehicle.color },
+                  vehicle.bodyType && {
+                    icon: TrendingUp,
+                    label: "Body Type",
+                    value: vehicle.bodyType,
+                  },
+                  vehicle.seats && {
+                    icon: Users,
+                    label: "Seating",
+                    value: `${vehicle.seats} Seats`,
+                  },
+                  vehicle.insuranceValidity && {
+                    icon: ShieldCheck,
+                    label: "Insurance Valid",
+                    value: vehicle.insuranceValidity,
+                  },
+                  vehicle.insuranceType && {
+                    icon: ShieldCheck,
+                    label: "Insurance Type",
+                    value: vehicle.insuranceType,
+                  },
+                  vehicle.rcAvailability && {
+                    icon: FileText,
+                    label: "RC Availability",
+                    value: vehicle.rcAvailability,
+                  },
+                ]
+                  .filter(Boolean)
+                  .map((stat, index) => (
+                    <StatCard
+                      key={index}
+                      icon={stat.icon}
+                      label={stat.label}
+                      value={stat.value}
+                      accent={stat.accent}
+                    />
+                  ))}
+
+                {/* RTO Info - Spans across grid columns intelligently based on screen size */}
+                {(vehicle.rtoCode || vehicle.rtoState) &&
+                  (vehicle.rtoState || vehicle.regState) && (
+                    <div className="col-span-1 sm:col-span-2">
+                      <StatCard
+                        icon={MapPin}
+                        accent={true}
+                        label="RTO Info"
+                        value={[
+                          vehicle.rtoCode ? upperCase(vehicle.rtoCode) : null,
+                          vehicle.rtoState || vehicle.regState
+                            ? upperCase(vehicle.rtoState || vehicle.regState)
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" – ")}
+                      />
+                    </div>
+                  )}
               </div>
             </CollapsibleCard>
 
             {/* ── SELLER INFORMATION ── */}
             <CollapsibleCard title="Seller Information" icon={Building}>
               <div className="space-y-4">
-                {vehicle.testDriveAvailable && (
-                  <div className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 rounded-xl text-[10px] font-black uppercase tracking-wider w-full justify-center shadow-xs">
-                    <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />{" "}
-                    Available for Test Drive
-                  </div>
-                )}
-
                 <div className="flex items-center gap-4 pb-4 border-b border-slate-100 dark:border-zinc-800/60">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-sm shrink-0 bg-linear-to-br from-indigo-500 to-blue-600">
                     {(
                       vehicle.sellerName ||
                       vehicle.ownerId?.garageName ||
                       vehicle.customerId?.name ||
-                      "S"
+                      "GS"
                     ).charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
