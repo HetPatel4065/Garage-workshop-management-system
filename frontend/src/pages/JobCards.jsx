@@ -659,7 +659,7 @@ export default function JobCards() {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 cursor-auto min-h-fit">
+    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -705,7 +705,6 @@ export default function JobCards() {
           )}
         </div>
       </div>
-
       {/* Search & Filter Bar */}
       <div className="mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -758,7 +757,6 @@ export default function JobCards() {
           )}
         </button>
       </div>
-
       {/* Advanced Filter Panel */}
       {showFilters && (
         <div className="mb-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 transition-all duration-300 animate-fade-in">
@@ -937,7 +935,6 @@ export default function JobCards() {
           </div>
         </div>
       )}
-
       <div className="mt-4 border-t border-gray-100 p-4">
         <p className="text-sm font-medium text-gray-600">
           Total Job Card Items:{" "}
@@ -946,7 +943,6 @@ export default function JobCards() {
           </span>
         </p>
       </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
@@ -954,10 +950,12 @@ export default function JobCards() {
       ) : (
         <div className="flex flex-col gap-4">
           {groupedJobCards.length === 0 ? (
-            <div className="text-gray-500 text-center mt-10 flex flex-col items-center gap-2 py-25 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-              <Clipboard className="w-8 h-8 text-gray-300" />
-              <p className="font-medium">No job cards found</p>
-            </div>
+            <EmptyState
+              icon={Clipboard}
+              title="No job cards found"
+              description="Try adjusting your filters or search terms to find matching job cards."
+              className="mt-10"
+            />
           ) : (
             <>
               {groupedJobCards.length > 50 && (
@@ -1049,7 +1047,6 @@ export default function JobCards() {
           )}
         </div>
       )}
-
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -1316,7 +1313,6 @@ export default function JobCards() {
           </div>
         </div>
       </Modal>
-
       <ConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

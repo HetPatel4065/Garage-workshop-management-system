@@ -222,18 +222,20 @@ export default function InventoryForm({
               key={t.id}
               type="button"
               onClick={() => setActiveTab(t.id)}
-              className={`text-sm sm:text-md font-bold pb-2 border-b-2 whitespace-nowrap ${
+              className={`relative text-sm sm:text-base font-semibold pb-3 border-b-2 transition-all duration-200 whitespace-nowrap ${
                 activeTab === t.id
-                  ? "border-black text-black"
-                  : "border-transparent text-gray-400"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
               {t.label}
-              {(t.id === "details" &&
+
+              {((t.id === "details" &&
                 (errors.name || errors.sku || errors.supplierContact)) ||
-              (t.id === "stock" && (errors.costPrice || errors.retailPrice)) ? (
-                <span className="ml-1 w-1.5 h-1.5 rounded-full bg-red-500 inline-block align-middle" />
-              ) : null}
+                (t.id === "stock" &&
+                  (errors.costPrice || errors.retailPrice))) && (
+                <span className="ml-2 inline-block w-2 h-2 rounded-full bg-red-500" />
+              )}
             </button>
           ))}
         </div>
@@ -418,13 +420,19 @@ export default function InventoryForm({
 
         {activeTab === "notes" && (
           <Section title="Notes">
-            <div className="bg-gray-100 border border-gray-200 rounded-lg p-4">
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
               <textarea
                 value={formData.notes}
                 onChange={(e) => set("notes", e.target.value)}
                 rows={6}
                 readOnly={readOnly}
-                className={`w-full border border-gray-300 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${readOnly ? "bg-gray-800 cursor-default" : ""}`}
+                className={`w-full rounded-xl p-3 text-sm outline-none transition resize-none
+                border border-slate-300 dark:border-slate-600
+              bg-white dark:bg-slate-900
+              text-slate-900 dark:text-slate-100
+              placeholder:text-slate-400 dark:placeholder:text-slate-500
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                ${readOnly ? "cursor-default bg-slate-100 dark:bg-slate-800" : ""}`}
               />
             </div>
           </Section>

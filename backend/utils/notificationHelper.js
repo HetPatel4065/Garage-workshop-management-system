@@ -52,7 +52,6 @@ export const createNotification = async ({
             <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
               <h2 style="color: #2563eb;">${title}</h2>
               <p>${message}</p>
-              ${link ? `<a href="${process.env.FRONTEND_URL}${link}" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 5px;">View Details</a>` : ""}
               <p style="font-size: 12px; color: #777; margin-top: 20px;">This is an automated project notification from your Garage Management System.</p>
             </div>
           `,

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import EmptyState from "../components/UI/EmptyState";
+import { Search } from "lucide-react";
 
 export default function SearchPage() {
   const location = useLocation();
@@ -248,15 +250,12 @@ export default function SearchPage() {
           {error}
         </div>
       ) : !hasResults ? (
-        <div className="text-center py-12 bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-100 dark:border-zinc-700/50">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-1">
-            No item or person found
-          </h3>
-          <p className="text-gray-500 dark:text-zinc-400 px-4">
-            We couldn't find any customers, vehicles, services, or inventory
-            matching "{query}". Try adjusting your search.
-          </p>
-        </div>
+        <EmptyState
+          icon={Search}
+          title="No item or person found"
+          description={`We couldn't find any customers, vehicles, services, or inventory matching "${query}". Try adjusting your search.`}
+          className="px-4 py-12"
+        />
       ) : (
         <div className="space-y-8">
           {/* Customers Section */}

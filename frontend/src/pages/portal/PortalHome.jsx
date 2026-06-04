@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import RegistrationModal from "./RegistrationModal";
 import GarageDetailsModal from "./GarageDetailsModal";
 import PortalLogin from "./PortalLogin";
+import EmptyState from "../../components/UI/EmptyState";
 import { useNavigate, Link } from "react-router-dom";
 
 /* ─── Skeleton card ─── */
@@ -281,7 +282,11 @@ export default function PortalHome() {
                         <div className="w-11 h-11 rounded-xl border border-slate-100 bg-slate-50 group-hover:bg-blue-50 group-hover:border-blue-100 flex items-center justify-center transition-all duration-300 shrink-0">
                           {garage.logo ? (
                             <img
-                              src={String(garage.logo).startsWith("http") ? garage.logo : `${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${String(garage.logo).replace(/^\//, "")}`}
+                              src={
+                                String(garage.logo).startsWith("http")
+                                  ? garage.logo
+                                  : `${import.meta.env.VITE_BASE_URL?.replace(/\/$/, "")}/${String(garage.logo).replace(/^\//, "")}`
+                              }
                               alt={garage.garageName}
                               className="w-7 h-7 object-contain"
                             />
@@ -346,27 +351,21 @@ export default function PortalHome() {
               </AnimatePresence>
             </div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200"
-            >
-              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                <Search className="w-6 h-6 text-slate-300" />
-              </div>
-              <p className="text-sm font-bold text-slate-800 mb-1">
-                No garages found
-              </p>
-              <p className="text-sm text-slate-400 mb-5">
-                No results for "{searchQuery}"
-              </p>
-              <button
-                onClick={clearSearch}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors underline underline-offset-2 bg-transparent border-none cursor-auto"
-              >
-                Clear search
-              </button>
-            </motion.div>
+            <EmptyState
+              icon={Search}
+              title="No garages found"
+              description={
+                searchQuery
+                  ? `No results for "${searchQuery}"`
+                  : "No garages match your criteria yet."
+              }
+              primaryAction={
+                searchQuery
+                  ? { label: "Clear search", onClick: clearSearch }
+                  : undefined
+              }
+              className="py-24"
+            />
           )}
         </section>
       </main>

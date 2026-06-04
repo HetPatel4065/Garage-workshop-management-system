@@ -15,6 +15,7 @@ import { Car, Plus, Filter } from "lucide-react";
 import { FaCar, FaUser } from "react-icons/fa";
 import VehicleCard from "../components/Vehicles/VehicleCard";
 import ExportButton from "../components/common/ExportButton";
+import EmptyState from "../components/UI/EmptyState";
 
 export default function Vehicles() {
   const { user, token: authToken } = useAuth();
@@ -367,7 +368,7 @@ export default function Vehicles() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 cursor-auto min-h-fit">
+    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -403,7 +404,6 @@ export default function Vehicles() {
           )}
         </div>
       </div>
-
       {/* Search & Filter Bar */}
       <div className="mb-6 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
@@ -452,7 +452,6 @@ export default function Vehicles() {
           </select>
         </div>
       </div>
-
       {/* Total count */}
       <div className="mb-4 ml-1">
         <p className="text-sm font-medium text-slate-500">
@@ -464,7 +463,6 @@ export default function Vehicles() {
           vehicles
         </p>
       </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
@@ -472,10 +470,12 @@ export default function Vehicles() {
       ) : (
         <div className="flex flex-col gap-4">
           {filteredFleet.length === 0 && (
-            <div className="text-gray-500 text-center mt-10 flex flex-col items-center gap-2 py-36 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-              <Car className="w-8 h-8 text-gray-300" />
-              <p className="font-medium">No vehicles found</p>
-            </div>
+            <EmptyState
+              icon={Car}
+              title="No vehicles found"
+              description="Try a different search term or reset filters to locate available vehicles."
+              className="mt-10"
+            />
           )}
 
           {groupedFleet.length > 50 && (
@@ -539,7 +539,6 @@ export default function Vehicles() {
           })}
         </div>
       )}
-
       {/* Add/Edit Vehicle Modal */}
       <Modal
         isOpen={isModalOpen}
@@ -770,7 +769,6 @@ export default function Vehicles() {
             );
           })()}
       </Modal>
-
       <ConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

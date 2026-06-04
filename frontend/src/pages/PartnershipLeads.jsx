@@ -22,6 +22,7 @@ import {
 import { FaWhatsapp } from "react-icons/fa";
 import { useToast } from "../context/ToastContext";
 import SearchBar from "../components/UI/SearchBar";
+import EmptyState from "../components/UI/EmptyState";
 import Modal from "../components/UI/Modal";
 import ConfirmModal from "../components/UI/ConfirmModal";
 import { useAuth } from "../context/AuthContext";
@@ -103,28 +104,6 @@ const SkeletonCard = () => (
     </div>
     <div className="border-t border-slate-100 dark:border-zinc-800 my-3" />
     <div className="h-8 bg-slate-100 dark:bg-zinc-800 rounded-2xl w-full" />
-  </div>
-);
-
-const EmptyState = ({ hasSearch }) => (
-  <div className="flex flex-col items-center gap-3 py-16 px-6 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800">
-    <div className="w-16 h-16 bg-slate-50 dark:bg-zinc-800 rounded-3xl flex items-center justify-center">
-      {hasSearch ? (
-        <Search size={24} className="text-slate-300 dark:text-zinc-600" />
-      ) : (
-        <Store size={24} className="text-slate-300 dark:text-zinc-600" />
-      )}
-    </div>
-    <div>
-      <p className="font-black text-slate-700 dark:text-zinc-300 text-sm">
-        {hasSearch ? "No matching leads" : "No partnership leads"}
-      </p>
-      <p className="text-xs text-slate-400 dark:text-zinc-500 font-medium mt-1">
-        {hasSearch
-          ? "Try adjusting your search filters"
-          : "Garage partnership applications will appear here"}
-      </p>
-    </div>
   </div>
 );
 
@@ -649,7 +628,19 @@ export default function PartnershipLeads() {
         {loading ? (
           [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
         ) : currentLeads.length === 0 ? (
-          <EmptyState hasSearch={!!activeQuery || statusFilter !== "All"} />
+          <EmptyState
+            icon={!!activeQuery || statusFilter !== "All" ? Search : Store}
+            title={
+              !!activeQuery || statusFilter !== "All"
+                ? "No matching leads"
+                : "No partnership leads"
+            }
+            description={
+              !!activeQuery || statusFilter !== "All"
+                ? "Try adjusting your search filters."
+                : "Garage partnership applications will appear here."
+            }
+          />
         ) : (
           currentLeads.map((lead) => (
             <LeadCard

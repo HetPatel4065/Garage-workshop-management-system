@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import EmptyState from "../components/UI/EmptyState";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -447,45 +448,40 @@ export default function HelpCenter() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
-                <Search size={28} className="mx-auto text-slate-300 mb-3" />
-                <p className="text-slate-500 font-semibold mb-1">
-                  No matching questions found
-                </p>
-                <p className="text-slate-400 text-sm mb-4">
-                  Try different keywords or browse a category
-                </p>
-                <button
-                  onClick={() => {
+              <EmptyState
+                icon={Search}
+                title="No matching questions found"
+                description="Try different keywords or browse a category."
+                primaryAction={{
+                  label: "Clear filters",
+                  onClick: () => {
                     clearSearch();
                     setActiveCategory("all");
-                  }}
-                  className="text-sm text-blue-600 hover:underline font-medium"
-                >
-                  Clear filters
-                </button>
-              </div>
+                  },
+                }}
+              />
             )}
           </div>
 
           {/* --- Support Sidebar --- */}
           <div className="space-y-6">
             <div className="bg-blue-600 rounded-3xl p-6 text-white shadow-xl shadow-blue-200">
-              <h3 className="font-bold text-xl mb-2">Still need help?</h3>
+              <h3 className="font-extrabold text-xl mb-2">Still need help?</h3>
               <p className="text-blue-100 text-sm mb-6">
-                Our support team is available Mon–Sat
-                <span className="block">9am–7pm</span>
+                <span className="block font-bold">Our support team is available</span>
+                <span className="block font-mono">Monday to Friday</span>
+                <span className="block font-mono">9am–7pm</span>
               </p>
               <div className="space-y-4">
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+919978972413"
                   className="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-all"
                 >
                   <Phone size={18} className="shrink-0" />
-                  <span className="text-sm font-bold">+91 98765 43210</span>
+                  <span className="text-sm font-bold">+91 99789 72413</span>
                 </a>
                 <a
-                  href="mailto:support@garageapp.com"
+                  href="mailto:het.bloomittech@gmail.com"
                   className="flex items-center gap-3 bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-all"
                 >
                   <Mail size={18} className="shrink-0" />

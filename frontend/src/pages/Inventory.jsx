@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import SearchBar from "../components/UI/SearchBar";
 import Modal from "../components/UI/Modal";
@@ -37,7 +37,7 @@ export default function Inventory() {
   const { user, token } = useAuth();
   const role = user?.role || "user";
   const isMechanic = role === "mechanic";
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const getToken = () => token;
 
@@ -243,7 +243,7 @@ export default function Inventory() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 cursor-auto">
+    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -289,7 +289,6 @@ export default function Inventory() {
           )}
         </div>
       </div>
-
       {/* Search & Sort Bar */}
       <div className="mb-6 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
@@ -348,7 +347,6 @@ export default function Inventory() {
         onDelete={handleDelete}
         onUpdateStock={handleUpdateStock}
       />
-
       {/* Modal */}
       <Modal
         isOpen={modalOpen}
@@ -375,7 +373,6 @@ export default function Inventory() {
           readOnly={isMechanic || viewOnly}
         />
       </Modal>
-
       {/* Stock Modal */}
       {stockItem && (
         <StockUpdateModal
@@ -385,7 +382,6 @@ export default function Inventory() {
           onSubmit={handleStockSubmit}
         />
       )}
-
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={deleteModalOpen}

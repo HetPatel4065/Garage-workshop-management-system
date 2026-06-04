@@ -124,29 +124,6 @@ const SkeletonCard = () => (
   </div>
 );
 
-// ─── Empty State ───
-const EmptyState = ({ hasSearch }) => (
-  <div className="flex flex-col items-center gap-3 py-16 px-6 text-center bg-white rounded-3xl border border-slate-100">
-    <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center">
-      {hasSearch ? (
-        <Search size={24} className="text-slate-300" />
-      ) : (
-        <Calendar size={24} className="text-slate-300" />
-      )}
-    </div>
-    <div>
-      <p className="font-black text-slate-700 text-sm">
-        {hasSearch ? "No matching reminders" : "No service reminders"}
-      </p>
-      <p className="text-xs text-slate-400 font-medium mt-1">
-        {hasSearch
-          ? "Try adjusting your search or filter"
-          : "Service reminders will appear here"}
-      </p>
-    </div>
-  </div>
-);
-
 // ─── Stat Card ───
 const StatCard = ({
   label,
@@ -197,7 +174,7 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
   // Consistent with filter: completed only when flag set AND date has passed
   const isCompleted = r.reminderStatus === "Completed" && nextDateNorm <= today;
   const isOverdue = nextDateNorm < today && !isCompleted;
-  
+
   const diffTime = nextDateNorm.getTime() - today.getTime();
   const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -213,7 +190,9 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
     if (days <= 7) {
       return (
         <span className="text-amber-600 dark:text-amber-400 font-bold">
-          {days === 0 ? "Due Today" : `In ${days} ${days === 1 ? "day" : "days"}`}
+          {days === 0
+            ? "Due Today"
+            : `In ${days} ${days === 1 ? "day" : "days"}`}
         </span>
       );
     }
@@ -258,11 +237,11 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
           label="Due Date"
           primary={
             r.nextServiceDate
-              ? new Date(r.nextServiceDate).toLocaleDateString("en-GB",{
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
+              ? new Date(r.nextServiceDate).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
               : "—"
           }
           secondary={getDueStatusText()}
@@ -284,13 +263,13 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
               <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 leading-none mb-0.5">
                 Previous Service
               </p>
-              {r.lastServiceName && (
-                <p className="text-[12px] font-bold text-slate-700 capitalize leading-tight">
-                  {r.lastServiceName}
-                </p>
-              )}
+
+              <p className="text-[12px] font-bold text-slate-700 capitalize leading-tight">
+                {r.lastServiceName?.replace(/\n/g, " - ")}
+              </p>
+
               <p className="text-[11px] font-semibold text-slate-400">
-                {format(new Date(r.lastServiceDate), "dd MMM yyyy")}
+                {format(new Date(r.lastServiceDate), "dd/MM/yyyy")}
               </p>
             </div>
           </div>
@@ -728,7 +707,19 @@ export default function ServiceReminders() {
         {loading ? (
           [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
         ) : currentReminders.length === 0 ? (
-          <EmptyState hasSearch={!!searchQuery || statusFilter !== "All"} />
+          <EmptyState
+            icon={!!searchQuery || statusFilter !== "All" ? Search : Calendar}
+            title={
+              !!searchQuery || statusFilter !== "All"
+                ? "No matching reminders"
+                : "No service reminders"
+            }
+            description={
+              !!searchQuery || statusFilter !== "All"
+                ? "Try adjusting your search or filter."
+                : "Service reminders will appear here."
+            }
+          />
         ) : (
           currentReminders.map((r) => (
             <ReminderCard

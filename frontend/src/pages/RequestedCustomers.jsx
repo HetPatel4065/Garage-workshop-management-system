@@ -22,6 +22,7 @@ import {
 import { FaCar } from "react-icons/fa";
 import { useToast } from "../context/ToastContext";
 import SearchBar from "../components/UI/SearchBar";
+import EmptyState from "../components/UI/EmptyState";
 import Modal from "../components/UI/Modal";
 import ConfirmModal from "../components/UI/ConfirmModal";
 import { Meta } from "react-router-dom";
@@ -101,29 +102,6 @@ const SkeletonCard = () => (
     </div>
     <div className="border-t border-slate-100 my-3" />
     <div className="h-8 bg-slate-100 rounded-2xl w-full" />
-  </div>
-);
-
-// ─── Empty State ──────────────────────────────────────────────────
-const EmptyState = ({ hasSearch }) => (
-  <div className="flex flex-col items-center gap-3 py-16 px-6 text-center bg-white rounded-3xl border border-slate-100">
-    <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center">
-      {hasSearch ? (
-        <Search size={24} className="text-slate-300" />
-      ) : (
-        <Users size={24} className="text-slate-300" />
-      )}
-    </div>
-    <div>
-      <p className="font-black text-slate-700 text-sm">
-        {hasSearch ? "No matching requests" : "No registration requests"}
-      </p>
-      <p className="text-xs text-slate-400 font-medium mt-1">
-        {hasSearch
-          ? "Try adjusting your search or filter"
-          : "New customer requests will appear here"}
-      </p>
-    </div>
   </div>
 );
 
@@ -690,7 +668,19 @@ export default function RequestedCustomers() {
         {loading ? (
           [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
         ) : currentRequests.length === 0 ? (
-          <EmptyState hasSearch={!!activeQuery || statusFilter !== "All"} />
+          <EmptyState
+            icon={!!activeQuery || statusFilter !== "All" ? Search : Users}
+            title={
+              !!activeQuery || statusFilter !== "All"
+                ? "No matching requests"
+                : "No registration requests"
+            }
+            description={
+              !!activeQuery || statusFilter !== "All"
+                ? "Try adjusting your search or filter."
+                : "New customer requests will appear here."
+            }
+          />
         ) : (
           currentRequests.map((req) => (
             <RequestCard

@@ -527,7 +527,7 @@ export default function AdminDirectory() {
         title="Send Announcement Alert"
         subtitle={
           <>
-            Dispatching dashboard notification to{" "}
+            Dispatching dashboard notification to
             <strong>{announcementModal.garageName}</strong>
           </>
         }

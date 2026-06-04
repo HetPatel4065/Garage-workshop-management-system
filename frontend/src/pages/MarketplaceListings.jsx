@@ -27,6 +27,7 @@ import { useSearchParams } from "react-router-dom";
 import VehicleFiltersSidebar from "./VehicleFiltersSidebar";
 import CardImageSlider from "../components/marketplace/CardImageSlider";
 import WishlistHeart from "../components/marketplace/WishlistHeart";
+import EmptyState from "../components/UI/EmptyState";
 import {
   BODY_TYPE_OPTIONS,
   SEATS_OPTIONS,
@@ -1010,41 +1011,32 @@ export default function MarketplaceListings({
       </p>
     </div>
   ) : filteredListings.length === 0 ? (
-    <div
-      className={`flex flex-col items-center justify-center py-24 px-4 text-center rounded-3xl border border-dashed ${
+    <EmptyState
+      icon={Tag}
+      title="No vehicles found"
+      description={emptyListingsMessage}
+      primaryAction={
+        viewMode === "my-listings" && isManager
+          ? { label: "List New Car", onClick: handleOpenAdd }
+          : undefined
+      }
+      secondaryAction={
+        viewMode === "explore"
+          ? {
+              label: "Clear all filters",
+              onClick: () => {
+                setFilters({ search: "" });
+                setSearchParams(new URLSearchParams(), { replace: true });
+              },
+            }
+          : undefined
+      }
+      className={
         viewMode === "my-listings"
           ? "bg-white border-slate-200"
           : "bg-white dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800"
-      }`}
-    >
-      <Tag className="w-16 h-16 text-slate-300 dark:text-zinc-700 mb-4" />
-      <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-200">
-        No vehicles found
-      </h3>
-      <p className="text-slate-500 dark:text-zinc-400 mt-2 max-w-md">
-        {emptyListingsMessage}
-      </p>
-      {viewMode === "my-listings" && isManager && (
-        <button
-          onClick={handleOpenAdd}
-          className="mt-6 flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-bold transition-all shadow-md"
-        >
-          <Plus size={17} />
-          List New Car
-        </button>
-      )}
-      {viewMode === "explore" && (
-        <button
-          onClick={() => {
-            setFilters({ search: "" });
-            setSearchParams(new URLSearchParams(), { replace: true });
-          }}
-          className="mt-6 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
-        >
-          Clear all filters
-        </button>
-      )}
-    </div>
+      }
+    />
   ) : (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       {filteredListings.map((item) => (
@@ -1262,7 +1254,8 @@ export default function MarketplaceListings({
   return (
     <>
       {viewMode === "my-listings" ? (
-        <div className="p-4 sm:p-6 bg-gray-100 cursor-auto min-h-fit">
+        <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
+          {" "}
           <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
@@ -1320,7 +1313,6 @@ export default function MarketplaceListings({
               </button>
             </div>
           </div>
-
           <>
             <>
               {/* Combined Layout Grid */}

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, Sun, Moon, Monitor } from "lucide-react";
-import ThemeToggle from "../theme/ThemeToggle";
 import { useTheme } from "../../hooks/useTheme";
 
 export const FAQ = () => {
@@ -44,13 +43,14 @@ export const FAQ = () => {
   ];
 
   return (
-    <section id="faq" className="px-6 max-w-3xl mx-auto">
+    <section id="faq" className="max-w-3xl mx-auto px-6">
+      {/* FAQ Header */}
       <div className="text-center mb-12 md:mb-16">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5"
+          className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full"
           style={{
             background: "rgba(99,102,241,0.08)",
             border: "1px solid rgba(99,102,241,0.20)",
@@ -63,6 +63,7 @@ export const FAQ = () => {
             Common Questions
           </span>
         </motion.div>
+
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -83,14 +84,16 @@ export const FAQ = () => {
             We've got answers.
           </span>
         </motion.h2>
+
         <p
-          className="font-medium text-sm md:text-base"
+          className="text-sm md:text-base font-medium"
           style={{ color: "var(--text-body)" }}
         >
           Everything you need to know about GaragePro.
         </p>
       </div>
 
+      {/* Accordion Stack */}
       <div className="space-y-3 md:space-y-4">
         {faqs.map((item, i) => (
           <motion.div
@@ -113,7 +116,9 @@ export const FAQ = () => {
                   : "0 1px 4px rgba(0,0,0,0.04)",
             }}
           >
+            {/* Accordion Trigger */}
             <button
+              type="button"
               onClick={() => setActive(active === i ? -1 : i)}
               className="w-full px-5 md:px-8 py-5 md:py-6 flex items-center justify-between text-left"
             >
@@ -124,7 +129,7 @@ export const FAQ = () => {
                 {item.q}
               </span>
               <div
-                className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center shrink-0 ml-4 transition-all duration-300"
+                className="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center shrink-0 ml-4 rounded-full transition-all duration-300"
                 style={{
                   background:
                     active === i
@@ -137,6 +142,8 @@ export const FAQ = () => {
                 <ChevronDown size={14} />
               </div>
             </button>
+
+            {/* Accordion Body */}
             <AnimatePresence>
               {active === i && (
                 <motion.div
@@ -166,16 +173,16 @@ export const Footer = () => {
 
   return (
     <footer
-      className="py-24 px-6 relative overflow-hidden"
+      className="relative py-24 px-6 overflow-hidden"
       style={{
         background:
           "linear-gradient(180deg, var(--bg-primary) 0%, var(--nav-bg) 100%)",
         borderTop: "1px solid var(--nav-border)",
       }}
     >
-      {/* Decorative glow */}
+      {/* Decorative Blur Glow */}
       <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-125 h-50"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-125 h-50 pointer-events-none"
         style={{
           background:
             "radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 70%)",
@@ -183,11 +190,12 @@ export const Footer = () => {
         }}
       />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-12 relative z-10">
+      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-12">
+        {/* Branding & Info Column */}
         <div className="md:col-span-2">
           <div className="flex items-center gap-2.5 mb-6">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-extrabold text-sm"
+              className="w-9 h-9 flex items-center justify-center text-white font-extrabold text-sm rounded-xl"
               style={{
                 background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",
                 boxShadow: "0 4px 16px rgba(99,102,241,0.30)",
@@ -203,7 +211,7 @@ export const Footer = () => {
             </span>
           </div>
           <p
-            className="text-sm font-medium leading-relaxed max-w-sm mb-8"
+            className="max-w-sm mb-8 text-sm font-medium leading-relaxed"
             style={{ color: "var(--text-body)" }}
           >
             The all-in-one operating system for modern mechanical workshops.
@@ -221,6 +229,7 @@ export const Footer = () => {
           </div>
         </div>
 
+        {/* Product Navigation Column */}
         <div>
           <h4
             className="text-xs font-extrabold uppercase tracking-widest mb-6"
@@ -233,20 +242,21 @@ export const Footer = () => {
               { label: "Features", href: "#features" },
               { label: "Pricing", href: "#pricing" },
               { label: "FAQ", href: "#faq" },
-            ].map((l) => (
-              <li key={l.label}>
+            ].map((link) => (
+              <li key={link.label}>
                 <a
-                  href={l.href}
+                  href={link.href}
                   className="text-sm font-medium transition-colors hover:text-indigo-600"
                   style={{ color: "var(--text-body)" }}
                 >
-                  {l.label}
+                  {link.label}
                 </a>
               </li>
             ))}
           </ul>
         </div>
 
+        {/* Company Navigation Column */}
         <div>
           <h4
             className="text-xs font-extrabold uppercase tracking-widest mb-6"
@@ -263,29 +273,29 @@ export const Footer = () => {
                 href: "/privacy-policy",
                 type: "link",
               },
-            ].map((l) => (
-              <li key={l.label}>
-                {l.type === "link" ? (
+            ].map((link) => (
+              <li key={link.label}>
+                {link.type === "link" ? (
                   <Link
-                    to={l.href}
+                    to={link.href}
                     className="text-sm font-medium transition-colors hover:text-indigo-600"
                     style={{
                       color: "var(--text-body)",
                       textDecoration: "none",
                     }}
                   >
-                    {l.label}
+                    {link.label}
                   </Link>
                 ) : (
                   <a
-                    href={l.href}
+                    href={link.href}
                     className="text-sm font-medium transition-colors hover:text-indigo-600"
                     style={{
                       color: "var(--text-body)",
                       textDecoration: "none",
                     }}
                   >
-                    {l.label}
+                    {link.label}
                   </a>
                 )}
               </li>
@@ -293,6 +303,7 @@ export const Footer = () => {
           </ul>
         </div>
 
+        {/* Theme Settings Configurator Column */}
         <div>
           <h4
             className="text-xs font-extrabold uppercase tracking-widest mb-6"
@@ -326,12 +337,13 @@ export const Footer = () => {
             ].map((opt) => {
               const Icon = opt.icon;
               const isActive = theme === opt.id;
+
               return (
                 <button
                   key={opt.id}
                   type="button"
                   onClick={() => setTheme(opt.id)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-[13px] font-bold tracking-wide transition-all duration-350 cursor-auto select-none active:scale-[0.98] ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-[13px] font-bold tracking-wide transition-all duration-350 select-none active:scale-[0.98] cursor-pointer ${
                     isActive
                       ? `${opt.activeColor} shadow-sm font-extrabold`
                       : "border-slate-200/80 dark:border-zinc-800 bg-white/40 hover:bg-white dark:bg-zinc-900/40 dark:hover:bg-zinc-900 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100"

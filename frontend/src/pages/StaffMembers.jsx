@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { FaUsers } from "react-icons/fa6";
 import SearchBar from "../components/UI/SearchBar";
+import EmptyState from "../components/UI/EmptyState";
 import { CardSkeleton, TableSkeleton } from "../components/UI/Skeleton";
 import ExportButton from "../components/common/ExportButton";
 import Modal from "../components/UI/Modal";
@@ -628,18 +629,12 @@ export default function StaffMembers() {
           </div>
         </div>
       ) : filteredStaff.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 mx-4 sm:mx-6 my-6">
-          <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
-            <Search className="w-8 h-8 text-slate-400" />
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
-            No Staff Found
-          </h3>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-sm text-center">
-            We couldn't find any staff members matching your search criteria.
-            Try adjusting your filters or search term.
-          </p>
-        </div>
+        <EmptyState
+          icon={Search}
+          title="No staff found"
+          description="We couldn't find any staff members matching your search criteria. Try adjusting your filters or search term."
+          className="mx-4 sm:mx-6 my-6"
+        />
       ) : (
         <>
           {/* MOBILE: CARD VIEW */}

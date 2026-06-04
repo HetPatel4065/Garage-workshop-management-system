@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import EmptyState from "../components/UI/EmptyState";
 import ExportButton from "../components/common/ExportButton";
 import {
   exportToPDF,
@@ -1267,18 +1268,12 @@ export default function Settings() {
                     )}
 
                     {catalog.length === 0 && (
-                      <div className="flex flex-col items-center justify-center py-12 px-4 bg-slate-50 dark:bg-slate-950/20 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl text-center animate-in fade-in zoom-in-95 duration-300">
-                        <div className="w-14 h-14 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-700 shadow-sm mb-4">
-                          <List size={28} />
-                        </div>
-                        <h5 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                          No Service Packages Found
-                        </h5>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-50 mx-auto">
-                          Click "Add New" to define your standard service
-                          prices.
-                        </p>
-                      </div>
+                      <EmptyState
+                        icon={List}
+                        title="No Service Packages Found"
+                        description={`Click "Add New" to define your standard service prices.`}
+                        className="py-12 px-4"
+                      />
                     )}
 
                     {catalog.map((s, idx) => (

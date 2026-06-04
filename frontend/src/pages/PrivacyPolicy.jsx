@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import EmptyState from "../components/UI/EmptyState";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import EmptyState from "../../components/UI/EmptyState";
 import {
   Search,
   Loader2,
@@ -170,16 +171,12 @@ const PortalServicesCatalog = ({ token }) => {
           <p className="font-bold text-sm">{error}</p>
         </div>
       ) : filteredServices.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl p-16 text-center">
-          <Info className="w-12 h-12 text-slate-350 dark:text-zinc-650 mx-auto mb-4" />
-          <h3 className="text-lg font-black text-slate-900 dark:text-white">
-            No Services Found
-          </h3>
-          <p className="text-slate-500 dark:text-zinc-400 font-bold text-xs sm:text-sm max-w-md mx-auto mt-2">
-            No matching services found in our catalog. Try adjusting your search
-            keywords or choosing a different category.
-          </p>
-        </div>
+        <EmptyState
+          icon={Info}
+          title="No Services Found"
+          description="No matching services found in our catalog. Try adjusting your search keywords or choosing a different category."
+          className="p-16"
+        />
       ) : (
         <motion.div
           layout

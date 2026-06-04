@@ -15,9 +15,7 @@ import {
   Users,
   FileText,
   CreditCard,
-  LifeBuoy,
 } from "lucide-react";
-
 
 const NAV_ITEMS = [
   {
@@ -123,7 +121,7 @@ const NAV_ITEMS = [
 ];
 
 /* ─────────────────────────────────────────────
-   DROPDOWN  (desktop)
+    DROPDOWN (desktop)
 ───────────────────────────────────────────── */
 const Dropdown = ({ items, visible }) => (
   <AnimatePresence>
@@ -147,8 +145,9 @@ const Dropdown = ({ items, visible }) => (
           }}
         >
           <div
-            className={`grid gap-1 ${items.length > 4 ? "grid-cols-2" : "grid-cols-1"
-              }`}
+            className={`grid gap-1 ${
+              items.length > 4 ? "grid-cols-2" : "grid-cols-1"
+            }`}
           >
             {items.map((item) => {
               const Icon = item.icon;
@@ -196,7 +195,7 @@ const Dropdown = ({ items, visible }) => (
 );
 
 /* ─────────────────────────────────────────────
-   MOBILE ACCORDION ITEM
+    MOBILE ACCORDION ITEM
 ───────────────────────────────────────────── */
 const MobileNavItem = ({ item, onClose }) => {
   const [open, setOpen] = useState(false);
@@ -294,7 +293,7 @@ const MobileNavItem = ({ item, onClose }) => {
 };
 
 /* ─────────────────────────────────────────────
-   MAIN NAVBAR
+    MAIN NAVBAR
 ───────────────────────────────────────────── */
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -328,22 +327,27 @@ export const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-2 md:py-3" : "py-4 md:py-5"
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "py-2 md:py-3" : "py-4 md:py-5"
+      }`}
       style={
         scrolled
           ? {
-            background: "var(--nav-bg)",
-            backdropFilter: "blur(24px)",
-            borderBottom: "1px solid var(--nav-border)",
-            boxShadow: "0 4px 32px rgba(99,102,241,0.08)",
-          }
+              background: "var(--nav-bg)",
+              backdropFilter: "blur(24px)",
+              borderBottom: "1px solid var(--nav-border)",
+              boxShadow: "0 4px 32px rgba(99,102,241,0.08)",
+            }
           : { background: "transparent" }
       }
     >
       <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
         {/* ── Logo ── */}
-        <Link to="/" className="flex items-center gap-2 md:gap-2.5 group" style={{ textDecoration: "none" }}>
+        <Link
+          to="/"
+          className="flex items-center gap-2 md:gap-2.5 group"
+          style={{ textDecoration: "none" }}
+        >
           <div
             className="w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center text-white font-extrabold text-xs md:text-sm group-hover:scale-110 transition-transform duration-300"
             style={{
@@ -375,7 +379,9 @@ export const Navbar = () => {
                   className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-150"
                   style={{
                     color:
-                      activeDropdown === item.label ? "#6366f1" : "var(--text-muted)",
+                      activeDropdown === item.label
+                        ? "#6366f1"
+                        : "var(--text-muted)",
                     background:
                       activeDropdown === item.label
                         ? "rgba(99,102,241,0.07)"
@@ -383,7 +389,7 @@ export const Navbar = () => {
                   }}
                   onClick={() =>
                     setActiveDropdown(
-                      activeDropdown === item.label ? null : item.label
+                      activeDropdown === item.label ? null : item.label,
                     )
                   }
                 >
@@ -436,7 +442,6 @@ export const Navbar = () => {
 
         {/* ── Tablet/Small Desktop Nav Links (Medium Screens) ── */}
         <div className="hidden md:flex lg:hidden items-center gap-1">
-          {/* We only show direct links on tablet to save space, or a simplified menu */}
           {NAV_ITEMS.filter((i) => !i.children).map((item) =>
             item.href.startsWith("/") ? (
               <Link
@@ -456,7 +461,7 @@ export const Navbar = () => {
               >
                 {item.label}
               </a>
-            )
+            ),
           )}
         </div>
 

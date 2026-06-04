@@ -10,17 +10,10 @@ import SearchBar from "../components/UI/SearchBar";
 import { useToast } from "../context/ToastContext";
 import InvoicePreview from "../components/Billing/InvoicePreview";
 import UnbilledServiceCard from "../components/Services/UnbilledServiceCard";
+import EmptyState from "../components/UI/EmptyState";
 import { ClipboardClock, FileText, ReceiptIndianRupee } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ExportButton from "../components/common/ExportButton";
-
-const EmptyState = ({ icon, title, description }) => (
-  <div className="text-center py-32 bg-gray-200 dark:bg-gray-900 rounded-[40px] border-2 border-dashed border-gray-300 flex flex-col items-center">
-    <div className="text-6xl mb-6">{icon}</div>
-    <p className="text-gray-900 font-black text-2xl tracking-normal">{title}</p>
-    <p className="text-gray-500 font-bold max-w-sm mt-2">{description}</p>
-  </div>
-);
 
 const LoadingIndicator = () => (
   <div className="flex flex-col items-center justify-center py-20 text-blue-600/50">

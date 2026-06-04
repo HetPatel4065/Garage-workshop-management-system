@@ -83,7 +83,7 @@ export const Pricing = () => {
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-8"
             style={{ color: "var(--text-heading)" }}
           >
-            Fair pricing.
+            Fair pricing.{" "}
             <span
               style={{
                 background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",

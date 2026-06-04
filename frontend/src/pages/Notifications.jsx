@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import SearchBar from "../components/UI/SearchBar";
+import EmptyState from "../components/UI/EmptyState";
 
 /* ─── Helper: icon + colour per type ─── */
 function getTypeStyles(type) {
@@ -440,10 +441,12 @@ export default function Notifications() {
           ))}
         </div>
       ) : (
-        <div className="text-gray-500 text-center mt-2 flex flex-col items-center gap-2 py-25 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-          <Bell className="w-8 h-8 text-gray-300" />
-          <p className="font-medium">No notifications found</p>
-        </div>
+        <EmptyState
+          icon={Bell}
+          title="No notifications found"
+          description="You currently have no notifications. We'll show messages here when there are updates."
+          className="mt-2"
+        />
       )}
     </div>
   );

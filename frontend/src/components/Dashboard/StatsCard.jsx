@@ -18,7 +18,7 @@ export default function StatsCard({
   sparklineData = [],
   children,
 }) {
-  // Enhanced color map to support both light and dark aesthetics gracefully
+  // Enhanced color map supporting both light and dark aesthetics gracefully
   const colorMap = {
     blue: {
       bg: "bg-blue-500/10 dark:bg-blue-500/10",
@@ -56,18 +56,18 @@ export default function StatsCard({
   const isPositiveTrend = trend && !trend.startsWith("-");
 
   return (
-    <div className="group relative bg-white dark:bg-[#16161a] rounded-2xl p-6 shadow-md dark:shadow-xl border border-zinc-200 dark:border-zinc-800/40 flex flex-col min-w-0 h-full overflow-hidden transition-all duration-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 hover:-translate-y-1.5 hover:-translate-x-1.5">
-      {/* Top Section: Icon & Optional Trend */}
+    <div className="group relative flex flex-col min-w-0 h-full p-6 bg-white dark:bg-[#16161a] border border-zinc-200 dark:border-zinc-800/40 rounded-2xl shadow-md dark:shadow-xl overflow-hidden transition-all duration-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 hover:-translate-y-1.5 hover:-translate-x-1.5">
+      {/* Top Section: Icon & Optional Trend Badge */}
       <div className="flex justify-between items-start mb-5 z-10">
         <div
-          className={`p-3 rounded-xl ${theme.bg} ${theme.text} transition-all duration-300 shadow-inner`}
+          className={`p-3 rounded-xl shadow-inner transition-all duration-300 ${theme.bg} ${theme.text}`}
         >
           {icon && React.cloneElement(icon, { size: 20, strokeWidth: 2.5 })}
         </div>
 
         {trend && (
           <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-md tracking-wide ${
+            className={`px-2.5 py-1 text-xs font-semibold tracking-wide rounded-md ${
               isPositiveTrend
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                 : "bg-red-500/10 text-red-600 dark:text-red-400"
@@ -78,24 +78,24 @@ export default function StatsCard({
         )}
       </div>
 
-      {/* Primary Value Section */}
-      <div className="space-y-1 relative z-10 flex-1 min-w-0">
-        <p className="text-zinc-400 dark:text-zinc-500 text-[10px] font-bold tracking-widest uppercase">
+      {/* Primary Value Display */}
+      <div className="relative flex-1 min-w-0 space-y-1 z-10">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
           {title}
         </p>
         <div className="flex items-baseline gap-2 flex-wrap">
-          <p className="text-2xl sm:text-3xl font-black text-zinc-800 dark:text-zinc-100 tracking-tight">
+          <p className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-800 dark:text-zinc-100">
             {value}
           </p>
         </div>
       </div>
 
-      {/* Slot for anything extra */}
-      {children && <div className="mt-4 relative z-10">{children}</div>}
+      {/* Optional Injected Content Slot */}
+      {children && <div className="relative mt-4 z-10">{children}</div>}
 
-      {/* Sparkline Overlay */}
+      {/* Sparkline Visual Overlay */}
       {sparklineData && sparklineData.length > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 h-12 w-full opacity-10 dark:opacity-20 group-hover:opacity-30 dark:group-hover:opacity-40 transition-all duration-500 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 h-12 w-full opacity-10 dark:opacity-20 pointer-events-none transition-all duration-500 group-hover:opacity-30 dark:group-hover:opacity-40">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={sparklineData}
