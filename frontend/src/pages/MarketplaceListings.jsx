@@ -1051,7 +1051,7 @@ export default function MarketplaceListings({
               navigate(`/portal/marketplace/${item._id}`);
             }
           }}
-          className={`bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/80 dark:border-zinc-800 overflow-hidden flex flex-col shadow-xs group hover:border-emerald-300 dark:hover:border-zinc-700 transition-all duration-300 ${
+          className={`bg-white dark:bg-zinc-900 rounded-md border border-slate-200/80 dark:border-zinc-800 overflow-hidden flex flex-col shadow-xs group hover:border-emerald-300 dark:hover:border-zinc-700 transition-all duration-300 ${
             isCustomer ? "cursor-auto hover:shadow-lg active:scale-[0.99]" : ""
           }`}
         >

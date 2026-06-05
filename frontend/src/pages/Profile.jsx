@@ -497,7 +497,7 @@ export default function Profile({ isAdvisor }) {
                           )}
 
                           <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-200/40 dark:bg-slate-800/50 px-3 py-1 rounded-full">
-                            Recommended: Square PNG/JPG • Max 5MB
+                            Recommended: Square PNG/JPG • Max 3MB
                           </p>
                         </div>
                       </div>

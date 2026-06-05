@@ -56,21 +56,37 @@ function PageLoadingFallback() {
 
 function AdminPreviewBanner({ garage, onExit }) {
   return (
-    <div className="bg-linear-to-r from-slate-900 via-indigo-900/40 to-slate-900 text-slate-100 px-6 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm border-b border-slate-800 text-xs sm:text-sm font-medium tracking-wide">
-      {" "}
+    <div
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-2.5 shadow-sm text-xs sm:text-sm font-medium tracking-wide transition-colors duration-200 
+      bg-linear-to-r from-slate-50 via-indigo-50/30 to-slate-50 text-slate-700 border-b border-slate-200/80 
+      dark:bg-linear-to-r dark:from-slate-900 dark:via-indigo-900/40 dark:to-slate-900 dark:text-slate-100 dark:border-slate-800"
+    >
+      {/* Left Side: Status & Info */}
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-        <span className="truncate">
+        <div className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0" />
+        <span className="truncate text-slate-600 dark:text-slate-300">
           Viewing:{" "}
-          <strong className="font-bold text-amber-100">
-            {garage.garageName}
+          {/* FIXED: Changed text-amber-100 to an elegant amber-600 in light mode and amber-400 in dark mode */}
+          <strong className="font-bold text-amber-600 dark:text-amber-400">
+            {garage.garageName}{" "}
           </strong>{" "}
-          &bull; Owner: {garage.name}
+          <span className="text-slate-700 dark:text-slate-200 mx-1">
+            &bull;(ID: {garage.garageId})
+          </span>
+          Owner:{" "}
+          <span className="font-semibold text-slate-800 dark:text-slate-300">
+            {garage.name}
+          </span>
         </span>
       </div>
+
+      {/* Right Side: Action Button */}
       <button
         onClick={onExit}
-        className="bg-white/15 hover:bg-white/25 active:scale-95 hover:scale-105 text-white border border-white/20 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-auto shadow-inner uppercase tracking-wider shrink-0 self-start sm:self-auto"
+        /* FIXED: Adjusted white transparent background to dark/light adaptive variants and cursor-pointer */
+        className="px-3 py-1 rounded-lg text-xs font-bold transition-all active:scale-95 uppercase tracking-wider shrink-0 self-start sm:self-auto cursor-pointer border
+      bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-sm
+      dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
       >
         Exit Preview
       </button>

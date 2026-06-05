@@ -505,7 +505,7 @@ export default function PartnershipLeads() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-zinc-950 rounded-xl transition-colors duration-300">
+    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-zinc-950 transition-colors duration-300">
       {/* ── Header ── */}
       <div className="mb-8 pb-5 border-b border-slate-200/80 dark:border-zinc-800">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

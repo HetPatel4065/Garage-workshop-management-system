@@ -2,9 +2,35 @@ import React, { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { FaCar } from "react-icons/fa";
 
+// Clean layout configurations split by variants
+const VARIANT_CONFIG = {
+  portal: {
+    wrapper:
+      "relative aspect-video w-full overflow-hidden bg-slate-900 group/slider",
+    btnLeft:
+      "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 z-10 cursor-auto",
+    btnRight:
+      "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 z-10 cursor-auto",
+    chevronSize: "w-4 h-4",
+    // Flush counter layout for top right corner
+    counter:
+      "absolute top-0 right-0 rounded-bl-md bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-white backdrop-blur-xs z-10",
+  },
+  listing: {
+    wrapper: "relative w-full h-full overflow-hidden bg-slate-900 group/slider",
+    btnLeft:
+      "absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-250 z-10 cursor-auto",
+    btnRight:
+      "absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-250 z-10 cursor-auto",
+    chevronSize: "w-3.5 h-3.5",
+    // Flush counter layout for top right corner
+    counter:
+      "absolute top-0 right-0 rounded-bl-md bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-white backdrop-blur-xs z-10",
+  },
+};
 
 export default function CardImageSlider({
-  photos,
+  photos = [],
   title,
   watermarkText = "",
   emptyIcon: EmptyIcon = Tag,
@@ -12,15 +38,20 @@ export default function CardImageSlider({
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
 
+  const styles = VARIANT_CONFIG[variant] || VARIANT_CONFIG.listing;
+
+  // Memoize photo values to safely handle reference-change tracking
   const photosKey = useMemo(
     () => (photos || []).map((p) => String(p)).join("|"),
     [photos],
   );
 
+  // Reset slider index when a different set of photos loads
   useEffect(() => {
     setCurrentIdx(0);
   }, [photosKey]);
 
+  // Handle Empty Fallbacks
   if (!photos || photos.length === 0) {
     if (variant === "portal") {
       return (
@@ -29,6 +60,7 @@ export default function CardImageSlider({
         </div>
       );
     }
+
     return (
       <div className="w-full h-full bg-slate-100 dark:bg-zinc-800 flex flex-col items-center justify-center text-slate-400 dark:text-zinc-650">
         <EmptyIcon className="w-8 h-8 opacity-45" />
@@ -39,8 +71,13 @@ export default function CardImageSlider({
     );
   }
 
-  const safeIdx = Math.min(currentIdx, photos.length - 1);
+  const safeIdx = Math.max(0, Math.min(currentIdx, photos.length - 1));
   const baseUrl = import.meta.env.VITE_BASE_URL?.replace(/\/$/, "") || "";
+
+  const currentPhoto = photos[safeIdx];
+  const imgSrc = currentPhoto?.startsWith("http")
+    ? currentPhoto
+    : `${baseUrl}/${currentPhoto?.replace(/^\//, "")}`;
 
   const nextSlide = (e) => {
     e.stopPropagation();
@@ -52,19 +89,11 @@ export default function CardImageSlider({
     setCurrentIdx((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
   };
 
-  const wrapperClass =
-    variant === "portal"
-      ? "relative aspect-video w-full overflow-hidden bg-slate-900 group/slider"
-      : "relative w-full h-full overflow-hidden bg-slate-900 group/slider";
-
   return (
-    <div className={wrapperClass}>
+    <div className={styles.wrapper}>
+      {/* Slider Core Image */}
       <img
-        src={
-          photos[safeIdx]?.startsWith("http")
-            ? photos[safeIdx]
-            : `${baseUrl}/${photos[safeIdx]?.replace(/^\//, "")}`
-        }
+        src={imgSrc}
         alt={`${title} - Photo ${safeIdx + 1}`}
         className="w-full h-full object-cover transition-transform duration-500 group-hover/slider:scale-103"
         onError={(e) => {
@@ -73,58 +102,28 @@ export default function CardImageSlider({
             "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80";
         }}
       />
+
+      {/* Watermark Element */}
       {watermarkText && (
-        <div className="absolute left-3 bottom-3 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-white shadow-xl shadow-black/20 backdrop-blur-sm mix-blend-difference">
+        <div className="absolute left-3 bottom-3 rounded-md bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-white shadow-xl shadow-black/20 backdrop-blur-sm mix-blend-difference">
           {watermarkText}
         </div>
       )}
+
+      {/* Conditional Arrow Controls & Top Corner Image Counter */}
       {photos.length > 1 && (
         <>
-          <button
-            type="button"
-            onClick={prevSlide}
-            className={
-              variant === "portal"
-                ? "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 z-10 cursor-auto"
-                : "absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-250 z-10 cursor-auto"
-            }
-          >
-            <ChevronLeft
-              className={variant === "portal" ? "w-4 h-4" : "w-3.5 h-3.5"}
-            />
+          <button type="button" onClick={prevSlide} className={styles.btnLeft}>
+            <ChevronLeft className={styles.chevronSize} />
           </button>
-          <button
-            type="button"
-            onClick={nextSlide}
-            className={
-              variant === "portal"
-                ? "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 z-10 cursor-auto"
-                : "absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-250 z-10 cursor-auto"
-            }
-          >
-            <ChevronRight
-              className={variant === "portal" ? "w-4 h-4" : "w-3.5 h-3.5"}
-            />
+
+          <button type="button" onClick={nextSlide} className={styles.btnRight}>
+            <ChevronRight className={styles.chevronSize} />
           </button>
-          <div
-            className={
-              variant === "portal"
-                ? "absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10"
-                : "absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1 z-10"
-            }
-          >
-            {photos.map((_, idx) => (
-              <span
-                key={idx}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  idx === safeIdx
-                    ? "bg-white scale-125 shadow-xs"
-                    : variant === "portal"
-                      ? "bg-white/50"
-                      : "bg-white/45"
-                }`}
-              />
-            ))}
+
+          {/* Numerical Counter Indicator in top right corner */}
+          <div className={styles.counter}>
+            {safeIdx + 1} / {photos.length}
           </div>
         </>
       )}

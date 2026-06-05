@@ -1237,7 +1237,7 @@ export default function Settings() {
                       )}
 
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                        Recommended: Square PNG or JPG (Max 5MB)
+                        Recommended: Square PNG or JPG (Max 3MB)
                       </p>
                     </div>
                   </div>
