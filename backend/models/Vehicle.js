@@ -57,8 +57,21 @@ const vehicleSchema = new mongoose.Schema(
     },
     reminderStatus: {
       type: String,
-      enum: ["Pending", "Reminder Sent", "Customer Contacted", "Service Booked", "Completed", "Overdue"],
+      enum: [
+        "Pending",
+        "Reminder Sent",
+        "Customer Contacted",
+        "Service Booked",
+        "Completed",
+        "Overdue",
+      ],
       default: "Pending",
+    },
+    serviceDate: {
+      type: Date,
+    },
+    nextServiceDate: {
+      type: Date,
     },
     status: {
       type: String,

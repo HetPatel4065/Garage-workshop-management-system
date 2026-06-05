@@ -84,10 +84,6 @@ function ToggleItem({
             : "cursor-auto bg-slate-50 dark:bg-zinc-900 border-slate-100 dark:border-zinc-800 hover:border-blue-200 dark:hover:border-blue-800/50 hover:bg-white dark:hover:bg-zinc-800/80"
       }`}
     >
-      {/* Background Accent */}
-      <div
-        className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none ${isOn ? "bg-blue-100/50 dark:bg-gray-800/20" : "bg-white dark:bg-zinc-700/30"}`}
-      />
 
       <div className="relative z-10 flex items-center justify-between w-full">
         <div className="pr-4 min-w-0">
@@ -973,7 +969,7 @@ export default function Settings() {
         <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
-              <p className="text-[11px] font-black text-blue-600 uppercase tracking-[0.22em] mb-2">
+              <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
                 Garage Management
               </p>
 
@@ -1167,7 +1163,7 @@ export default function Settings() {
 
                   {/* Single Brand Logo */}
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-1.5 h-6 bg-black rounded-full" />
+                    <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
                     <h3 className="text-lg font-bold text-slate-800">
                       Business Logo
                     </h3>

@@ -278,7 +278,7 @@ export default function HelpCenter() {
   const clearSearch = () => setSearchQuery("");
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-gray-100 min-h-screen min-w-0">
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-100 min-w-0">
       <div className="max-w-5xl mx-auto">
         {/* --- Hero Section with Search --- */}
         <div className="space-y-4 mb-10">

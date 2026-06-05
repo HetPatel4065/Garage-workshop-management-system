@@ -14,7 +14,13 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
-import { FormInput, FormTextarea, FormButton, FormError, FormRow } from "../../components/layout/Form/forms";
+import {
+  FormInput,
+  FormTextarea,
+  FormButton,
+  FormError,
+  FormRow,
+} from "../../components/layout/Form/forms";
 
 const RegistrationModal = ({ isOpen, onClose, garage }) => {
   const [step, setStep] = useState(1); // 1: Details, 2: OTP, 3: Success
@@ -242,7 +248,9 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                         if (!value.startsWith("+91")) {
                           value = "+91 ";
                         }
-                        let digits = value.replace("+91", "").replace(/\D/g, "");
+                        let digits = value
+                          .replace("+91", "")
+                          .replace(/\D/g, "");
                         digits = digits.slice(0, 10);
                         value = "+91 " + digits;
                         handleInputChange({
@@ -284,7 +292,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                       onChange={(e) => {
                         let value = e.target.value
                           .toUpperCase()
-                          .replace(/[^A-Z0-9]/g, ""); 
+                          .replace(/[^A-Z0-9]/g, "");
 
                         let formattedValue = "";
                         for (let i = 0; i < value.length; i++) {
@@ -384,7 +392,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     Verify your email
                   </h4>
                   <p className="text-slate-500">
-                    We've sent a 6-digit code to{" "}
+                    We've sent a 6-digit code to your email address
                     <span className="font-bold text-slate-900">
                       {formData.email}
                     </span>
@@ -399,7 +407,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     value={formData.otp}
                     onChange={handleInputChange}
                     placeholder="000000"
-                    inputClassName="w-full text-center text-4xl font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
+                    inputClassName="w-full h-15 text-center text-5xl placeholder:text-3xl placeholder:text-center font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
                   />
                 </div>
 

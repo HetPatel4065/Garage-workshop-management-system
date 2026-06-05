@@ -9,7 +9,11 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
 import { io } from "socket.io-client";
-import { FormInput, FormButton, FormError } from "../../components/layout/Form/forms";
+import {
+  FormInput,
+  FormButton,
+  FormError,
+} from "../../components/layout/Form/forms";
 
 const normalizeSocketUrl = (value) => {
   if (!value) return "";
@@ -342,7 +346,7 @@ const PortalLogin = ({ isOpen, onClose, prefilledEmail }) => {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="000000"
-                    inputClassName="w-full text-center text-4xl font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
+                    inputClassName="w-full h-15 text-center text-5xl placeholder:text-3xl placeholder:text-center font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
                   />
                 </div>
 

@@ -61,15 +61,24 @@ const upload = multer({
 
 // 🏪 PUBLIC / CUSTOMER MARKETPLACE ROUTES (optional auth enriches wishlist data)
 router.get("/marketplace", optionalAuth, getMarketplaceListings);
-router.get("/marketplace/:id/wishlist-count", optionalAuth, getMarketplaceWishlistCount);
+router.get(
+  "/marketplace/:id/wishlist-count",
+  optionalAuth,
+  getMarketplaceWishlistCount,
+);
 router.get("/marketplace/:id", optionalAuth, getMarketplaceVehicleDetails);
+
+const uploadPhotos = upload.fields([
+  { name: "photos", maxCount: 100 },
+  { name: "photos[]", maxCount: 100 },
+]);
 
 // ️ OWNER LISTING MANAGEMENT ROUTES (Protected by Auth & Role)
 router.post(
   "/",
   auth,
   requireRole("admin", "owner"),
-  upload.array("photos", 10),
+  uploadPhotos,
   createListing,
 );
 
@@ -84,7 +93,7 @@ router.put(
   "/:id",
   auth,
   requireRole("admin", "owner"),
-  upload.array("photos", 10),
+  uploadPhotos,
   updateListing,
 );
 router.delete("/:id", auth, requireRole("admin", "owner"), deleteListing);

@@ -54,6 +54,15 @@ const normalizeListingColor = (color) => {
   return matched || trimmed;
 };
 
+const normalizeUploadedFiles = (files) => {
+  if (!files) return [];
+  if (Array.isArray(files)) return files;
+  if (typeof files === "object") {
+    return Object.values(files).flat();
+  }
+  return [];
+};
+
 const enrichSpecifications = (specs, { bodyType, seats, ownership }) => {
   const list = Array.isArray(specs)
     ? specs.filter((s) => s?.key?.trim() && s?.value?.trim())
@@ -198,7 +207,8 @@ export const createListing = async (req, res) => {
 
     // Prepare photos array by watermarking and uploading to Cloudinary
     let photos = [];
-    if (req.files && req.files.length > 0) {
+    const uploadedFiles = normalizeUploadedFiles(req.files);
+    if (uploadedFiles.length > 0) {
       // Configure Cloudinary from env
       if (process.env.CLOUDINARY_URL) {
         cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
@@ -218,7 +228,7 @@ export const createListing = async (req, res) => {
         garageName = "Garage";
       }
 
-      for (const file of req.files) {
+      for (const file of uploadedFiles) {
         const filePath = path.join(UPLOADS_DIR, file.filename);
         // Apply local watermark first (keeps existing behavior)
         try {
@@ -484,7 +494,8 @@ export const updateListing = async (req, res) => {
       updatedPhotos = listing.photos;
     }
 
-    if (req.files && req.files.length > 0) {
+    const uploadedFiles = normalizeUploadedFiles(req.files);
+    if (uploadedFiles.length > 0) {
       // Configure Cloudinary
       if (process.env.CLOUDINARY_URL) {
         cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
@@ -505,7 +516,7 @@ export const updateListing = async (req, res) => {
           garageName = "Garage";
         }
 
-        for (const file of req.files) {
+        for (const file of uploadedFiles) {
           const filePath = path.join(UPLOADS_DIR, file.filename);
           try {
             await addWatermark(filePath, garageName);
@@ -531,7 +542,7 @@ export const updateListing = async (req, res) => {
         }
       } else {
         // For customers, simply upload without watermark
-        for (const file of req.files) {
+        for (const file of uploadedFiles) {
           const filePath = path.join(UPLOADS_DIR, file.filename);
           try {
             const uploadRes = await cloudinary.uploader.upload(filePath, {

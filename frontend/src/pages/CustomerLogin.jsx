@@ -12,7 +12,11 @@ import {
 import axios from "axios";
 import { seedSessionHistory } from "../utils/authHistory";
 import { io } from "socket.io-client";
-import { FormInput, FormError, FormButton } from "../components/layout/Form/forms";
+import {
+  FormInput,
+  FormError,
+  FormButton,
+} from "../components/layout/Form/forms";
 
 const normalizeSocketUrl = (value) => {
   if (!value) return "";
@@ -417,7 +421,11 @@ export default function CustomerLogin() {
                     }`}
                   >
                     {registrationStatus.status === "rejected" ? (
-                      <FormError message=" " isBanner className="bg-transparent border-none p-0 w-6 h-6 text-rose-400 shrink-0" />
+                      <FormError
+                        message=" "
+                        isBanner
+                        className="bg-transparent border-none p-0 w-6 h-6 text-rose-400 shrink-0"
+                      />
                     ) : registrationStatus.status === "approved" ? (
                       <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                     ) : (

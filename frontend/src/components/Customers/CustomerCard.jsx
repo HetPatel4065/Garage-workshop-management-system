@@ -72,7 +72,7 @@ export default function CustomerCard({
       </div>
 
       {/* ── META GRID ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4 relative z-10">
         <MetaField label="Contact" primary={customer.phone || "No Phone"} />
         <MetaField label="Email" primary={customer.email || "—"} />
         <MetaField

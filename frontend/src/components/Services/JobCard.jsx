@@ -55,13 +55,9 @@ export default function JobCard({
       </div>
 
       {/* ── META GRID ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-6.5 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4 relative z-10">
         <MetaField label="Customer" value={ownerName} />
         <MetaField label="Plate Number" value={v.licensePlate || "NO PLATE"} />
-        <MetaField
-          label="Instructions"
-          value={jc.serviceInstructions || "General Maintenance"}
-        />
         <MetaField
           label="Registered Date"
           value={
@@ -73,7 +69,11 @@ export default function JobCard({
                 })
               : "—"
           }
-        />{" "}
+        />
+        <MetaField
+          label="Instructions"
+          value={jc.serviceInstructions || "General Maintenance"}
+        />
       </div>
 
       {/* ── BOTTOM ROW ── */}

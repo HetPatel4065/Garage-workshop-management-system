@@ -198,19 +198,19 @@ export default function InventoryForm({
 
           <div className="shrink-0">
             {formData.stock === "" ? (
-              <span className="text-sm font-bold px-3 py-1 rounded-full border text-gray-600 bg-gray-50 border-gray-200">
+              <span className="text-sm font-bold px-3 py-1 rounded-full border text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-700">
                 Fill Stock
               </span>
             ) : formData.stock === 0 ? (
-              <span className="text-sm font-bold px-3 py-1 rounded-full border text-red-600 bg-red-50 border-red-200">
+              <span className="text-sm font-bold px-3 py-1 rounded-full border text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-900/20 dark:border-red-800">
                 Out of Stock
               </span>
             ) : formData.stock <= formData.minLimit ? (
-              <span className="text-sm font-bold px-3 py-1 rounded-full border text-yellow-700 bg-yellow-50 border-yellow-200">
+              <span className="text-sm font-bold px-3 py-1 rounded-full border text-yellow-700 bg-yellow-50 border-yellow-200 dark:text-yellow-400 dark:bg-yellow-900/20 dark:border-yellow-800">
                 Low Stock
               </span>
             ) : (
-              <span className="text-sm font-bold px-3 py-1 rounded-full border text-emerald-700 bg-emerald-50 border-emerald-200">
+              <span className="text-sm font-bold px-3 py-1 rounded-full border text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800">
                 In Stock
               </span>
             )}

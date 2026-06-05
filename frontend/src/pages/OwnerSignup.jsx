@@ -113,7 +113,7 @@ export default function OwnerSignup() {
 
   return (
     <div className="min-h-screen bg-emerald-50/30 dark:bg-zinc-950 flex items-center justify-center p-4 sm:p-6 lg:p-8 selection:bg-emerald-200">
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-emerald-100 dark:border-zinc-800 shadow-[0_24px_70px_rgba(16,185,129,0.06)] overflow-hidden min-h-[600px]">
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-emerald-100 dark:border-zinc-800 shadow-[0_24px_70px_rgba(16,185,129,0.06)] overflow-hidden min-h-150">
         {/* ── Left Column: Value Prop & Trust (Emerald Branding) ── */}
         <div className="w-full lg:w-5/12 bg-emerald-600 dark:bg-emerald-950 p-8 sm:p-12 text-white flex flex-col justify-between relative overflow-hidden">
           {/* Decorative ambient gradient blobs inside the panel */}

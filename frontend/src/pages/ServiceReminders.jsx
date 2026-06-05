@@ -22,7 +22,7 @@ import {
 import { format } from "date-fns";
 import { FaCar } from "react-icons/fa6";
 import ExportButton from "../components/common/ExportButton";
-import EmptyState from "../components/UI/EmptyState";                       
+import EmptyState from "../components/UI/EmptyState";
 
 // ─── MetaField (mirrors RequestedCustomers) ───
 function MetaField({
@@ -176,7 +176,10 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
   const isCompleted = r.reminderStatus === "Completed" && nextDateNorm <= today;
   const isOverdue = nextDateNorm < today && !isCompleted;
 
-  const lastDateNorm = r.lastServiceDate || r.serviceDate ? new Date(r.lastServiceDate || r.serviceDate) : null;
+  const lastDateNorm =
+    r.lastServiceDate || r.serviceDate
+      ? new Date(r.lastServiceDate || r.serviceDate)
+      : null;
   if (lastDateNorm) lastDateNorm.setHours(0, 0, 0, 0);
 
   const startDate = lastDateNorm && today < lastDateNorm ? lastDateNorm : today;
@@ -227,7 +230,7 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
       </div>
 
       {/* ── META GRID ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-4 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4 relative z-10">
         <MetaField
           label="Customer"
           primary={r.customerId?.name || r.customerName || "Walk-in"}
@@ -600,7 +603,7 @@ export default function ServiceReminders() {
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-[11px] font-black text-blue-600 uppercase tracking-[0.22em] mb-2">
+            <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Service Management
             </p>
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">

@@ -15,14 +15,17 @@ const SIGNUP_ROLES = [
     icon: Store,
     route: "/owner/signup",
     gradient: "from-emerald-500 to-teal-500",
-    ring: "ring-emerald-300",
-    iconBg: "bg-emerald-100",
-    iconColor: "text-emerald-600",
-    badgeBg: "bg-emerald-50 border-emerald-100",
-    hoverBorder: "hover:border-emerald-300",
-    tagColor: "text-emerald-600 bg-emerald-50",
+    ring: "ring-emerald-300 dark:ring-emerald-700",
+    iconBg: "bg-emerald-100 dark:bg-emerald-900/20",
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    badgeBg:
+      "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800",
+    hoverBorder: "hover:border-emerald-300 dark:hover:border-emerald-700",
+    tagColor:
+      "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/20",
     tag: "Create Business",
   },
+
   {
     id: "staff",
     label: "Staff Member",
@@ -30,17 +33,19 @@ const SIGNUP_ROLES = [
     icon: HardHat,
     route: "/staff/signup",
     gradient: "from-violet-500 to-purple-500",
-    ring: "ring-violet-300",
-    iconBg: "bg-violet-100",
-    iconColor: "text-violet-600",
-    badgeBg: "bg-violet-50 border-violet-100",
-    hoverBorder: "hover:border-violet-300",
-    tagColor: "text-violet-600 bg-violet-50",
+    ring: "ring-violet-300 dark:ring-violet-700",
+    iconBg: "bg-violet-100 dark:bg-violet-900/20",
+    iconColor: "text-violet-600 dark:text-violet-400",
+    badgeBg:
+      "bg-violet-50 border-violet-200 dark:bg-violet-900/10 dark:border-violet-800",
+    hoverBorder: "hover:border-violet-300 dark:hover:border-violet-700",
+    tagColor:
+      "text-violet-700 bg-violet-50 dark:text-violet-400 dark:bg-violet-900/20",
     tag: "Join Workshop",
   },
 ];
 
-// ─── Animation variants ───────────────────────────────────────────────────────
+// ─── Animation variants ───
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08 } },
@@ -89,7 +94,7 @@ export default function Signup() {
           </p>
         </motion.div>
 
-        {/* ── Role cards grid ───────────────────────────────────── */}
+        {/* ── Role cards grid ─── */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -151,7 +156,7 @@ export default function Signup() {
           })}
         </motion.div>
 
-        {/* ── Footer ───────────────────────────────────────────── */}
+        {/* ── Footer ─── */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

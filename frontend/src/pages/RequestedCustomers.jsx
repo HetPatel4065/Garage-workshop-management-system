@@ -167,7 +167,7 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
       </div>
 
       {/* ── META GRID ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-6.5 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4 relative z-10">
         <MetaField label="Phone" primary={req.phone || "No Phone"} />
         <MetaField label="Email" primary={req.email || "—"} noCapitalize />
         <MetaField label="Vehicle" primary={req.vehicleModel || "—"} />
@@ -183,34 +183,33 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
           className="col-span-1"
         />
         <MetaField
-          label="Submitted"
+          label="Submitted Date"
           primary={dateObj.toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
             year: "numeric",
           })}
-          secondary={dateObj.toLocaleTimeString("en-IN", {
+          secondary={`Time: ${dateObj.toLocaleTimeString("en-IN", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
-          })}
+          })}`}
         />
         <MetaField
-          label="Appointment"
+          label="Appointment Date"
           primary={
-            req.appointmentDate && req.status === "approved"
-              ? new Date(req.appointmentDate).getFullYear() > 2000
+            req.status !== "approved"
+              ? "Not Scheduled"
+              : req.appointmentDate &&
+                  new Date(req.appointmentDate).getFullYear() > 2000
                 ? new Date(req.appointmentDate).toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
                   })
                 : "Date Not Set"
-              : req.status === "approved"
-                ? "Date Not Set"
-                : "Not Scheduled"
           }
-          secondary={req.appointmentTime || ""}
+          secondary={`Time: ${req.appointmentTime || "—"}`}
         />
       </div>
 
@@ -551,12 +550,12 @@ export default function RequestedCustomers() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 min-h-screen">
+    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950">
       {/* ── Header ── */}
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-[11px] font-black text-blue-600 uppercase tracking-[0.22em] mb-2">
+            <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Requested Customer Management
             </p>
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
@@ -937,6 +936,12 @@ export default function RequestedCustomers() {
                 className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 value={inspectionDate}
                 onChange={(e) => setInspectionDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                max={
+                  new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split("T")[0]
+                } // 1 year from now
               />
             </div>
             <div className="space-y-1.5">

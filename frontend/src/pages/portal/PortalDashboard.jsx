@@ -571,7 +571,12 @@ const PortalDashboard = ({ garageSettings }) => {
                             containerBorder =
                               "border-rose-250 dark:border-rose-900/50";
                           } else if (daysLeft <= 7) {
-                            statusText = daysLeft === 0 ? "Due Today" : daysLeft === 1 ? "Due Tomorrow" : `In ${daysLeft} days`;
+                            statusText =
+                              daysLeft === 0
+                                ? "Due Today"
+                                : daysLeft === 1
+                                  ? "Due Tomorrow"
+                                  : `In ${daysLeft} days`;
                             statusBadgeLabel = "Due Soon";
                             statusClass =
                               "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/50";
@@ -626,7 +631,9 @@ const PortalDashboard = ({ garageSettings }) => {
                                   <span
                                     className={`inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${statusClass}`}
                                   >
-                                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDotClass}`} />
+                                    <span
+                                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDotClass}`}
+                                    />
                                     {statusBadgeLabel}
                                   </span>
                                   <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
@@ -856,6 +863,29 @@ const PortalDashboard = ({ garageSettings }) => {
                     </p>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "sell" && (
+            <motion.div
+              key="sell"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="space-y-6"
+            >
+              <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-xs overflow-hidden">
+                <div className="border-b border-slate-100 dark:border-zinc-800">
+                  <MarketplaceListings
+                    token={token}
+                    isCustomer={true}
+                    currentUser={user}
+                    portalPreviewCustomerId={
+                      isStaffPortalSession ? selectedCustomerId : ""
+                    }
+                  />
+                </div>
               </div>
             </motion.div>
           )}

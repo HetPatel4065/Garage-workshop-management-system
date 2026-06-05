@@ -234,10 +234,10 @@ export default function Profile({ isAdvisor }) {
   ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 min-h-screen">
+    <div className="p-4 sm:p-6 bg-gray-100">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+            <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
             Account Management
           </p>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight leading-tight">

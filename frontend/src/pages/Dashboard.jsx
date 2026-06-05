@@ -245,7 +245,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div className="bg-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:gap-6 xl:flex-row xl:items-center xl:justify-between">
         {/* Left Side: Identity & Greetings */}
         <div className="min-w-0 flex-1">

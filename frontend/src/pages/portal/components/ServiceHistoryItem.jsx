@@ -128,16 +128,37 @@ const ServiceHistoryItem = ({ svc, isOpen, toggleExpand }) => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[10px] sm:text-xs font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-slate-400" /> Date
+                    <Calendar className="w-3 h-3 text-slate-400" /> Service Date
                   </span>
                   <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-zinc-200 truncate">
-                    {new Date(svc.createdAt).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    {svc.serviceDate
+                      ? new Date(svc.serviceDate).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : new Date(svc.createdAt).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
                   </span>
                 </div>
+
+                {svc.nextServiceDate && (
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-[10px] sm:text-xs font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-emerald-400" /> Next Service
+                    </span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-zinc-200 truncate">
+                      {new Date(svc.nextServiceDate).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                )}
 
                 {svc.priority && (
                   <div className="flex flex-col gap-0.5 min-w-0">

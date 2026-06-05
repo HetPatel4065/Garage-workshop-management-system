@@ -451,7 +451,7 @@ export default function MarketplaceListings({
     setBrand(listing.brand);
     setModel(listing.model);
     setColor(getColorFromListing(listing));
-    setYear(listing.year);
+    setYear(listing.regYear);
     setPrice(listing.price);
     setFuelType(listing.fuelType);
     setKmDriven(listing.kmDriven);
@@ -917,7 +917,7 @@ export default function MarketplaceListings({
                   {vehicle.title || "Untitled Vehicle"}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-zinc-400">
-                  {vehicle.brand} • {vehicle.model} • {vehicle.year}
+                  {vehicle.brand} • {vehicle.model} • {vehicle.regYear}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-zinc-400">
                   Customer: {booking.customerId?.name || "Unknown"} •{" "}
@@ -1112,7 +1112,7 @@ export default function MarketplaceListings({
                 <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">
                   {item.brand}
                 </span>
-                <span>{item.year}</span>
+                <span>{item.regYear}</span>
               </div>
               <h3 className="font-extrabold text-lg capitalize text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors leading-snug line-clamp-1">
                 {item.title}
@@ -1203,32 +1203,46 @@ export default function MarketplaceListings({
             )}
             {!isCustomer && (
               <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-zinc-800/60 shrink-0">
+                {/* Status Toggle Button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleToggleStatus(item);
                   }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all border active:scale-95 flex items-center justify-center gap-1.5 cursor-auto ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all border active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
                     normalizeListingStatus(item.status) === "Available"
-                      ? "bg-slate-50 dark:bg-zinc-800/40 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800"
-                      : "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
+                      ? "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:bg-zinc-800/40 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800/80 dark:hover:text-white"
+                      : "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:border-emerald-600 dark:hover:bg-emerald-500"
                   }`}
                 >
-                  <CheckCircle size={14} />
-                  {normalizeListingStatus(item.status) === "Available"
-                    ? "Mark Sold"
-                    : "Re-List Auto"}
+                  {normalizeListingStatus(item.status) === "Available" ? (
+                    <>
+                      <CheckCircle size={14} />
+                      <span>Mark Sold</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={14} />
+                      <span>Re-List Auto</span>
+                    </>
+                  )}
                 </button>
+
+                {/* Edit Button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleOpenEdit(item);
                   }}
-                  className="p-2 text-slate-500 hover:text-blue-500 bg-slate-50 dark:bg-zinc-800/40 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-xl border border-slate-200 dark:border-zinc-800 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-auto"
+                  className="p-2 rounded-xl border transition-all active:scale-90 flex items-center justify-center shrink-0 cursor-pointer 
+                bg-slate-50 text-slate-500 border-slate-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 
+                dark:bg-zinc-800/40 dark:text-zinc-400 dark:border-zinc-800 dark:hover:bg-blue-600 dark:hover:text-white dark:hover:border-blue-600"
                   title="Edit vehicle listing Details"
                 >
                   <Edit2 size={14} />
                 </button>
+
+                {/* Delete Button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1236,8 +1250,10 @@ export default function MarketplaceListings({
                     setDeleteTarget(item._id);
                     setDeleteModalOpen(true);
                   }}
-                  className="p-2 text-slate-400 hover:text-red-500 bg-slate-50 dark:bg-zinc-800/40 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl border border-slate-200 dark:border-zinc-800 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-auto"
-                  title="Remove from Showroom"
+                  className="p-2 rounded-xl border transition-all active:scale-90 flex items-center justify-center shrink-0 cursor-pointer 
+                bg-slate-50 text-slate-400 border-slate-200 hover:bg-red-600 hover:text-white hover:border-red-600 
+                dark:bg-zinc-800/40 dark:text-zinc-500 dark:border-zinc-800 dark:hover:bg-red-600 dark:hover:text-white dark:hover:border-red-600"
+                  title="Remove from Tab"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -1254,12 +1270,12 @@ export default function MarketplaceListings({
   return (
     <>
       {viewMode === "my-listings" ? (
-        <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
+        <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950">
           {" "}
           <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
-                <p className="text-[11px] font-black text-blue-600 uppercase tracking-[0.22em] mb-2">
+                <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
                   Car Sales
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
@@ -2102,7 +2118,7 @@ export default function MarketplaceListings({
                   type="text"
                   value={sellerName}
                   onChange={(e) => setSellerName(e.target.value)}
-                  placeholder="e.g. John Owner, Het Garage"
+                  placeholder="e.g. John Doe"
                   className="w-full h-11 px-4 capitalize rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 focus:outline-none text-sm transition-all dark:text-white"
                 />
               </div>
@@ -2204,7 +2220,7 @@ export default function MarketplaceListings({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Provide a premium short pitch highlighting engine status, maintenance records, and interior condition..."
                 rows={3}
-                className="w-full p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 focus:outline-none text-sm transition-all resize-none dark:text-white"
+                className="w-full capitalize p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 focus:outline-none text-sm transition-all resize-none dark:text-white"
               />
             </div>
           </div>

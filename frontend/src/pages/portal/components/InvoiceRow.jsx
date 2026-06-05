@@ -158,9 +158,6 @@ const InvoiceRow = ({
                 {getStatusIcon(invoice.status)}
                 {invoice.status}
               </span>
-              <button onClick={handlePayment} className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-md transition-colors">
-                Pay Now
-              </button>
             </div>
           </div>
         </div>

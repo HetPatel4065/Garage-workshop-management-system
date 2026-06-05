@@ -112,7 +112,7 @@ export default function StaffSignup() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full max-w-xl"
       >
-        {/* ── Brand Header ─────────────────────────────────────── */}
+        {/* ── Brand Header ── */}
         <div className="text-center mb-6">
           <div
             className="group inline-flex items-center gap-3 mb-2 cursor-auto select-none"
@@ -144,7 +144,7 @@ export default function StaffSignup() {
           </p>
         </div>
 
-        {/* ── Card ─────────────────────────────────────────────── */}
+        {/* ── Card ── */}
         <div className="bg-white rounded-2xl border border-violet-100 overflow-hidden">
           <div className="h-1 w-full bg-linear-to-r from-violet-400 via-violet-500 to-purple-500" />
 

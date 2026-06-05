@@ -15,7 +15,10 @@ import jwt from "jsonwebtoken";
 import GarageSettings from "../models/GarageSettings.js";
 import { generateAndSaveInvoicePDF } from "../utils/generateInvoice.js";
 import { createNotification } from "../utils/notificationHelper.js";
-import { uploadInvoicePDF, getSignedDownloadUrl } from "../services/cloudinary.service.js";
+import {
+  uploadInvoicePDF,
+  getSignedDownloadUrl,
+} from "../services/cloudinary.service.js";
 import fs from "fs/promises";
 import { createReadStream } from "fs";
 import path from "path";
@@ -444,6 +447,35 @@ export const getCustomerDashboardData = async (req, res) => {
         .lean(),
     ]);
 
+    // ── Enrich vehicles with serviceDate and nextServiceDate from latest service ──
+    if (vehicles.length > 0) {
+      const vehicleIds = vehicles.map((v) => v._id);
+      const latestServices = await Service.find({
+        vehicleId: { $in: vehicleIds },
+      })
+        .select("vehicleId serviceDate nextServiceDate")
+        .sort({ vehicleId: 1, serviceDate: -1 })
+        .lean();
+
+      // Map vehicleId -> latest serviceDate and nextServiceDate
+      const serviceDateMap = {};
+      const nextServiceMap = {};
+      latestServices.forEach((svc) => {
+        const vid = String(svc.vehicleId);
+        if (!serviceDateMap[vid]) {
+          serviceDateMap[vid] = svc.serviceDate;
+          nextServiceMap[vid] = svc.nextServiceDate;
+        }
+      });
+
+      // Attach serviceDate and nextServiceDate to each vehicle
+      vehicles.forEach((vehicle) => {
+        const vid = String(vehicle._id);
+        vehicle.serviceDate = serviceDateMap[vid] || null;
+        vehicle.nextServiceDate = nextServiceMap[vid] || null;
+      });
+    }
+
     // ── Enrich JobCards with Service detail (parts, labor, selected services) ──
     const jobCardIds = rawJobCards.map((j) => j._id);
     const services1 = jobCardIds.length
@@ -533,6 +565,8 @@ export const getCustomerDashboardData = async (req, res) => {
       priority: svc.priority,
       createdAt: svc.createdAt,
       updatedAt: svc.updatedAt,
+      serviceDate: svc.serviceDate || null,
+      nextServiceDate: svc.nextServiceDate || null,
       mechanicName: svc.mechanicId?.name || null,
       advisorName: svc.advisorId?.name || null,
       jobCardId: svc.jobId?.jobCardId || null,
@@ -919,12 +953,18 @@ export const generatePortalInvoicePDF = async (req, res) => {
 
     // 4. Upload to Cloudinary via the centralised service
     try {
-      const { secure_url, public_id } = await uploadInvoicePDF(filePath, ownerId);
+      const { secure_url, public_id } = await uploadInvoicePDF(
+        filePath,
+        ownerId,
+      );
       invoice.pdfUrl = secure_url;
       invoice.publicId = public_id;
       await invoice.save();
     } catch (err) {
-      console.error("[Portal] Cloudinary upload failed for portal invoice PDF:", err.message);
+      console.error(
+        "[Portal] Cloudinary upload failed for portal invoice PDF:",
+        err.message,
+      );
       const BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
       invoice.pdfUrl = `${BASE_URL}/uploads/${relativePath}`;
       invoice.publicId = null;
@@ -962,8 +1002,12 @@ export const downloadPortalInvoicePDF = async (req, res) => {
   try {
     const invoice = await Invoice.findOne({ _id: id, customerId });
     if (!invoice) {
-      console.error(`[Portal] downloadPortalInvoicePDF - invoice not found or unauthorized: ${id}, customerId: ${customerId}`);
-      return res.status(404).json({ error: "Invoice not found or unauthorized" });
+      console.error(
+        `[Portal] downloadPortalInvoicePDF - invoice not found or unauthorized: ${id}, customerId: ${customerId}`,
+      );
+      return res
+        .status(404)
+        .json({ error: "Invoice not found or unauthorized" });
     }
 
     const filename = `Invoice-${invoice.invoiceNumber || invoice._id}.pdf`;
@@ -974,23 +1018,32 @@ export const downloadPortalInvoicePDF = async (req, res) => {
     if (invoice.publicId) {
       try {
         const signedUrl = getSignedDownloadUrl(invoice.publicId);
-        console.log("[Portal] downloadPortalInvoicePDF - fetching from Cloudinary signed URL (server-side)", {
-          invoiceId: id,
-          publicId: invoice.publicId,
-        });
+        console.log(
+          "[Portal] downloadPortalInvoicePDF - fetching from Cloudinary signed URL (server-side)",
+          {
+            invoiceId: id,
+            publicId: invoice.publicId,
+          },
+        );
 
         const cloudinaryResponse = await fetch(signedUrl);
 
         if (!cloudinaryResponse.ok) {
           const errText = await cloudinaryResponse.text().catch(() => "");
-          console.error("[Portal] downloadPortalInvoicePDF - Cloudinary signed URL fetch failed", {
-            status: cloudinaryResponse.status,
-            body: errText,
-          });
+          console.error(
+            "[Portal] downloadPortalInvoicePDF - Cloudinary signed URL fetch failed",
+            {
+              status: cloudinaryResponse.status,
+              body: errText,
+            },
+          );
           // Fall through to on-the-fly regeneration
         } else {
           res.setHeader("Content-Type", "application/pdf");
-          res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${filename}"`,
+          );
 
           // Stream Cloudinary response body → Express response
           for await (const chunk of cloudinaryResponse.body) {
@@ -999,13 +1052,18 @@ export const downloadPortalInvoicePDF = async (req, res) => {
           return res.end();
         }
       } catch (signErr) {
-        console.error("[Portal] downloadPortalInvoicePDF - signed URL fetch error:", signErr.message);
+        console.error(
+          "[Portal] downloadPortalInvoicePDF - signed URL fetch error:",
+          signErr.message,
+        );
         // Fall through to on-the-fly regeneration
       }
     }
 
     // ── PATH 2: no publicId (legacy / fallback) → regenerate on the fly ──
-    console.log(`[Portal] downloadPortalInvoicePDF - no publicId, regenerating PDF on the fly for invoice: ${id}`);
+    console.log(
+      `[Portal] downloadPortalInvoicePDF - no publicId, regenerating PDF on the fly for invoice: ${id}`,
+    );
 
     const populatedInvoice = await Invoice.findOne({ _id: id, customerId })
       .populate("customerId")
@@ -1029,10 +1087,14 @@ export const downloadPortalInvoicePDF = async (req, res) => {
       logo: settings?.invoiceLogo || owner?.logo || "",
       mobileNumber: settings?.contactNumber || owner?.mobileNumber || "",
       garageName: settings?.garageName || owner?.garageName || "Garage Name",
-      businessAddress: settings?.businessAddress || owner?.address || "Garage Address",
+      businessAddress:
+        settings?.businessAddress || owner?.address || "Garage Address",
     };
 
-    const relativePath = await generateAndSaveInvoicePDF(populatedInvoice, branding);
+    const relativePath = await generateAndSaveInvoicePDF(
+      populatedInvoice,
+      branding,
+    );
     const generatedFilePath = path.join(process.cwd(), "uploads", relativePath);
 
     res.setHeader("Content-Type", "application/pdf");
@@ -1049,7 +1111,10 @@ export const downloadPortalInvoicePDF = async (req, res) => {
     });
 
     readStream.on("error", (err) => {
-      console.error("[Portal] downloadPortalInvoicePDF - stream error:", err.message);
+      console.error(
+        "[Portal] downloadPortalInvoicePDF - stream error:",
+        err.message,
+      );
       if (!res.headersSent) {
         res.status(500).json({ error: "Failed to stream invoice PDF" });
       }
@@ -1062,6 +1127,9 @@ export const downloadPortalInvoicePDF = async (req, res) => {
       customerId,
       error: error?.message || error,
     });
-    return res.status(500).json({ error: "Failed to download invoice PDF", details: error.message });
+    return res.status(500).json({
+      error: "Failed to download invoice PDF",
+      details: error.message,
+    });
   }
 };

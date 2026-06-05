@@ -7,7 +7,7 @@ import GarageSidebar from "./Sidebar/GarageSidebar";
 import ServiceReminderModal from "../UI/ServiceReminderModal";
 import { useAuth } from "../../context/AuthContext";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants ───
 
 const ADMIN_NAVBAR_HIDDEN_PATHS = ["/dashboard", "/partnership-leads"];
 
@@ -15,7 +15,7 @@ const REMINDER_SESSION_KEY = "service_reminder_shown";
 
 const REMINDER_THRESHOLD_DAYS = 3;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ───
 
 function isDueWithinThreshold(nextServiceDate, today, days) {
   const nextDate = new Date(nextServiceDate);
@@ -37,7 +37,7 @@ function filterUrgentReminders(vehicles) {
   );
 }
 
-// ─── Loading fallback ─────────────────────────────────────────────────────────
+// ─── Loading fallback ───
 
 function PageLoadingFallback() {
   return (
@@ -52,11 +52,12 @@ function PageLoadingFallback() {
   );
 }
 
-// ─── Admin preview banner ─────────────────────────────────────────────────────
+// ─── Admin preview banner ───
 
 function AdminPreviewBanner({ garage, onExit }) {
   return (
-    <div className="bg-linear-to-r from-amber-600 via-orange-600 to-red-600 text-white px-4 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shadow-md text-xs sm:text-sm font-semibold tracking-wide border-b border-orange-500/30">
+    <div className="bg-linear-to-r from-slate-900 via-indigo-900/40 to-slate-900 text-slate-100 px-6 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm border-b border-slate-800 text-xs sm:text-sm font-medium tracking-wide">
+      {" "}
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
         <span className="truncate">
@@ -67,10 +68,9 @@ function AdminPreviewBanner({ garage, onExit }) {
           &bull; Owner: {garage.name}
         </span>
       </div>
-
       <button
         onClick={onExit}
-        className="bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-auto shadow-inner uppercase tracking-wider shrink-0 self-start sm:self-auto"
+        className="bg-white/15 hover:bg-white/25 active:scale-95 hover:scale-105 text-white border border-white/20 px-3 py-1 rounded-md text-xs font-bold transition-all cursor-auto shadow-inner uppercase tracking-wider shrink-0 self-start sm:self-auto"
       >
         Exit Preview
       </button>
@@ -78,7 +78,7 @@ function AdminPreviewBanner({ garage, onExit }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main component ───
 
 export default function GarageLayout({ children }) {
   const { user, token, selectedGarage, exitGaragePreview } = useAuth();
@@ -87,8 +87,7 @@ export default function GarageLayout({ children }) {
 
   const role = user?.role?.toLowerCase();
 
-  // ── Derived values ───────────────────────────────────────────────────────────
-
+  // ── Derived values ───
   const hideNavbar =
     role === "admin" &&
     !selectedGarage &&
@@ -96,7 +95,7 @@ export default function GarageLayout({ children }) {
       location.pathname.startsWith(path),
     );
 
-  // ── Local state ──────────────────────────────────────────────────────────────
+  // ── Local state ───
 
   const [sidebarOpen, setSidebarOpen] = useState(
     () => typeof window !== "undefined" && window.innerWidth >= 1024,
@@ -110,7 +109,7 @@ export default function GarageLayout({ children }) {
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
   const [urgentReminders, setUrgentReminders] = useState([]);
 
-  // ── Side effects ─────────────────────────────────────────────────────────────
+  // ── Side effects ───
 
   // Check for urgent service reminders (once per session)
   useEffect(() => {
@@ -169,7 +168,7 @@ export default function GarageLayout({ children }) {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Render ───
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300">
@@ -188,7 +187,7 @@ export default function GarageLayout({ children }) {
         setCollapsed={setCollapsed}
       />
 
-      {/* ── Main content column ───────────────────────────────────────────────── */}
+      {/* ── Main content column ── */}
       <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden relative">
         {!hideNavbar && (
           <GarageNavbar
@@ -207,7 +206,7 @@ export default function GarageLayout({ children }) {
           />
         )}
 
-        {/* ── Page content ──────────────────────────────────────────────────── */}
+        {/* ── Page content ── */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300 relative min-w-0">
           <div className="h-full w-full min-w-0 font-sans">
             <Suspense fallback={<PageLoadingFallback />}>
@@ -221,7 +220,7 @@ export default function GarageLayout({ children }) {
         </main>
       </div>
 
-      {/* ── Reminder modal ────────────────────────────────────────────────────── */}
+      {/* ── Reminder modal ── */}
       <ServiceReminderModal
         isOpen={reminderModalOpen}
         onClose={() => setReminderModalOpen(false)}

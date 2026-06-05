@@ -367,12 +367,12 @@ export default function Billing() {
         : filteredHistory;
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
+    <div className="max-w-7xl mx-auto bg-gray-100 p-4 sm:p-6 md:p-8">
       {/* 🚀 Header */}
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-[11px] font-black text-blue-600 uppercase tracking-[0.22em] mb-2">
+            <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Accounts & Ledger
             </p>
 
