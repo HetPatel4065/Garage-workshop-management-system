@@ -9,16 +9,14 @@ import {
   User,
   MapPin,
   CheckCircle,
-  MessageSquare,
   ArrowLeft,
-  ChevronRight,
   TrendingUp,
   Shield,
   MessageCircle,
-  Clock,
   Mail,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
+import { FormInput, FormTextarea, FormError, FormButton, FormRow } from "../components/layout/Form/forms";
 
 const SERVICES_LIST = [
   "General Maintenance",
@@ -228,133 +226,86 @@ export default function OwnerSignup() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="mb-6 flex items-start gap-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400"
+                    className="mb-6"
                   >
-                    <svg
-                      className="w-4 h-4 mt-0.5 shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <p className="text-xs font-semibold">{error}</p>
+                    <FormError message={error} isBanner />
                   </motion.div>
                 )}
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Garage & Owner Name (Grid) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
-                        Garage Name <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <Store className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/80" />
-                        <input
-                          type="text"
-                          required
-                          value={garageName}
-                          onChange={(e) => setGarageName(e.target.value)}
-                          placeholder="Speedy Auto Works"
-                          className="w-full h-11 pl-10 pr-4 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all dark:text-white"
-                        />
-                      </div>
-                    </div>
+                  <FormRow cols={2}>
+                    <FormInput
+                      type="text"
+                      required
+                      value={garageName}
+                      onChange={(e) => setGarageName(e.target.value)}
+                      placeholder="Speedy Auto Works"
+                      label="Garage Name"
+                      leftIcon={<Store className="w-4 h-4 text-emerald-500/80" />}
+                      inputClassName="border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 focus:ring-emerald-400/20 focus:border-emerald-500 dark:text-white"
+                    />
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
-                        Owner Name <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/80" />
-                        <input
-                          type="text"
-                          required
-                          value={ownerName}
-                          onChange={(e) => setOwnerName(e.target.value)}
-                          placeholder="Rahul Sharma"
-                          className="w-full h-11 pl-10 pr-4 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all dark:text-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                    <FormInput
+                      type="text"
+                      required
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      placeholder="Rahul Sharma"
+                      label="Owner Name"
+                      leftIcon={<User className="w-4 h-4 text-emerald-500/80" />}
+                      inputClassName="border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 focus:ring-emerald-400/20 focus:border-emerald-500 dark:text-white"
+                    />
+                  </FormRow>
 
                   {/* Mobile & City (Grid) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
-                        Mobile Number <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/80" />
-                        <input
-                          type="tel"
-                          required
-                          value={mobileNumber || "+91 "} // Fallback to prefix if state is empty
-                          onChange={(e) => {
-                            const input = e.target.value;
+                  <FormRow cols={2}>
+                    <FormInput
+                      type="tel"
+                      required
+                      value={mobileNumber || "+91 "}
+                      onChange={(e) => {
+                        const input = e.target.value;
+                        if (!input.startsWith("+91 ")) {
+                          setMobileNumber("+91 ");
+                          return;
+                        }
+                        const rawDigits = input.slice(4).replace(/\D/g, "");
+                        if (rawDigits.length <= 10) {
+                          setMobileNumber(`+91 ${rawDigits}`);
+                        }
+                      }}
+                      placeholder="+91 9876543210"
+                      maxLength={14}
+                      label="Mobile Number"
+                      leftIcon={<Phone className="w-4 h-4 text-emerald-500/80" />}
+                      inputClassName="border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 focus:ring-emerald-400/20 focus:border-emerald-500 dark:text-white"
+                    />
 
-                            // 1. Prevent deleting the '+91 ' prefix
-                            if (!input.startsWith("+91 ")) {
-                              // If they somehow clear it, reset it back to just the prefix
-                              setMobileNumber("+91 ");
-                              return;
-                            }
-
-                            // 2. Extract just the dynamic numbers typed after '+91 '
-                            const rawDigits = input.slice(4).replace(/\D/g, "");
-
-                            // 3. Limit to exactly 10 digits maximum
-                            if (rawDigits.length <= 10) {
-                              setMobileNumber(`+91 ${rawDigits}`);
-                            }
-                          }}
-                          placeholder="+91 9876543210"
-                          maxLength={14} // Length of "+91 " (4 chars) + 10 digits = 14 total characters Max
-                          className="w-full h-11 pl-10 pr-4 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all dark:text-white"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/80" />
-                        <input
-                          type="text"
-                          required
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          placeholder="Mumbai"
-                          className="w-full h-11 pl-10 pr-4 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all dark:text-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                    <FormInput
+                      type="text"
+                      required
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Mumbai"
+                      label="City"
+                      leftIcon={<MapPin className="w-4 h-4 text-emerald-500/80" />}
+                      inputClassName="border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 focus:ring-emerald-400/20 focus:border-emerald-500 dark:text-white"
+                    />
+                  </FormRow>
 
                   {/* Email Address Field */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
-                      Email Address <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500/80" />
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="owner@example.com"
-                        className="w-full h-11 pl-10 pr-4 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all dark:text-white"
-                      />
-                    </div>
-                  </div>
+                  <FormInput
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="owner@example.com"
+                    label="Email Address"
+                    leftIcon={<Mail className="w-4 h-4 text-emerald-500/80" />}
+                    inputClassName="border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 focus:ring-emerald-400/20 focus:border-emerald-500 dark:text-white"
+                  />
 
                   {/* Services Offered (Chips/Tags) */}
                   <div>
@@ -386,55 +337,27 @@ export default function OwnerSignup() {
                   </div>
 
                   {/* Optional Message */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
-                      Optional Message
-                    </label>
-                    <textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Tell us more about your garage (e.g. number of bays, key mechanics, years in business...)"
-                      rows={3}
-                      className="w-full p-3.5 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all resize-none dark:text-white"
-                    />
-                  </div>
+                  <FormTextarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Tell us more about your garage (e.g. number of bays, key mechanics, years in business...)"
+                    rows={3}
+                    label="Optional Message"
+                    textareaClassName="w-full p-3.5 rounded-xl border border-emerald-100 dark:border-zinc-800 bg-emerald-50/20 dark:bg-zinc-800/40 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 transition-all resize-none dark:text-white"
+                  />
 
                   {/* Submit Button */}
-                  <button
+                  <FormButton
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-65 disabled:cursor-not-allowed shadow-md shadow-emerald-500/10 transition-all pt-0.5 mt-2"
+                    loading={isLoading}
+                    loadingText="Requesting Partnership..."
+                    variant="emerald"
+                    icon={<Store className="w-4 h-4" />}
+                    className="mt-2 text-sm font-bold shadow-md shadow-emerald-500/10 pt-0.5"
+                    size="lg"
                   >
-                    {isLoading ? (
-                      <>
-                        <svg
-                          className="animate-spin w-4 h-4 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          />
-                        </svg>
-                        <span>Requesting Partnership...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Store className="w-4 h-4" />
-                        <span>Request Partnership</span>
-                      </>
-                    )}
-                  </button>
+                    Request Partnership
+                  </FormButton>
                 </form>
 
                 {/* Back to Home / Login link */}

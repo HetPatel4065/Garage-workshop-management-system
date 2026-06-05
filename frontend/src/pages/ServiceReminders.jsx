@@ -22,6 +22,7 @@ import {
 import { format } from "date-fns";
 import { FaCar } from "react-icons/fa6";
 import ExportButton from "../components/common/ExportButton";
+import EmptyState from "../components/UI/EmptyState";                       
 
 // ─── MetaField (mirrors RequestedCustomers) ───
 function MetaField({
@@ -175,7 +176,11 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
   const isCompleted = r.reminderStatus === "Completed" && nextDateNorm <= today;
   const isOverdue = nextDateNorm < today && !isCompleted;
 
-  const diffTime = nextDateNorm.getTime() - today.getTime();
+  const lastDateNorm = r.lastServiceDate || r.serviceDate ? new Date(r.lastServiceDate || r.serviceDate) : null;
+  if (lastDateNorm) lastDateNorm.setHours(0, 0, 0, 0);
+
+  const startDate = lastDateNorm && today < lastDateNorm ? lastDateNorm : today;
+  const diffTime = nextDateNorm.getTime() - startDate.getTime();
   const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   const getDueStatusText = () => {

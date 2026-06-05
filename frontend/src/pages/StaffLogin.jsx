@@ -5,6 +5,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Wrench, HardHat, UserCog } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { FaUsers } from "react-icons/fa";
+import { FormInput, FormError, FormButton } from "../components/layout/Form/forms";
 
 const GREETINGS = [
   "Ready to start your shift?",
@@ -68,11 +69,6 @@ export default function StaffLogin() {
     }
   };
 
-  const inputCls =
-    "w-full h-11 px-3.5 rounded-xl border border-violet-200 bg-violet-50/60 text-sm " +
-    "text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 " +
-    "focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white transition-all";
-
   return (
     <div className="min-h-screen bg-violet-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <motion.div
@@ -126,51 +122,30 @@ export default function StaffLogin() {
                   initial={{ opacity: 0, scale: 0.97 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.97 }}
-                  className="mb-5 flex items-start gap-3 p-3.5 rounded-xl bg-red-50 border border-red-100"
+                  className="mb-5"
                 >
-                  <svg
-                    className="w-4 h-4 text-red-500 mt-0.5 shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <p className="text-sm text-red-600">{error}</p>
+                  <FormError message={error} isBanner />
                 </motion.div>
               )}
             </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Work Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="staff-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@yourgarage.com"
-                  className={inputCls}
-                />
-              </div>
+              <FormInput
+                id="staff-email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@yourgarage.com"
+                label="Work Email"
+                inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white"
+              />
 
               {/* Garage ID — required for all staff */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Garage ID <span className="text-red-500">*</span>
-                  <span className="text-slate-400 ml-1 text-xs font-normal">
-                    (10-digit)
-                  </span>
-                </label>
-                <input
+                <FormInput
                   id="staff-garage-id"
                   type="text"
                   inputMode="numeric"
@@ -181,7 +156,9 @@ export default function StaffLogin() {
                     setGarageId(e.target.value.replace(/\D/g, "").slice(0, 10))
                   }
                   placeholder="1234567890"
-                  className={`${inputCls} font-mono tracking-widest`}
+                  label="Garage ID"
+                  hint="10-digit"
+                  inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white font-mono tracking-widest"
                 />
                 <p className="mt-1.5 text-[11px] text-slate-400 ml-0.5">
                   Ask your garage owner for this 10-digit ID.
@@ -189,21 +166,17 @@ export default function StaffLogin() {
               </div>
 
               {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    id="staff-password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className={`${inputCls} pr-11`}
-                  />
+              <FormInput
+                id="staff-password"
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                label="Password"
+                inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white pr-11"
+                rightAction={
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -216,8 +189,8 @@ export default function StaffLogin() {
                       <EyeIcon style={{ width: 18, height: 18 }} />
                     )}
                   </button>
-                </div>
-              </div>
+                }
+              />
 
               {/* Staff role hint */}
               <div className="flex gap-2 pt-1">
@@ -233,42 +206,17 @@ export default function StaffLogin() {
               </div>
 
               {/* Submit */}
-              <button
+              <FormButton
                 id="staff-login-btn"
                 type="submit"
-                disabled={isLoading}
-                className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white bg-violet-500 hover:bg-violet-600 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-violet-400/30 transition-all mt-2"
+                loading={isLoading}
+                loadingText="Clocking in…"
+                variant="violet"
+                icon={<FaUsers className="w-4 h-4" />}
+                className="mt-2"
               >
-                {isLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin w-4 h-4 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    <span>Clocking in…</span>
-                  </>
-                ) : (
-                  <>
-                    <FaUsers className="w-4 h-4" />
-                    <span>Staff Sign In</span>
-                  </>
-                )}
-              </button>
+                Staff Sign In
+              </FormButton>
             </form>
 
             {/* Footer */}

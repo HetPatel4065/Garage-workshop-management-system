@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Bell,
   ShieldCheck,
@@ -13,6 +13,7 @@ import {
   Download,
   Users as UsersIcon,
   Mail,
+  X,
   Smartphone,
   MapPin,
   Image,
@@ -29,6 +30,7 @@ import {
   Check,
   FileText,
   Table,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -212,6 +214,8 @@ export default function Settings() {
 
   const [logoFile, setLogoFile] = useState(null);
   const [invoiceLogoFile, setInvoiceLogoFile] = useState(null);
+  const [logoRemoved, setLogoRemoved] = useState(false);
+  const logoInputRef = useRef(null);
 
   const [catalog, setCatalog] = useState([]);
   const [deletedCatalogIds, setDeletedCatalogIds] = useState([]);
@@ -314,7 +318,18 @@ export default function Settings() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "gstNumber"
+          ? value
+              .toUpperCase()
+              .replace(/[^A-Z0-9]/g, "")
+              .slice(0, 15)
+          : value,
+    }));
+
     setHasChanges(true);
   };
 
@@ -373,6 +388,7 @@ export default function Settings() {
         }
       });
 
+      data.append("logoRemoved", logoRemoved ? "true" : "false");
       // Append files
       if (logoFile) data.append("logo", logoFile);
       if (invoiceLogoFile) data.append("invoiceLogo", invoiceLogoFile);
@@ -418,6 +434,7 @@ export default function Settings() {
         setHasChanges(false);
         setLogoFile(null);
         setInvoiceLogoFile(null);
+        setLogoRemoved(false);
         setDeletedCatalogIds([]); // Clear deleted tracking
         await refreshUser();
         addToast("Settings saved successfully!");
@@ -1134,6 +1151,8 @@ export default function Settings() {
                         value={formData.gstNumber}
                         onChange={handleInputChange}
                         icon={<FileText size={16} />}
+                        placeholder="e.g. AAAAA0000A1Z5XX"
+                        maxLength={15}
                       />
                       <InputField
                         label="UPI ID (For Payments)"
@@ -1178,20 +1197,47 @@ export default function Settings() {
                     {/* Action Section */}
                     <div className="flex flex-col items-center gap-3">
                       {canEdit && (
-                        <label className="cursor-auto bg-blue-600 text-white px-10 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
-                          Upload New Logo
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
+                        <div className="flex flex-wrap justify-center gap-3">
+                          <label className="cursor-auto bg-blue-600 text-white px-10 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
+                            Upload New Logo
+                            <input
+                              ref={logoInputRef}
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  handleChange();
+                                  setLogoFile(e.target.files[0]);
+                                  setLogoRemoved(false);
+                                }
+                              }}
+                            />
+                          </label>
+                          {(logoFile || formData.logo) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLogoFile(null);
+                                setLogoRemoved(true);
+                                if (logoInputRef.current) {
+                                  logoInputRef.current.value = "";
+                                }
+                                if (formData.logo) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    logo: "",
+                                  }));
+                                }
                                 handleChange();
-                                setLogoFile(e.target.files[0]);
-                              }
-                            }}
-                          />
-                        </label>
+                              }}
+                              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-all"
+                            >
+                              <X size={14} />
+                              Remove Logo
+                            </button>
+                          )}
+                        </div>
                       )}
 
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
@@ -1334,7 +1380,7 @@ export default function Settings() {
                               }
                               setCatalog(catalog.filter((_, i) => i !== idx));
                             }}
-                            className="self-end md:self-auto p-3 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all"
+                            className="self-end md:self-auto p-3 text-slate-400 dark:text-slate-400 hover:text-red-600 dark:hover:text-white hover:bg-red-50 dark:hover:bg-red-950/50 active:scale-95 rounded-xl transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                           >
                             <Trash2 size={20} />
                           </button>

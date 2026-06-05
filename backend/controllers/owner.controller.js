@@ -16,7 +16,10 @@ export const getOwnerSettings = async (req, res) => {
 // ✏️ UPDATE OWNER / GARAGE SETTINGS
 export const updateOwnerSettings = async (req, res) => {
   try {
+    const clearLogo =
+      req.body.logoRemoved === "true" || req.body.logoRemoved === true;
     const updateData = { ...req.body };
+    delete updateData.logoRemoved;
 
     if (req.file) {
       if (process.env.CLOUDINARY_URL) {
@@ -41,6 +44,8 @@ export const updateOwnerSettings = async (req, res) => {
       try {
         await fs.unlink(req.file.path);
       } catch (e) {}
+    } else if (clearLogo) {
+      updateData.logo = "";
     }
 
     const owner = await Owner.findByIdAndUpdate(

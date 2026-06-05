@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Store,
 } from "lucide-react";
+import { FormInput, FormButton, FormError } from "../components/layout/Form/forms";
 
 export default function OwnerRegister() {
   const [searchParams] = useSearchParams();
@@ -124,7 +125,7 @@ export default function OwnerRegister() {
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 selection:bg-emerald-500/30 relative overflow-hidden">
       {/* Dynamic abstract grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
-      <div className="absolute top-[-10%] right-[-10%] w-140 h-140 rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-10%] right-[-10%] w-140 h-140 rounded-full bg-emerald-50/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-140 h-140 rounded-full bg-teal-500/10 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-xl bg-zinc-900/60 backdrop-blur-2xl rounded-[2.5rem] border border-zinc-800/80 shadow-[0_24px_80px_rgba(0,0,0,0.5)] overflow-hidden p-8 sm:p-12 relative z-10">
@@ -276,88 +277,60 @@ export default function OwnerRegister() {
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Password Field */}
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 mb-1.5">
-                    Create Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full h-11 pl-10 pr-10 rounded-xl border border-zinc-800 bg-zinc-800/20 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 text-sm transition-all text-white"
-                    />
+                <FormInput
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  label="Create Password"
+                  labelClassName="block text-xs font-bold text-zinc-400 mb-1.5"
+                  leftIcon={<Lock className="w-4 h-4 text-emerald-400" />}
+                  inputClassName="border-zinc-800 bg-zinc-800/20 focus:ring-emerald-400/20 focus:border-emerald-500 text-white"
+                  rightAction={
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
-                  </div>
-                </div>
+                  }
+                />
 
                 {/* Confirm Password Field */}
-                <div>
-                  <label className="block text-xs font-bold text-zinc-400 mb-1.5">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full h-11 pl-10 pr-10 rounded-xl border border-zinc-800 bg-zinc-800/20 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 focus:border-emerald-500 text-sm transition-all text-white"
-                    />
+                <FormInput
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  label="Confirm Password"
+                  labelClassName="block text-xs font-bold text-zinc-400 mb-1.5"
+                  leftIcon={<Lock className="w-4 h-4 text-emerald-400" />}
+                  inputClassName="border-zinc-800 bg-zinc-800/20 focus:ring-emerald-400/20 focus:border-emerald-500 text-white"
+                  rightAction={
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
-                  </div>
-                </div>
+                  }
+                />
 
                 {/* Submit Button */}
-                <button
+                <FormButton
                   type="submit"
-                  disabled={submitting}
-                  className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] disabled:opacity-65 transition-all shadow-md shadow-emerald-500/10 pt-0.5 mt-2"
+                  loading={submitting}
+                  loadingText="Creating Account..."
+                  variant="emerald"
+                  className="mt-2 text-sm font-bold shadow-md shadow-emerald-500/10 pt-0.5"
+                  size="lg"
                 >
-                  {submitting ? (
-                    <>
-                      <svg
-                        className="animate-spin w-4 h-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      <span>Creating Account...</span>
-                    </>
-                  ) : (
-                    <span>Activate Garage & Dashboard</span>
-                  )}
-                </button>
+                  Activate Garage & Dashboard
+                </FormButton>
               </form>
 
               {/* Login Link */}

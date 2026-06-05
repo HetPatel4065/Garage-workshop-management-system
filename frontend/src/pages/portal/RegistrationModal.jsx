@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Wrench,
-  Loader2,
   Phone,
   Mail,
   User,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
+import { FormInput, FormTextarea, FormButton, FormError, FormRow } from "../../components/layout/Form/forms";
 
 const RegistrationModal = ({ isOpen, onClose, garage }) => {
   const [step, setStep] = useState(1); // 1: Details, 2: OTP, 3: Success
@@ -95,6 +95,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
       )}
     </label>
   );
+
   const handleVerifyAndRegister = async (e) => {
     e.preventDefault();
     if (!formData.otp) {
@@ -184,7 +185,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                 onSubmit={handleSendOTP}
                 className="space-y-5"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <FormRow cols={2} gap="gap-5">
                   <div className="space-y-2">
                     <Label
                       required
@@ -192,17 +193,15 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     >
                       Full Name
                     </Label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        required
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="John Doe"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
-                      />
-                    </div>
+                    <FormInput
+                      required
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="John Doe"
+                      leftIcon={<User className="w-5 h-5 text-slate-400" />}
+                      inputClassName="pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label
@@ -211,22 +210,20 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     >
                       Email Address
                     </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        required
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="john@example.com"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
-                      />
-                    </div>
+                    <FormInput
+                      required
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="john@example.com"
+                      leftIcon={<Mail className="w-5 h-5 text-slate-400" />}
+                      inputClassName="pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                    />
                   </div>
-                </div>
+                </FormRow>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <FormRow cols={2} gap="gap-5">
                   <div className="space-y-2">
                     <Label
                       required
@@ -234,42 +231,27 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     >
                       Phone Number
                     </Label>
-
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-
-                      <input
-                        required
-                        name="phone"
-                        value={formData.phone}
-                        placeholder="+91 1234567890"
-                        maxLength={14}
-                        onChange={(e) => {
-                          let value = e.target.value;
-
-                          // Always start with +91
-                          if (!value.startsWith("+91")) {
-                            value = "+91 ";
-                          }
-
-                          // Remove everything except digits after +91
-                          let digits = value
-                            .replace("+91", "")
-                            .replace(/\D/g, "");
-
-                          // Limit to 10 digits
-                          digits = digits.slice(0, 10);
-
-                          // Format with space
-                          value = "+91 " + digits;
-
-                          handleInputChange({
-                            target: { name: "phone", value },
-                          });
-                        }}
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
-                      />
-                    </div>
+                    <FormInput
+                      required
+                      name="phone"
+                      value={formData.phone}
+                      placeholder="+91 1234567890"
+                      maxLength={14}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (!value.startsWith("+91")) {
+                          value = "+91 ";
+                        }
+                        let digits = value.replace("+91", "").replace(/\D/g, "");
+                        digits = digits.slice(0, 10);
+                        value = "+91 " + digits;
+                        handleInputChange({
+                          target: { name: "phone", value },
+                        });
+                      }}
+                      leftIcon={<Phone className="w-5 h-5 text-slate-400" />}
+                      inputClassName="pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label
@@ -278,76 +260,69 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     >
                       Location / Area
                     </Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        placeholder="City, State"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
-                      />
-                    </div>
+                    <FormInput
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      placeholder="City, State"
+                      leftIcon={<MapPin className="w-5 h-5 text-slate-400" />}
+                      inputClassName="pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                    />
                   </div>
-                </div>
+                </FormRow>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <FormRow cols={2} gap="gap-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 ml-1">
+                    <label className="text-sm font-bold text-slate-700 ml-1 block">
                       Vehicle Number
                     </label>
-                    <div className="relative">
-                      <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        name="vehicleNumber"
-                        value={formData.vehicleNumber}
-                        placeholder="GJ01AA0000"
-                        maxLength={10}
-                        onChange={(e) => {
-                          let value = e.target.value
-                            .toUpperCase()
-                            .replace(/[^A-Z0-9]/g, ""); 
+                    <FormInput
+                      name="vehicleNumber"
+                      value={formData.vehicleNumber}
+                      placeholder="GJ01AA0000"
+                      maxLength={10}
+                      onChange={(e) => {
+                        let value = e.target.value
+                          .toUpperCase()
+                          .replace(/[^A-Z0-9]/g, ""); 
 
-                          let formattedValue = "";
-
-                          for (let i = 0; i < value.length; i++) {
-                            const char = value[i];
-                            if (i === 0 || i === 1 || i === 4 || i === 5) {
-                              if (/[A-Z]/.test(char)) formattedValue += char;
-                            } else {
-                              if (/[0-9]/.test(char)) formattedValue += char;
-                            }
+                        let formattedValue = "";
+                        for (let i = 0; i < value.length; i++) {
+                          const char = value[i];
+                          if (i === 0 || i === 1 || i === 4 || i === 5) {
+                            if (/[A-Z]/.test(char)) formattedValue += char;
+                          } else {
+                            if (/[0-9]/.test(char)) formattedValue += char;
                           }
+                        }
 
-                          handleInputChange({
-                            target: {
-                              name: "vehicleNumber",
-                              value: formattedValue,
-                            },
-                          });
-                        }}
-                        className="w-full uppercase pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none text-base font-semibold tracking-wider"
-                      />
-                    </div>
+                        handleInputChange({
+                          target: {
+                            name: "vehicleNumber",
+                            value: formattedValue,
+                          },
+                        });
+                      }}
+                      leftIcon={<Car className="w-5 h-5 text-slate-400" />}
+                      inputClassName="w-full uppercase pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none text-base font-semibold tracking-wider"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 ml-1">
+                    <label className="text-sm font-bold text-slate-700 ml-1 block">
                       Vehicle Model
                     </label>
-                    <div className="relative">
-                      <Wrench className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        name="vehicleModel"
-                        value={formData.vehicleModel}
-                        onChange={handleInputChange}
-                        placeholder="Toyota Camry"
-                        className="w-full capitalize pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
-                      />
-                    </div>
+                    <FormInput
+                      name="vehicleModel"
+                      value={formData.vehicleModel}
+                      onChange={handleInputChange}
+                      placeholder="Toyota Camry"
+                      leftIcon={<Wrench className="w-5 h-5 text-slate-400" />}
+                      inputClassName="w-full capitalize pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                    />
                   </div>
-                </div>
+                </FormRow>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <FormRow cols={2} gap="gap-5">
                   <div className="space-y-2">
                     <Label
                       required
@@ -357,38 +332,37 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     </Label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <textarea
+                      <FormTextarea
                         required
                         name="requestedService"
                         value={formData.requestedService}
                         onChange={handleInputChange}
                         placeholder="e.g. Oil leak, brake noise, AC not cooling"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                        textareaClassName="pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none resize-none"
                       />
                     </div>
                   </div>
-                </div>
+                </FormRow>
 
                 {error && (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="text-sm font-bold">{error}</p>
-                  </div>
+                  <FormError
+                    message={error}
+                    isBanner
+                    className="bg-red-50 text-red-600 rounded-2xl border border-red-100"
+                  />
                 )}
 
-                <button
+                <FormButton
                   disabled={loading}
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 disabled:opacity-70"
+                  variant="blue"
+                  loading={loading}
+                  loadingText=""
+                  icon={<Send className="w-5 h-5" />}
+                  className="py-5 rounded-3xl font-bold text-lg shadow-xl shadow-blue-200"
                 >
-                  {loading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" /> Send Verification Code
-                    </>
-                  )}
-                </button>
+                  Send Verification Code
+                </FormButton>
               </motion.form>
             )}
 
@@ -418,36 +392,36 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                 </div>
 
                 <div className="max-w-xs mx-auto">
-                  <input
+                  <FormInput
                     required
                     maxLength={6}
                     name="otp"
                     value={formData.otp}
                     onChange={handleInputChange}
                     placeholder="000000"
-                    className="w-full text-center text-4xl font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
+                    inputClassName="w-full text-center text-4xl font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
                   />
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="text-sm font-bold">{error}</p>
-                  </div>
+                  <FormError
+                    message={error}
+                    isBanner
+                    className="bg-red-50 text-red-600 rounded-2xl border border-red-100"
+                  />
                 )}
 
                 <div className="space-y-4">
-                  <button
+                  <FormButton
                     disabled={loading}
                     type="submit"
-                    className="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-70"
+                    variant="dark"
+                    loading={loading}
+                    loadingText=""
+                    className="py-5 rounded-3xl font-bold text-lg shadow-xl shadow-slate-200"
                   >
-                    {loading ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                    ) : (
-                      "Verify & Register"
-                    )}
-                  </button>
+                    Verify & Register
+                  </FormButton>
 
                   <div className="flex flex-col items-center gap-2">
                     <button

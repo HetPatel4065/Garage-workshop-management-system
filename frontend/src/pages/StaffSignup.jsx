@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { FaUsers } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
+import { FormInput, FormError, FormButton, FormRow, FormSection } from "../components/layout/Form/forms";
 
 const GREETINGS = [
   // Friendly & Community-Focused
@@ -103,11 +104,6 @@ export default function StaffSignup() {
     }
   };
 
-  const inputCls =
-    "w-full h-11 pl-10 pr-3.5 rounded-xl border border-violet-200 bg-violet-50/60 text-sm " +
-    "text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 " +
-    "focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white transition-all";
-
   return (
     <div className="min-h-screen bg-violet-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <motion.div
@@ -160,20 +156,9 @@ export default function StaffSignup() {
                   initial={{ opacity: 0, scale: 0.97 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.97 }}
-                  className="mb-5 flex items-start gap-3 p-3.5 rounded-xl bg-red-50 border border-red-100"
+                  className="mb-5"
                 >
-                  <svg
-                    className="w-4 h-4 text-red-500 mt-0.5 shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <p className="text-sm text-red-600">{error}</p>
+                  <FormError message={error} isBanner />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -222,107 +207,74 @@ export default function StaffSignup() {
               </div>
 
               {/* Personal Details */}
-              <div className="space-y-3.5 pt-2">
-                <p className="text-[10px] font-black text-violet-600 uppercase tracking-widest border-b border-slate-100 pb-1 mb-2">
-                  Personal Details
-                </p>
-
+              <FormSection title="Personal Details" className="pt-2">
                 {/* Name */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Jane Doe"
-                      className={inputCls}
-                    />
-                  </div>
-                </div>
+                <FormInput
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Jane Doe"
+                  label="Full Name"
+                  leftIcon={<User className="w-4 h-4 text-violet-400" />}
+                  inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white"
+                />
 
                 {/* Email & Mobile */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Email Address <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="jane@example.com"
-                        className={inputCls}
-                      />
-                    </div>
-                  </div>
+                <FormRow cols={2}>
+                  <FormInput
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="jane@example.com"
+                    label="Email Address"
+                    leftIcon={<Mail className="w-4 h-4 text-violet-400" />}
+                    inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white"
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Mobile Number <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
-                      <input
-                        type="tel"
-                        required
-                        value={mobileNumber}
-                        onChange={(e) => {
-                          let v = e.target.value;
-                          if (!v.startsWith("+91 ")) {
-                            v = "+91 " + v.replace("+91", "").trim();
-                          }
-                          if (v.length <= 14) setMobileNumber(v);
-                        }}
-                        placeholder="+91 9876543210"
-                        className={inputCls}
-                      />
-                    </div>
-                  </div>
-                </div>
+                  <FormInput
+                    type="tel"
+                    required
+                    value={mobileNumber}
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith("+91 ")) {
+                        v = "+91 " + v.replace("+91", "").trim();
+                      }
+                      if (v.length <= 14) setMobileNumber(v);
+                    }}
+                    placeholder="+91 9876543210"
+                    label="Mobile Number"
+                    leftIcon={<Phone className="w-4 h-4 text-violet-400" />}
+                    inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white"
+                  />
+                </FormRow>
 
                 {/* Password */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="hidden" />
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400 flex items-center justify-center font-bold text-base select-none">
-                      *
-                    </div>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min. 8 characters"
-                      className={`${inputCls} pr-11`}
-                    />
+                <FormInput
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min. 8 characters"
+                  label="Password"
+                  leftIcon={<div className="text-violet-400 font-bold text-base select-none">*</div>}
+                  inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white pr-11"
+                  rightAction={
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-500 transition-colors"
+                      className="text-slate-400 hover:text-violet-500 transition-colors"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
-                  </div>
-                </div>
-              </div>
+                  }
+                />
+              </FormSection>
 
               {/* Garage Link Details */}
-              <div className="space-y-3.5 pt-2">
-                <p className="text-[10px] font-black text-violet-600 uppercase tracking-widest border-b border-slate-100 pb-1 mb-2">
-                  Garage Verification
-                </p>
-
+              <FormSection title="Garage Verification" className="pt-2">
                 <div className="flex gap-3 p-3 bg-violet-50 border border-violet-100 rounded-xl">
                   <ShieldCheck className="w-5 h-5 text-violet-600 mt-0.5 shrink-0" />
                   <p className="text-xs text-slate-600 leading-relaxed">
@@ -333,67 +285,35 @@ export default function StaffSignup() {
                 </div>
 
                 {/* Garage ID */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    10-Digit Garage Connection ID{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Wrench className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      required
-                      maxLength={10}
-                      value={ownerId}
-                      onChange={(e) =>
-                        setOwnerId(
-                          e.target.value.replace(/\D/g, "").slice(0, 10),
-                        )
-                      }
-                      placeholder="e.g. 1234567890"
-                      className={`${inputCls} font-mono tracking-widest`}
-                    />
-                  </div>
-                </div>
-              </div>
+                <FormInput
+                  type="text"
+                  inputMode="numeric"
+                  required
+                  maxLength={10}
+                  value={ownerId}
+                  onChange={(e) =>
+                    setOwnerId(
+                      e.target.value.replace(/\D/g, "").slice(0, 10),
+                    )
+                  }
+                  placeholder="e.g. 1234567890"
+                  label="10-Digit Garage Connection ID"
+                  leftIcon={<Wrench className="w-4 h-4 text-violet-400" />}
+                  inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white font-mono tracking-widest"
+                />
+              </FormSection>
 
               {/* Submit */}
-              <button
+              <FormButton
                 type="submit"
-                disabled={isLoading}
-                className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white bg-violet-500 hover:bg-violet-600 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-violet-400/30 transition-all mt-3"
+                loading={isLoading}
+                loadingText="Creating your staff account…"
+                variant="violet"
+                icon={<FaUsers className="w-4 h-4" />}
+                className="mt-3"
               >
-                {isLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin w-4 h-4 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    <span>Creating your staff account…</span>
-                  </>
-                ) : (
-                  <>
-                    <FaUsers className="w-4 h-4" />
-                    <span>Request to Join Garage</span>
-                  </>
-                )}
-              </button>
+                Request to Join Garage
+              </FormButton>
             </form>
 
             {/* Footer */}

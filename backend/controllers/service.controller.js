@@ -159,15 +159,34 @@ export const createService = async (req, res) => {
       }
     }
 
+    if (serviceData.status === "Completed") {
+      serviceData.endTime = new Date();
+      if (!serviceData.serviceDate) {
+        serviceData.serviceDate = new Date();
+      }
+    }
+
     const newService = new Service(serviceData);
     await newService.save();
 
     // Update vehicle reminderStatus if serviceDate is provided
-    if (serviceData.vehicleId && serviceData.serviceDate) {
+    if (newService.vehicleId && newService.serviceDate) {
       const { default: Vehicle } = await import("../models/Vehicle.js");
-      await Vehicle.findByIdAndUpdate(serviceData.vehicleId, {
-        reminderStatus: "Pending",
-      });
+      if (newService.status === "Completed") {
+        const nextNorm = newService.nextServiceDate ? new Date(newService.nextServiceDate) : null;
+        if (nextNorm) nextNorm.setHours(0, 0, 0, 0);
+        const todayNorm = new Date();
+        todayNorm.setHours(0, 0, 0, 0);
+
+        await Vehicle.findByIdAndUpdate(newService.vehicleId, {
+          reminderStatus:
+            nextNorm && nextNorm > todayNorm ? "Pending" : "Completed",
+        });
+      } else {
+        await Vehicle.findByIdAndUpdate(newService.vehicleId, {
+          reminderStatus: "Pending",
+        });
+      }
     }
 
     res.status(201).json(newService);

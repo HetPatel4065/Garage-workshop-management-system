@@ -191,6 +191,7 @@ export const updateSettings = async (req, res) => {
       notifications,
       security,
       defaultDiscountPercent,
+      logoRemoved,
     } = req.body;
 
     // Parse JSON strings (sent via FormData)
@@ -255,6 +256,8 @@ export const updateSettings = async (req, res) => {
       }
     }
 
+    const clearLogo = logoRemoved === "true" || logoRemoved === true;
+
     if (req.files) {
       if (process.env.CLOUDINARY_URL) {
         cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
@@ -300,6 +303,10 @@ export const updateSettings = async (req, res) => {
       }
     }
 
+    if (clearLogo && !req.files.logo) {
+      settingsUpdate.logo = "";
+    }
+
     const settings = await GarageSettings.findOneAndUpdate(
       { ownerId },
       { $set: settingsUpdate },
@@ -315,7 +322,13 @@ export const updateSettings = async (req, res) => {
     if (note !== undefined) ownerUpdate.note = note;
     if (parsedLaborPrices !== undefined)
       ownerUpdate.laborPrices = parsedLaborPrices;
-    if (settingsUpdate.logo) ownerUpdate.logo = settingsUpdate.logo;
+    if (settingsUpdate.logo !== undefined) {
+      ownerUpdate.logo = settingsUpdate.logo;
+    }
+
+    if (clearLogo) {
+      ownerUpdate.logo = "";
+    }
 
     const updatedOwner = await Owner.findByIdAndUpdate(
       ownerId,

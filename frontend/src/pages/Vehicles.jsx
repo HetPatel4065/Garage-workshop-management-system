@@ -455,12 +455,10 @@ export default function Vehicles() {
       {/* Total count */}
       <div className="mb-4 ml-1">
         <p className="text-sm font-medium text-slate-500">
-          Showing{" "}
+          Total Vehicles:{" "}
           <span className="text-slate-900 font-bold">
             {filteredFleet.length}
-          </span>{" "}
-          of <span className="text-slate-900 font-bold">{vehicles.length}</span>{" "}
-          vehicles
+          </span>
         </p>
       </div>
       {loading ? (

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useLoading } from "../../context/LoadingContext";
 import { useToast } from "../../context/ToastContext";
+import { FormInput, FormSelect, FormTextarea, FormButton } from "../layout/Form/forms";
 import {
   Search,
   Filter,
@@ -536,67 +537,58 @@ export default function AdminDirectory() {
         closeOnBackdrop={false}
       >
         <form onSubmit={handleSendAnnouncement} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              Notification Type
-            </label>
-            <select
-              value={announcementModal.type}
-              onChange={(e) =>
-                setAnnouncementModal((m) => ({
-                  ...m,
-                  type: e.target.value,
-                }))
-              }
-              className="w-full h-11 px-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-            >
-              <option value="info">Info (Blue)</option>
-              <option value="success">Success (Green)</option>
-              <option value="warning">Warning (Yellow)</option>
-              <option value="error">Error (Red)</option>
-            </select>
-          </div>
+          <FormSelect
+            value={announcementModal.type}
+            onChange={(e) =>
+              setAnnouncementModal((m) => ({
+                ...m,
+                type: e.target.value,
+              }))
+            }
+            label="Notification Type"
+            labelClassName="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5"
+            selectClassName="w-full h-11 px-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="info">Info (Blue)</option>
+            <option value="success">Success (Green)</option>
+            <option value="warning">Warning (Yellow)</option>
+            <option value="error">Error (Red)</option>
+          </FormSelect>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              Alert Title
-            </label>
-            <input
-              type="text"
-              required
-              value={announcementModal.title}
-              onChange={(e) =>
-                setAnnouncementModal((m) => ({
-                  ...m,
-                  title: e.target.value,
-                }))
-              }
-              placeholder="e.g. Scheduled System Upgrade"
-              className="w-full h-11 px-3.5 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all"
-            />
-          </div>
+          <FormInput
+            type="text"
+            required
+            value={announcementModal.title}
+            onChange={(e) =>
+              setAnnouncementModal((m) => ({
+                ...m,
+                title: e.target.value,
+              }))
+            }
+            placeholder="e.g. Scheduled System Upgrade"
+            label="Alert Title"
+            labelClassName="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5"
+            inputClassName="w-full h-11 px-3.5 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all"
+          />
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              Message Body
-            </label>
-            <textarea
-              required
-              rows={4}
-              value={announcementModal.message}
-              onChange={(e) =>
-                setAnnouncementModal((m) => ({
-                  ...m,
-                  message: e.target.value,
-                }))
-              }
-              placeholder="Provide details of the announcement here..."
-              className="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all resize-none"
-            />
-          </div>
+          <FormTextarea
+            required
+            rows={4}
+            value={announcementModal.message}
+            onChange={(e) =>
+              setAnnouncementModal((m) => ({
+                ...m,
+                message: e.target.value,
+              }))
+            }
+            placeholder="Provide details of the announcement here..."
+            label="Message Body"
+            labelClassName="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5"
+            textareaClassName="w-full p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all resize-none"
+          />
 
           <div className="flex gap-3 pt-2">
-            <button
+            <FormButton
               type="button"
               onClick={() =>
                 setAnnouncementModal({
@@ -608,16 +600,20 @@ export default function AdminDirectory() {
                   type: "warning",
                 })
               }
-              className="flex-1 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-all cursor-auto"
+              variant="secondary"
+              className="flex-1 text-xs uppercase tracking-wider font-bold"
+              fullWidth={false}
             >
               Cancel
-            </button>
-            <button
+            </FormButton>
+            <FormButton
               type="submit"
-              className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-400/25 cursor-auto"
+              variant="blue"
+              className="flex-1 text-xs uppercase tracking-wider font-bold"
+              fullWidth={false}
             >
               Dispatch Alert
-            </button>
+            </FormButton>
           </div>
         </form>
       </Modal>

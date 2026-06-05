@@ -37,7 +37,7 @@ const enrichVehiclesWithServiceDates = async (vehicles, ownerId) => {
     lastServices.forEach((s) => {
       lastServiceMap[s._id.toString()] = {
         lastServiceName: s.serviceName || null,
-        lastServiceDate: s.completedAt || s.updatedAt || null,
+        lastServiceDate: s.serviceDate || s.completedAt || s.updatedAt || null,
         serviceDate: s.serviceDate || null,
         nextServiceDate: s.nextServiceDate || null,
       };

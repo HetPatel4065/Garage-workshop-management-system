@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -95,6 +95,8 @@ export default function Profile({ isAdvisor }) {
 
   const [logoFile, setLogoFile] = useState(null);
   const [invoiceLogoFile, setInvoiceLogoFile] = useState(null);
+  const [logoRemoved, setLogoRemoved] = useState(false);
+  const logoInputRef = useRef(null);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -147,6 +149,7 @@ export default function Profile({ isAdvisor }) {
       Object.keys(formData).forEach((key) => {
         data.append(key, formData[key]);
       });
+      data.append("logoRemoved", logoRemoved ? "true" : "false");
 
       if (logoFile) data.append("logo", logoFile);
       if (invoiceLogoFile) data.append("invoiceLogo", invoiceLogoFile);
@@ -163,6 +166,7 @@ export default function Profile({ isAdvisor }) {
         await refreshUser();
         setLogoFile(null);
         setInvoiceLogoFile(null);
+        setLogoRemoved(false);
         fetchProfile();
       } else {
         const err = await res.json();
@@ -449,23 +453,49 @@ export default function Profile({ isAdvisor }) {
                         <div className="flex flex-col items-center gap-3">
                           {canEdit && (
                             <div className="flex flex-wrap justify-center gap-3">
-                              <label className="cursor-auto bg-slate-900  hover:bg-blue-600 dark:hover:bg-blue-600 text-white dark:text-slate-900 hover:text-white dark:hover:text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-md active:scale-95 flex items-center gap-2">
+                              <label className="cursor-auto bg-slate-900 hover:bg-blue-600 dark:hover:bg-blue-600 text-white dark:text-slate-900 hover:text-white dark:hover:text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-md active:scale-95 flex items-center gap-2">
                                 <Upload size={14} />
-                                Upload New
+                                Upload New Logo
                                 <input
+                                  ref={logoInputRef}
                                   type="file"
                                   className="hidden"
                                   accept="image/*"
                                   onChange={(e) => {
                                     if (e.target.files?.[0]) {
                                       setLogoFile(e.target.files[0]);
+                                      setLogoRemoved(false);
                                       setHasChanges(true);
                                     }
                                   }}
                                 />
                               </label>
+                              {(logoFile || formData.logo) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLogoFile(null);
+                                    setLogoRemoved(true);
+                                    if (logoInputRef.current) {
+                                      logoInputRef.current.value = "";
+                                    }
+                                    if (formData.logo) {
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        logo: "",
+                                      }));
+                                    }
+                                    setHasChanges(true);
+                                  }}
+                                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-all text-xs font-bold uppercase tracking-widest"
+                                >
+                                  <X size={14} />
+                                  Remove Logo
+                                </button>
+                              )}
                             </div>
                           )}
+
                           <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-200/40 dark:bg-slate-800/50 px-3 py-1 rounded-full">
                             Recommended: Square PNG/JPG • Max 5MB
                           </p>
@@ -568,7 +598,10 @@ export default function Profile({ isAdvisor }) {
                           value={formData.gstRate}
                           onChange={handleInputChange}
                           icon={
-                            <Percent size={16} className="text-black dark:text-white" />
+                            <Percent
+                              size={16}
+                              className="text-black dark:text-white"
+                            />
                           }
                         />
                         <InputField
@@ -577,7 +610,12 @@ export default function Profile({ isAdvisor }) {
                           type="number"
                           value={formData.defaultDiscountPercent}
                           onChange={handleInputChange}
-                          icon={<Tag size={16} className="text-black dark:text-white" />}
+                          icon={
+                            <Tag
+                              size={16}
+                              className="text-black dark:text-white"
+                            />
+                          }
                         />
                       </div>
 
@@ -588,7 +626,10 @@ export default function Profile({ isAdvisor }) {
                         onChange={handleChange}
                         disabled={!canEdit}
                         icon={
-                          <CreditCard size={18} className="text-black dark:text-white" />
+                          <CreditCard
+                            size={18}
+                            className="text-black dark:text-white"
+                          />
                         }
                         placeholder="garage@upi"
                         required

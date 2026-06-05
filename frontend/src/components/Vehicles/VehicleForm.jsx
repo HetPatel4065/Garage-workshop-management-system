@@ -1,3 +1,6 @@
+import React from "react";
+import { FormInput, FormSelect, FormLabel, FormRow } from "../layout/Form/forms";
+
 export const FUEL_TYPES = ["Petrol", "Diesel", "Electric", "CNG", "Hybrid"];
 export const TRANSMISSION_TYPES = ["Automatic", "Manual"];
 export const VEHICLE_STATUSES = ["In Garage", "With Owner", "Archived"];
@@ -67,71 +70,6 @@ const formatDateForInput = (dateStr) => {
   }
 };
 
-/* ─── Shared primitives ─────────────── */
-const Label = ({ children, hint, required, error }) => (
-  <label
-    className={`block text-sm font-medium mb-1.5 ${error ? "text-red-600" : "text-gray-700"}`}
-  >
-    {children}
-    {required && <span className="text-red-500 text-xs ml-1">*</span>}
-    {hint && (
-      <span className="text-gray-400 text-xs ml-1 font-normal">({hint})</span>
-    )}
-  </label>
-);
-
-const FieldInput = ({
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  disabled,
-  required,
-  name,
-  className = "",
-  maxLength,
-  error,
-  min,
-}) => (
-  <div>
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      disabled={disabled}
-      name={name}
-      required={required}
-      maxLength={maxLength}
-      min={min}
-      className={`w-full bg-white border ${error ? "border-red-500 bg-red-100 focus:ring-red-200" : "border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500"} rounded-md px-3 py-2 text-sm text-gray-900 
-        focus:outline-none focus:ring-1 
-        disabled:bg-gray-100 disabled:text-gray-900 placeholder:text-gray-400 transition-all ${className}`}
-    />
-    {error && (
-      <p className="text-[10px] text-red-500 mt-1 font-medium">{error}</p>
-    )}
-  </div>
-);
-
-const StyledSelect = ({ value, onChange, children, disabled, error }) => (
-  <div>
-    <select
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      className={`w-full bg-white border ${error ? "border-red-500 bg-red-50" : "border-gray-300"} rounded-md px-3 py-2 text-sm text-gray-900 
-        focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500
-        disabled:bg-gray-100 disabled:text-gray-900 transition-all`}
-    >
-      {children}
-    </select>
-    {error && (
-      <p className="text-[10px] text-red-500 mt-1 font-medium">{error}</p>
-    )}
-  </div>
-);
-
 export default function VehicleForm({
   vehicle,
   onChange,
@@ -152,7 +90,6 @@ export default function VehicleForm({
       processedValue = cleaned.substring(0, 10);
     }
 
-    // ... rest of your logic
     onChange({ ...vehicle, [field]: processedValue });
   };
 
@@ -216,37 +153,29 @@ export default function VehicleForm({
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Registration Details
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-100 rounded-xl p-4">
-            <div>
-              <Label required error={errors.licensePlate}>
-                Licence Plate
-              </Label>
-              <FieldInput
-                value={vehicle.licensePlate}
-                onChange={(e) => handleChange("licensePlate", e.target.value)}
-                placeholder="GJ01AB1234"
-                className="uppercase"
-                disabled={isReadOnly}
-                required
-                error={errors.licensePlate}
-              />
-            </div>
-            <div>
-              <Label required error={errors.chassisnumber}>
-                Chassis No. (VIN)
-              </Label>
-              <FieldInput
-                value={vehicle.chassisnumber}
-                onChange={(e) => handleChange("chassisnumber", e.target.value)}
-                placeholder="17 Digit Number"
-                className="uppercase"
-                disabled={isReadOnly}
-                maxLength={17}
-                error={errors.chassisnumber}
-                required
-              />
-            </div>
-          </div>
+          <FormRow cols={2} className="bg-gray-100 rounded-xl p-4">
+            <FormInput
+              value={vehicle.licensePlate}
+              onChange={(e) => handleChange("licensePlate", e.target.value)}
+              placeholder="GJ01AB1234"
+              inputClassName="uppercase"
+              disabled={isReadOnly}
+              required
+              error={errors.licensePlate}
+              label="Licence Plate"
+            />
+            <FormInput
+              value={vehicle.chassisnumber}
+              onChange={(e) => handleChange("chassisnumber", e.target.value)}
+              placeholder="17 Digit Number"
+              inputClassName="uppercase"
+              disabled={isReadOnly}
+              maxLength={17}
+              error={errors.chassisnumber}
+              required
+              label="Chassis No. (VIN)"
+            />
+          </FormRow>
         </div>
 
         {/* SECTION: Specifications */}
@@ -254,79 +183,65 @@ export default function VehicleForm({
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Technical Specifications
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-100 rounded-xl">
-            <div>
-              <Label required error={errors.make}>
-                Make
-              </Label>
-              <FieldInput
-                value={vehicle.make}
-                onChange={(e) =>
-                  handleChange("make", capitalizeWords(e.target.value))
-                }
-                placeholder="Toyota"
-                disabled={isReadOnly}
-                error={errors.make}
-              />
-            </div>
-            <div>
-              <Label required error={errors.model}>
-                Model
-              </Label>
-              <FieldInput
-                value={vehicle.model}
-                onChange={(e) =>
-                  handleChange("model", capitalizeWords(e.target.value))
-                }
-                placeholder="Camry"
-                disabled={isReadOnly}
-                error={errors.model}
-              />
-            </div>
-            <div>
-              <Label error={errors.year}>Year</Label>
-              <FieldInput
-                value={vehicle.year}
-                onChange={(e) => handleChange("year", e.target.value)}
-                placeholder="2022"
-                disabled={isReadOnly}
-                error={errors.year}
-              />
-            </div>
-            <div>
-              <Label>Engine Type</Label>
-              <FieldInput
-                value={vehicle.engineType}
-                onChange={(e) => handleChange("engineType", e.target.value)}
-                placeholder="2.0L V4"
-                disabled={isReadOnly}
-              />
-            </div>
-            <div>
-              <Label>Fuel Type</Label>
-              <StyledSelect
-                value={vehicle.fuelType}
-                onChange={(e) => handleChange("fuelType", e.target.value)}
-                disabled={isReadOnly}
-              >
-                {FUEL_TYPES.map((f) => (
-                  <option key={f}>{f}</option>
-                ))}
-              </StyledSelect>
-            </div>
-            <div>
-              <Label>Transmission</Label>
-              <StyledSelect
-                value={vehicle.transmission}
-                onChange={(e) => handleChange("transmission", e.target.value)}
-                disabled={isReadOnly}
-              >
-                {TRANSMISSION_TYPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </StyledSelect>
-            </div>
-          </div>
+          <FormRow cols={3} className="p-4 bg-gray-100 rounded-xl">
+            <FormInput
+              value={vehicle.make}
+              onChange={(e) =>
+                handleChange("make", capitalizeWords(e.target.value))
+              }
+              placeholder="Toyota"
+              disabled={isReadOnly}
+              error={errors.make}
+              label="Make"
+              required
+            />
+            <FormInput
+              value={vehicle.model}
+              onChange={(e) =>
+                handleChange("model", capitalizeWords(e.target.value))
+              }
+              placeholder="Camry"
+              disabled={isReadOnly}
+              error={errors.model}
+              label="Model"
+              required
+            />
+            <FormInput
+              value={vehicle.year}
+              onChange={(e) => handleChange("year", e.target.value)}
+              placeholder="2022"
+              disabled={isReadOnly}
+              error={errors.year}
+              label="Year"
+            />
+            <FormInput
+              value={vehicle.engineType}
+              onChange={(e) => handleChange("engineType", e.target.value)}
+              placeholder="2.0L V4"
+              disabled={isReadOnly}
+              label="Engine Type"
+            />
+            <FormSelect
+              value={vehicle.fuelType}
+              onChange={(e) => handleChange("fuelType", e.target.value)}
+              disabled={isReadOnly}
+              label="Fuel Type"
+            >
+              {FUEL_TYPES.map((f) => (
+                <option key={f}>{f}</option>
+              ))}
+            </FormSelect>
+            <FormSelect
+              value={vehicle.transmission}
+              onChange={(e) => handleChange("transmission", e.target.value)}
+              disabled={isReadOnly}
+              label="Transmission"
+            >
+              {TRANSMISSION_TYPES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </FormSelect>
+          </FormRow>
         </div>
 
         {/* SECTION: Status */}
@@ -334,29 +249,25 @@ export default function VehicleForm({
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Maintenance Status
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-100 rounded-xl p-4">
-            <div>
-              <Label>Current KM</Label>
-              <FieldInput
-                value={vehicle.currentMileage}
-                onChange={(e) => handleChange("currentMileage", e.target.value)}
-                placeholder="45000"
-                disabled={isReadOnly}
-              />
-            </div>
-            <div>
-              <Label>Garage Status</Label>
-              <StyledSelect
-                value={vehicle.status}
-                onChange={(e) => handleChange("status", e.target.value)}
-                disabled={isReadOnly}
-              >
-                {VEHICLE_STATUSES.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </StyledSelect>
-            </div>
-          </div>
+          <FormRow cols={4} className="bg-gray-100 rounded-xl p-4">
+            <FormInput
+              value={vehicle.currentMileage}
+              onChange={(e) => handleChange("currentMileage", e.target.value)}
+              placeholder="45000"
+              disabled={isReadOnly}
+              label="Current KM"
+            />
+            <FormSelect
+              value={vehicle.status}
+              onChange={(e) => handleChange("status", e.target.value)}
+              disabled={isReadOnly}
+              label="Garage Status"
+            >
+              {VEHICLE_STATUSES.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </FormSelect>
+          </FormRow>
         </div>
 
         {showRemove && !isReadOnly && (

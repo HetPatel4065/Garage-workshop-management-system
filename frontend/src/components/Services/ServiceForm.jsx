@@ -7,37 +7,48 @@ const priorityOptions = ["Low", "Medium", "High", "Urgent"];
 
 const STATUS_META = {
   Pending: {
-    color: "text-amber-700 bg-amber-50 border-amber-200",
+    color:
+      "text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-700",
     dot: "bg-amber-500",
   },
   "In-progress": {
-    color: "text-blue-700 bg-blue-50 border-blue-200",
+    color:
+      "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-300 dark:bg-blue-900/30 dark:border-blue-700",
     dot: "bg-blue-500",
   },
   Completed: {
-    color: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    color:
+      "text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700",
     dot: "bg-emerald-500",
   },
   Cancelled: {
-    color: "text-red-700 bg-red-50 border-red-200",
+    color:
+      "text-red-700 bg-red-50 border-red-200 dark:text-red-300 dark:bg-red-900/30 dark:border-red-700",
     dot: "bg-red-500",
   },
 };
 
 const PRIORITY_META = {
   Low: {
-    color: "text-gray-600 bg-gray-50 border-gray-200",
+    color:
+      "text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600",
     dot: "bg-gray-400",
   },
   Medium: {
-    color: "text-blue-700 bg-blue-50 border-blue-200",
+    color:
+      "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-300 dark:bg-blue-900/30 dark:border-blue-700",
     dot: "bg-blue-400",
   },
   High: {
-    color: "text-orange-700 bg-orange-50 border-orange-200",
+    color:
+      "text-orange-700 bg-orange-50 border-orange-200 dark:text-orange-300 dark:bg-orange-900/30 dark:border-orange-700",
     dot: "bg-orange-500",
   },
-  Urgent: { color: "text-red-700 bg-red-50 border-red-200", dot: "bg-red-500" },
+  Urgent: {
+    color:
+      "text-red-700 bg-red-50 border-red-200 dark:text-red-300 dark:bg-red-900/30 dark:border-red-700",
+    dot: "bg-red-500",
+  },
 };
 
 const cleanServiceItem = (str) => {
@@ -71,12 +82,12 @@ const calculateNextServiceDate = (serviceDateStr) => {
 /* ─── Shared primitives ───────────────────────────────────── */
 const Label = ({ children, required, hint, error }) => (
   <label
-    className={`flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-widest mb-1.5 ${error ? "text-red-600" : "text-gray-900"}`}
+    className={`flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-widest mb-1.5 ${error ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}
   >
     {children}
     {required && <span className="text-red-500 font-black ml-0.5">*</span>}
     {hint && (
-      <span className="normal-case font-normal text-gray-500 text-[11px] ml-1">
+      <span className="normal-case font-normal text-gray-500 dark:text-gray-400 text-[11px] ml-1">
         ({hint})
       </span>
     )}
@@ -105,13 +116,13 @@ const FieldInput = ({
       required={required}
       min={min}
       max={max}
-      className={`w-full border rounded-lg px-3 py-2.5 text-sm transition placeholder:text-gray-400
-        focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-900
-        ${error ? "border-red-500 bg-red-100 focus:ring-red-100" : "border-gray-200 bg-white text-gray-900 focus:ring-gray-900 focus:border-transparent"} 
+      className={`w-full border rounded-lg px-3 py-2.5 text-sm transition placeholder:text-gray-400 dark:placeholder:text-gray-600
+        focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-900 dark:disabled:bg-gray-800 dark:disabled:text-gray-300
+        ${error ? "border-red-500 bg-red-100 focus:ring-red-100 dark:border-red-500 dark:bg-red-900/20 dark:focus:ring-red-900/30" : "border-gray-200 bg-white text-gray-900 focus:ring-gray-900 focus:border-transparent dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:ring-gray-400"} 
         ${className}`}
     />
     {error && (
-      <p className="text-[10px] text-red-500 mt-1 font-bold italic uppercase tracking-tighter">
+      <p className="text-[10px] text-red-500 dark:text-red-400 mt-1 font-bold italic uppercase tracking-tighter">
         {error}
       </p>
     )}
@@ -125,13 +136,13 @@ const StyledSelect = ({ value, onChange, children, disabled, error }) => (
       onChange={onChange}
       disabled={disabled}
       className={`w-full capitalize border rounded-lg px-3 py-2.5 text-sm transition
-        focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-900
-        ${error ? "border-red-500 bg-red-100 focus:ring-red-100" : "border-gray-200 bg-white text-gray-900 focus:ring-gray-900"}`}
+        focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-900 dark:disabled:bg-gray-800 dark:disabled:text-gray-300
+        ${error ? "border-red-500 bg-red-100 focus:ring-red-100 dark:border-red-500 dark:bg-red-900/20 dark:focus:ring-red-900/30" : "border-gray-200 bg-white text-gray-900 focus:ring-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:ring-gray-400"}`}
     >
       {children}
     </select>
     {error && (
-      <p className="text-[10px] text-red-500 mt-1 font-bold italic uppercase tracking-tighter">
+      <p className="text-[10px] text-red-500 dark:text-red-400 mt-1 font-bold italic uppercase tracking-tighter">
         {error}
       </p>
     )}
@@ -140,13 +151,13 @@ const StyledSelect = ({ value, onChange, children, disabled, error }) => (
 
 const Section = ({ title, subtitle, action, children }) => (
   <div className="space-y-4">
-    <div className="flex items-center justify-between pb-2.5 border-b border-gray-100">
+    <div className="flex items-center justify-between pb-2.5 border-b border-gray-100 dark:border-gray-800">
       <div>
-        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-700">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
           {title}
         </h3>
         {subtitle && (
-          <p className="text-[12px] font-semibold text-gray-500 mt-0.5">
+          <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">
             {subtitle}
           </p>
         )}
@@ -214,7 +225,6 @@ export default function ServiceForm({
 
   useEffect(() => {
     if (!serviceDate) return;
-    // Always recalculate nextServiceDate = serviceDate + 6 months
     const calculatedNext = calculateNextServiceDate(serviceDate);
     if (calculatedNext) {
       setNextServiceDate(calculatedNext);
@@ -233,7 +243,6 @@ export default function ServiceForm({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // If there's no token at all, stop early instead of sending requests destined to fail
         if (!token) {
           addToast(
             "Authentication token missing. Please log in again.",
@@ -286,7 +295,6 @@ export default function ServiceForm({
           ),
         ]);
 
-        // Array to easily check any authorization dropping across any of the endpoints
         const responses = [
           custRes,
           invRes,
@@ -304,11 +312,9 @@ export default function ServiceForm({
             "Session expired or unauthorized access. Please re-login.",
             "error",
           );
-          // Optional: window.location.href = "/login";
           return;
         }
 
-        // Safe to process payloads now that status codes are clear
         if (custRes.ok) setCustomers(await custRes.json());
         if (invRes.ok) setInventory(await invRes.json());
         if (catalogRes.ok) setServiceCatalog(await catalogRes.json());
@@ -339,7 +345,6 @@ export default function ServiceForm({
 
     const roleKey = user?.role === "mechanic" ? "mechanicId" : "advisorId";
 
-    // Get unique customer IDs from my assigned job cards
     const myCustomerIds = new Set(
       allJobCards
         .filter((jc) => {
@@ -396,7 +401,6 @@ export default function ServiceForm({
       const vId = jc.vehicleId?._id || jc.vehicleId;
 
       if (cId && vId) {
-        // Manually trigger population for this specific JC
         const v = filteredAllVehicles.find(
           (x) => x._id === vId || x.id === vId,
         );
@@ -459,7 +463,6 @@ export default function ServiceForm({
         ? serviceData.customerId._id
         : serviceData.customerId;
 
-    // Fallback to standalone decoupled mapping
     const cVehicles = filteredAllVehicles.filter(
       (v) => v.customerId === selId || v.customerId?._id === selId,
     );
@@ -537,14 +540,18 @@ export default function ServiceForm({
       serviceData.serviceDate
         ? new Date(serviceData.serviceDate).toISOString().split("T")[0]
         : serviceData.vehicleId?.serviceDate
-          ? new Date(serviceData.vehicleId.serviceDate).toISOString().split("T")[0]
+          ? new Date(serviceData.vehicleId.serviceDate)
+              .toISOString()
+              .split("T")[0]
           : "",
     );
     setNextServiceDate(
       serviceData.nextServiceDate
         ? new Date(serviceData.nextServiceDate).toISOString().split("T")[0]
         : serviceData.vehicleId?.nextServiceDate
-          ? new Date(serviceData.vehicleId.nextServiceDate).toISOString().split("T")[0]
+          ? new Date(serviceData.vehicleId.nextServiceDate)
+              .toISOString()
+              .split("T")[0]
           : "",
     );
 
@@ -601,7 +608,6 @@ export default function ServiceForm({
       return;
     setCustomerId(customerData._id);
 
-    // Look up decoupled vehicles instead of relying on the prop which is now devoid of embedded vehicles
     const cVehicles = filteredAllVehicles.filter(
       (v) =>
         v.customerId === customerData._id ||
@@ -651,7 +657,6 @@ export default function ServiceForm({
       return;
     }
 
-    // Extract decoupled vehicles for the selected customer
     const cVehicles = filteredAllVehicles.filter(
       (v) => v.customerId === id || v.customerId?._id === id,
     );
@@ -681,7 +686,6 @@ export default function ServiceForm({
           : "",
       );
 
-      // Look up any JobCard instructions to prepopulate serviceName explicitly
       const matchingJc = allJobCards.find(
         (jc) => jc.vehicleId?._id === v._id || jc.vehicleId === v._id,
       );
@@ -703,7 +707,6 @@ export default function ServiceForm({
           }
         }
 
-        // Inherit Staff Assignment if not editing existing service
         if (!isEditing) {
           setJobId(matchingJc._id);
           if (matchingJc.mechanicId) {
@@ -764,7 +767,6 @@ export default function ServiceForm({
         fuelType: v.fuelType || "",
       });
 
-      // ── Sync service dates from the selected vehicle ──
       setServiceDate(
         v.serviceDate
           ? new Date(v.serviceDate).toISOString().split("T")[0]
@@ -790,7 +792,6 @@ export default function ServiceForm({
           );
         }
 
-        // Inherit Staff Assignment if not editing existing service
         if (!isEditing) {
           setJobId(matchingJc._id);
           if (matchingJc.mechanicId) {
@@ -865,14 +866,12 @@ export default function ServiceForm({
     const u = [...selectedServices];
 
     if (catalogId === "manual_entry") {
-      // Logic for Manual/Other entry
       u[i] = {
         serviceCatalogId: "manual_entry",
-        name: "", // Reset name so user can type their own
+        name: "",
         priceAtTimeOfService: 0,
       };
     } else {
-      // Standard logic for items existing in your catalog
       const item = serviceCatalog.find((x) => x._id === catalogId);
       u[i] = item
         ? {
@@ -922,7 +921,6 @@ export default function ServiceForm({
       errs.chassisnumber = "VIN must be 17 characters";
     }
 
-    // Custom items validation
     selectedServices.forEach((s, i) => {
       if (s.serviceCatalogId === "manual_entry" && !s.name?.trim()) {
         errs[`service_${i}`] = "Service name required";
@@ -955,7 +953,6 @@ export default function ServiceForm({
     if (Object.keys(currentErrors).length > 0) {
       addToast("Please fix the errors in the form", "error");
 
-      // Determine which tab to switch to based on error keys
       const errKeys = Object.keys(currentErrors);
       if (
         errKeys.some((k) =>
@@ -971,11 +968,9 @@ export default function ServiceForm({
       return;
     }
 
-    // Always recalculate nextServiceDate from serviceDate (fixed 6-month rule)
     let finalNextServiceDate = "";
     if (serviceDate) {
       finalNextServiceDate = calculateNextServiceDate(serviceDate);
-      // Fallback in case helper returns empty
       if (!finalNextServiceDate) {
         const d = new Date(serviceDate);
         d.setMonth(d.getMonth() + 6);
@@ -1106,7 +1101,6 @@ export default function ServiceForm({
   const [activeDropdown, setActiveDropdown] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -1118,32 +1112,34 @@ export default function ServiceForm({
   }, []);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
       {/*TOP BAR*/}
-      <div className="shrink-0 bg-white px-3 border-b border-gray-100 sm:px-5">
+      <div className="shrink-0 bg-white dark:bg-gray-950 px-3 border-b border-gray-100 dark:border-gray-800 sm:px-5">
         {/* Row 1: Title + Status/Priority Badges */}
-        <div className="w-full pb-5 border-b border-gray-100/80">
+        <div className="w-full pb-5 border-b border-gray-100/80 dark:border-gray-800/80">
           <div className="flex flex-col gap-4 justify-between items-start lg:flex-row lg:items-center">
             {/* Left Column: Title & Subtitle */}
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold tracking-tight text-gray-900 wrap-break-words leading-tight">
+              <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100 wrap-break-words leading-tight">
                 {services.length > 0 ? (
                   services.map((s, i) => (
                     <span key={i}>
                       {capitalizeWords(s.trim())}
                       {i < services.length - 1 && (
-                        <span className="mx-2 font-light text-gray-300">+</span>
+                        <span className="mx-2 font-light text-gray-300 dark:text-gray-600">
+                          +
+                        </span>
                       )}
                     </span>
                   ))
                 ) : !readOnly ? (
-                  <span className="text-base font-normal italic text-gray-400">
+                  <span className="text-base font-normal italic text-gray-400 dark:text-gray-600">
                     Unnamed Service Record
                   </span>
                 ) : null}
               </h2>
 
-              <p className="mt-1 text-xs font-medium text-gray-400 font-mono">
+              <p className="mt-1 text-xs font-medium text-gray-400 dark:text-gray-500 font-mono">
                 {isEditing && serviceData._id
                   ? `ID: ${serviceData._id.slice(-8).toUpperCase()}`
                   : "Draft Record"}
@@ -1166,17 +1162,19 @@ export default function ServiceForm({
                           activeDropdown === "status" ? null : "status",
                         )
                       }
-                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm transition-all duration-150 hover:scale-[1.02] active:scale-95`}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-150 hover:scale-[1.02] active:scale-95"
                     >
-                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 tracking-wider">
                         Status:
                       </span>
                       <span
                         className={`w-2 h-2 rounded-full ${STATUS_META[status]?.dot || "bg-gray-400"}`}
                       />
-                      <span className="text-gray-900">{status}</span>
+                      <span className="text-gray-900 dark:text-gray-100">
+                        {status}
+                      </span>
                       <svg
-                        className={`w-3 h-3 text-gray-400 transition-transform ${activeDropdown === "status" ? "rotate-180" : ""}`}
+                        className={`w-3 h-3 text-gray-400 dark:text-gray-500 transition-transform ${activeDropdown === "status" ? "rotate-180" : ""}`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1191,7 +1189,7 @@ export default function ServiceForm({
                     </button>
 
                     {activeDropdown === "status" && (
-                      <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-100 rounded-xl shadow-xl z-50 p-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="absolute right-0 mt-1.5 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl dark:shadow-black/40 z-50 p-1 animate-in fade-in slide-in-from-top-1 duration-150">
                         {statusOptions
                           .filter(
                             (o) =>
@@ -1208,8 +1206,8 @@ export default function ServiceForm({
                               }}
                               className={`flex items-center justify-between w-full px-3 py-2 text-xs font-medium rounded-lg text-left transition-colors ${
                                 status === o
-                                  ? "bg-slate-50 text-slate-900 font-semibold"
-                                  : "text-gray-600 hover:bg-gray-50"
+                                  ? "bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-gray-100 font-semibold"
+                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                               }`}
                             >
                               <div className="flex items-center gap-2">
@@ -1220,7 +1218,7 @@ export default function ServiceForm({
                               </div>
                               {status === o && (
                                 <svg
-                                  className="w-3.5 h-3.5 text-slate-900"
+                                  className="w-3.5 h-3.5 text-slate-900 dark:text-gray-100"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -1240,12 +1238,14 @@ export default function ServiceForm({
                   </>
                 ) : (
                   <div
-                    className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-slate-50/50 ${STATUS_META[status]?.color || "border-gray-200"}`}
+                    className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-slate-50/50 dark:bg-slate-900/50 ${STATUS_META[status]?.color || "border-gray-200 dark:border-gray-700"}`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${STATUS_META[status]?.dot}`}
                     />
-                    <span className="text-gray-700">{status}</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {status}
+                    </span>
                   </div>
                 )}
               </div>
@@ -1261,17 +1261,19 @@ export default function ServiceForm({
                           activeDropdown === "priority" ? null : "priority",
                         )
                       }
-                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm transition-all duration-150 hover:scale-[1.02] active:scale-95`}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-150 hover:scale-[1.02] active:scale-95"
                     >
-                      <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 tracking-wider">
                         Priority:
                       </span>
                       <span
                         className={`w-2 h-2 rounded-full ${PRIORITY_META[priority]?.dot || "bg-gray-400"}`}
                       />
-                      <span className="text-gray-900">{priority}</span>
+                      <span className="text-gray-900 dark:text-gray-100">
+                        {priority}
+                      </span>
                       <svg
-                        className={`w-3 h-3 text-gray-400 transition-transform ${activeDropdown === "priority" ? "rotate-180" : ""}`}
+                        className={`w-3 h-3 text-gray-400 dark:text-gray-500 transition-transform ${activeDropdown === "priority" ? "rotate-180" : ""}`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1286,7 +1288,7 @@ export default function ServiceForm({
                     </button>
 
                     {activeDropdown === "priority" && (
-                      <div className="absolute right-0 mt-1.5 w-42 bg-white border border-gray-100 rounded-xl shadow-xl z-50 p-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="absolute right-0 mt-1.5 w-42 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl dark:shadow-black/40 z-50 p-1 animate-in fade-in slide-in-from-top-1 duration-150">
                         {priorityOptions.map((o) => (
                           <button
                             key={o}
@@ -1297,8 +1299,8 @@ export default function ServiceForm({
                             }}
                             className={`flex items-center justify-between w-full px-3 py-2 text-xs font-medium rounded-lg text-left transition-colors ${
                               priority === o
-                                ? "bg-amber-50/60 text-amber-900 font-semibold"
-                                : "text-gray-600 hover:bg-gray-50"
+                                ? "bg-amber-50/60 dark:bg-amber-900/20 text-amber-900 dark:text-amber-300 font-semibold"
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
                             <div className="flex items-center gap-2">
@@ -1309,7 +1311,7 @@ export default function ServiceForm({
                             </div>
                             {priority === o && (
                               <svg
-                                className="w-3.5 h-3.5 text-amber-800"
+                                className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -1329,12 +1331,14 @@ export default function ServiceForm({
                   </>
                 ) : (
                   <div
-                    className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-slate-50/50 ${PRIORITY_META[priority]?.color || "border-gray-200"}`}
+                    className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border bg-slate-50/50 dark:bg-slate-900/50 ${PRIORITY_META[priority]?.color || "border-gray-200 dark:border-gray-700"}`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${PRIORITY_META[priority]?.dot}`}
                     />
-                    <span className="text-gray-700">{priority}</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {priority}
+                    </span>
                   </div>
                 )}
               </div>
@@ -1346,12 +1350,12 @@ export default function ServiceForm({
         {(vehicle.licensePlate || customerId) && (
           <div className="flex flex-wrap gap-2 items-center mb-3 mt-3">
             {vehicle.licensePlate && (
-              <span className="text-sm font-mono uppercase text-gray-500 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md">
+              <span className="text-sm font-mono uppercase text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-2 py-1 rounded-md">
                 {vehicle.licensePlate}
               </span>
             )}
             {vehicle.make && (
-              <span className="text-sm text-gray-500 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md">
+              <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-2 py-1 rounded-md">
                 {vehicle.make} {vehicle.model}
               </span>
             )}
@@ -1359,7 +1363,7 @@ export default function ServiceForm({
         )}
 
         {/* Row 3: Tab Navigation */}
-        <div className="flex gap-0 -mb-px overflow-x-auto scrollbar-none">
+        <div className="flex gap-0 -mb-px overflow-x-auto scrollbar-none border-b border-slate-200 dark:border-slate-800">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -1367,15 +1371,16 @@ export default function ServiceForm({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1 px-2.5 py-2 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap relative sm:gap-1.5 sm:px-4 sm:py-2.5 sm:text-sm ${
+                className={`flex items-center gap-1 px-2.5 py-2 text-xs font-semibold border-b-2 transition-all whitespace-nowrap relative sm:gap-1.5 sm:px-4 sm:py-2.5 sm:text-sm focus-visible:outline-none focus-visible:text-slate-900 dark:focus-visible:text-slate-100 ${
                   isActive
-                    ? "border-gray-900 text-gray-900"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
+                    ? "border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100"
+                    : "border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
+
                 {tab.hasError && (
-                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white shadow-sm" />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 dark:bg-red-400 rounded-full ring-2 ring-white dark:ring-slate-900 shadow-sm" />
                 )}
               </button>
             );
@@ -1384,13 +1389,13 @@ export default function ServiceForm({
       </div>
 
       {/* ══ SCROLLABLE BODY ══════════════════════════════ */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-3 sm:px-5 py-4 sm:py-5 space-y-5 sm:space-y-6">
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-3 sm:px-5 py-4 sm:py-5 space-y-5 sm:space-y-6 bg-white dark:bg-gray-950">
         {/* ═══ TAB: SERVICE INFO ═══════════════════════ */}
         {activeTab === "info" && (
           <>
             {showConfig && (
               <Section title="Customer & Vehicle">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-gray-100 rounded-xl p-4 bg-gray-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-gray-100 dark:border-gray-800 rounded-xl p-4 bg-gray-100 dark:bg-gray-900">
                   <div>
                     <Label required error={errors.customerId}>
                       Customer
@@ -1448,8 +1453,8 @@ export default function ServiceForm({
                 </div>
 
                 {isBlocked && (
-                  <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 animate-pulse">
-                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+                  <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl flex items-center gap-3 animate-pulse">
+                    <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400 shrink-0">
                       <svg
                         className="w-6 h-6"
                         fill="none"
@@ -1465,10 +1470,10 @@ export default function ServiceForm({
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-black text-red-900 uppercase tracking-tight">
+                      <p className="text-sm font-black text-red-900 dark:text-red-300 uppercase tracking-tight">
                         Customer Blocked
                       </p>
-                      <p className="text-xs text-red-700 font-medium">
+                      <p className="text-xs text-red-700 dark:text-red-400 font-medium">
                         This customer has been restricted. You cannot create or
                         edit services for them until they are unblocked.
                       </p>
@@ -1477,12 +1482,12 @@ export default function ServiceForm({
                 )}
 
                 {vehicle.licensePlate && (
-                  <div className="mt-2 rounded-xl border border-gray-100 bg-gray-100 p-4">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-3">
+                  <div className="mt-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-100 dark:bg-gray-900 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mb-3">
                       Vehicle Details
                     </p>
                     {readOnly ? (
-                      /* ── READ-ONLY: Clean info panel, no grey disabled inputs ── */
+                      /* ── READ-ONLY: Clean info panel ── */
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                         {[
                           { label: "Make", value: vehicle.make },
@@ -1527,10 +1532,10 @@ export default function ServiceForm({
                           },
                         ].map(({ label, value }) => (
                           <div key={label}>
-                            <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-0.5">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">
                               {label}
                             </p>
-                            <p className="text-sm font-bold text-gray-800 capitalize">
+                            <p className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">
                               {value || "—"}
                             </p>
                           </div>
@@ -1572,7 +1577,6 @@ export default function ServiceForm({
                                 if (field === "serviceDate") {
                                   const newServiceDate = e.target.value;
                                   setServiceDate(newServiceDate);
-                                  // nextServiceDate is auto-calculated via useEffect
                                 } else if (!isMechanic) {
                                   handleVehicleField(field, e.target.value);
                                   if (errors[field])
@@ -1593,6 +1597,12 @@ export default function ServiceForm({
                               maxLength={
                                 field === "chassisnumber" ? 17 : undefined
                               }
+                              min={
+                                field === "serviceDate"
+                                  ? new Date().toISOString().split("T")[0]
+                                  : undefined
+                              }
+                              max={field === "serviceDate" ? 0 : undefined}
                             />
                           </div>
                         ))}
@@ -1611,11 +1621,11 @@ export default function ServiceForm({
                         : "Assign staff members to this service"
                     }
                   >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-gray-100 rounded-xl p-4 bg-gray-50">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-gray-100 dark:border-gray-800 rounded-xl p-4 bg-gray-50 dark:bg-gray-900">
                       <div>
                         <Label>Assigned Advisor</Label>
                         {jobId ? (
-                          <div className="px-4 py-2.5 bg-white capitalize border border-gray-100 rounded-xl text-sm font-bold text-indigo-600 flex items-center gap-2">
+                          <div className="px-4 py-2.5 bg-white dark:bg-gray-800 capitalize border border-gray-100 dark:border-gray-700 rounded-xl text-sm font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                             {availableAdvisors.find((a) => a._id === advisorId)
                               ?.name || "Not Assigned"}
@@ -1643,7 +1653,7 @@ export default function ServiceForm({
                       <div>
                         <Label>Assigned Mechanic</Label>
                         {jobId ? (
-                          <div className="px-4 py-2.5 bg-white border capitalize border-gray-100 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2">
+                          <div className="px-4 py-2.5 bg-white dark:bg-gray-800 border capitalize border-gray-100 dark:border-gray-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                             {availableMechanics.find(
                               (m) => m._id === mechanicId,
@@ -1694,10 +1704,12 @@ export default function ServiceForm({
                         ...requestedServices,
                       ])
                     }
-                    className="text-[12px] font-bold text-white bg-gray-900 rounded-lg px-3 py-2 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-95 transition-all duration-200 flex items-center gap-1.5"
+                    /* Updated className to perfectly match your catalog service button styling */
+                    className="text-[12px] font-bold text-zinc-100 bg-zinc-800 hover:bg-zinc-700 hover:shadow-lg transition-all flex items-center gap-1.5 rounded-lg px-3 py-2 active:scale-95 duration-200"
                   >
                     <svg
-                      className="w-3.5 h-3.5"
+                      /* Added text-zinc-100 class directly to the SVG */
+                      className="w-3.5 h-3.5 text-zinc-100"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -1709,17 +1721,17 @@ export default function ServiceForm({
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    Add task
+                    <span>Add task</span>
                   </button>
                 )
               }
             >
               <div className="space-y-2">
                 {!requestedServices.length && (
-                  <div className="flex flex-col items-center justify-center py-8 gap-2 bg-gray-100 rounded-xl">
-                    <div className="w-10 h-10 rounded-full  flex items-center justify-center">
+                  <div className="flex flex-col items-center justify-center py-8 gap-2 bg-gray-100 dark:bg-gray-900 rounded-xl">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-gray-300"
+                        className="w-5 h-5 text-gray-300 dark:text-gray-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1732,10 +1744,10 @@ export default function ServiceForm({
                         />
                       </svg>
                     </div>
-                    <p className="text-xs text-gray-400 font-medium">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                       No tasks added yet
                     </p>
-                    <p className="text-[11px] text-gray-300">
+                    <p className="text-[11px] text-gray-300 dark:text-gray-600">
                       Click "Add task" above to get started
                     </p>
                   </div>
@@ -1745,8 +1757,8 @@ export default function ServiceForm({
                     key={idx}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
                       task.status === "Done"
-                        ? "bg-emerald-50/60 border-emerald-100"
-                        : "bg-gray-100 border-gray-200 hover:border-gray-300"
+                        ? "bg-emerald-50/60 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800"
+                        : "bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                     }`}
                   >
                     <button
@@ -1758,7 +1770,7 @@ export default function ServiceForm({
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
                         task.status === "Done"
                           ? "bg-emerald-500 border-emerald-500"
-                          : "border-gray-300 hover:border-gray-500"
+                          : "border-gray-300 dark:border-gray-600 hover:border-gray-500 dark:hover:border-gray-400"
                       } ${readOnly ? "cursor-default" : ""}`}
                     >
                       {task.status === "Done" && (
@@ -1789,10 +1801,10 @@ export default function ServiceForm({
                       }}
                       placeholder="Describe task…"
                       disabled={readOnly || !canEditEverything}
-                      className={`flex-1 bg-transparent border-none outline-none text-sm capitalize font-medium placeholder:text-gray-300 ${
+                      className={`flex-1 bg-transparent border-none outline-none text-sm capitalize font-medium placeholder:text-gray-300 dark:placeholder:text-gray-600 ${
                         task.status === "Done"
-                          ? "line-through text-gray-400"
-                          : "text-gray-800"
+                          ? "line-through text-gray-400 dark:text-gray-500"
+                          : "text-gray-800 dark:text-gray-200"
                       } ${readOnly || !canEditEverything ? "cursor-not-allowed" : ""}`}
                     />
                     {!readOnly && canEditEverything && (
@@ -1803,7 +1815,7 @@ export default function ServiceForm({
                             requestedServices.filter((_, i) => i !== idx),
                           )
                         }
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 active:scale-90 transition-all duration-150 shrink-0"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-90 transition-all duration-150 shrink-0"
                         title="Remove task"
                       >
                         <svg
@@ -1825,7 +1837,7 @@ export default function ServiceForm({
                 ))}
               </div>
             </Section>
-            <hr />
+            <hr className="border-gray-100 dark:border-gray-800" />
             {/* Catalog services */}
             <Section
               title="Service Catalog Items"
@@ -1845,10 +1857,11 @@ export default function ServiceForm({
                         },
                       ])
                     }
-                    className="text-[12px] font-bold text-white bg-gray-900 rounded-lg px-3 py-2 hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-1.5"
+                    /* Removed dark: text overrides to ensure it's always high contrast */
+                    className="text-[12px] font-bold text-zinc-100 bg-zinc-800 hover:bg-zinc-700 hover:shadow-lg transition-all flex items-center gap-1.5 rounded-lg px-3 py-2 active:scale-95 duration-200"
                   >
                     <svg
-                      className="w-3.5 h-3.5"
+                      className="w-3.5 h-3.5 text-zinc-100"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -1860,17 +1873,17 @@ export default function ServiceForm({
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    Add catalog service
+                    <span>Add catalog service</span>
                   </button>
                 )
               }
             >
               <div className="space-y-3">
                 {!selectedServices.length && (
-                  <div className="flex flex-col items-center justify-center py-8 gap-2 bg-gray-100 rounded-xl p-4">
-                    <div className="w-10 h-10 rounded-full  flex items-center justify-center">
+                  <div className="flex flex-col items-center justify-center py-8 gap-2 bg-gray-100 dark:bg-gray-900 rounded-xl p-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-gray-300"
+                        className="w-5 h-5 text-gray-300 dark:text-gray-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1882,7 +1895,7 @@ export default function ServiceForm({
                         />
                       </svg>
                     </div>
-                    <p className="text-xs text-gray-400 font-medium">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                       No catalog services selected
                     </p>
                   </div>
@@ -1891,13 +1904,12 @@ export default function ServiceForm({
                 {selectedServices.map((item, idx) => (
                   <div
                     key={idx}
-                    className="space-y-2 bg-gray-100 rounded-xl relative p-4"
+                    className="space-y-2 bg-gray-100 dark:bg-gray-900 rounded-xl relative p-4"
                   >
                     <div className="flex items-start gap-2">
                       <div className="flex-1">
-                        {/* Service Dropdown */}
                         {readOnly ? (
-                          <div className="w-full bg-gray-50 capitalize border border-transparent rounded-lg px-3 py-2.5 text-sm font-bold text-gray-800">
+                          <div className="w-full bg-gray-50 dark:bg-gray-800 capitalize border border-transparent rounded-lg px-3 py-2.5 text-sm font-bold text-gray-800 dark:text-gray-200">
                             {item.name || "Service"}
                           </div>
                         ) : (
@@ -1923,7 +1935,7 @@ export default function ServiceForm({
                             ))}
                             <option
                               value="manual_entry"
-                              className="text-blue-600 font-bold"
+                              className="text-blue-600 dark:text-blue-400 font-bold"
                             >
                               + Custom / Other Service
                             </option>
@@ -1931,7 +1943,6 @@ export default function ServiceForm({
                         )}
                       </div>
 
-                      {/* Delete Action */}
                       {!readOnly && canEditEverything && (
                         <button
                           type="button"
@@ -1959,10 +1970,9 @@ export default function ServiceForm({
                         </button>
                       )}
                     </div>
-                    {/* Manual Name Entry - Only visible if "Other" is selected */}
                     {item.serviceCatalogId === "manual_entry" && (
-                      <div className="flex items-center gap-2 px-1 animate-in fade-in slide-in-from-top-1 duration-200 bg-white border border-gray-200 rounded-md">
-                        <div className="w-1.5 h-1.5 rounded-full bg-stone-900" />
+                      <div className="flex items-center gap-2 px-1 animate-in fade-in slide-in-from-top-1 duration-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                        <div className="w-1.5 h-1.5 rounded-full bg-stone-900 dark:bg-stone-300" />
                         <input
                           type="text"
                           placeholder="Enter custom service name..."
@@ -1975,21 +1985,19 @@ export default function ServiceForm({
                             }
                           }}
                           disabled={readOnly || !canEditEverything}
-                          className={`w-full text-sm py-1 outline-none! bg-transparent capitalize ${
+                          className={`w-full text-sm py-1 outline-none bg-transparent capitalize text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${
                             readOnly || !canEditEverything
-                              ? "border-b border-transparent text-gray-700 font-semibold cursor-default"
-                              : "border-b border-dashed border-gray-200 focus:border-blue-400"
+                              ? "border-b border-transparent text-gray-700 dark:text-gray-300 font-semibold cursor-default"
+                              : "border-b border-dashed border-gray-200 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-500"
                           }`}
                         />
                       </div>
                     )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-2 sm:gap-3 items-start sm:items-center">
-                      <div className="hidden sm:block" />{" "}
-                      {/* Spacer for grid alignment */}
-                      {/* Price Input */}
+                      <div className="hidden sm:block" />
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xs font-bold">
                           ₹
                         </span>
                         <input
@@ -2005,7 +2013,7 @@ export default function ServiceForm({
                             }
                           }}
                           disabled={readOnly || !canEditEverything}
-                          className="border border-gray-100 rounded-lg pl-7 pr-3 py-2 text-sm w-full bg-white font-bold outline-none focus:ring-1 focus:ring-gray-900 transition"
+                          className="border border-gray-100 dark:border-gray-700 rounded-lg pl-7 pr-3 py-2 text-sm w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-bold outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-400 transition disabled:opacity-60"
                         />
                       </div>
                     </div>
@@ -2014,7 +2022,7 @@ export default function ServiceForm({
               </div>
             </Section>
 
-            <hr />
+            <hr className="border-gray-100 dark:border-gray-800" />
             {/*Labour charge */}
             <Section
               title="Labour & Notes"
@@ -2030,10 +2038,12 @@ export default function ServiceForm({
                         { laborType: "", labourCost: 0 },
                       ])
                     }
-                    className="text-[12px] font-bold text-white bg-gray-900 rounded-lg px-3 py-2 hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-1.5"
+                    /* Applied the reliable high-contrast dark style */
+                    className="text-[12px] font-bold text-zinc-100 bg-zinc-800 hover:bg-zinc-700 hover:shadow-lg transition-all flex items-center gap-1.5 rounded-lg px-3 py-2 active:scale-95 duration-200"
                   >
                     <svg
-                      className="w-3.5 h-3.5"
+                      /* Set icon text color to match */
+                      className="w-3.5 h-3.5 text-zinc-100"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -2045,18 +2055,17 @@ export default function ServiceForm({
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    Add labour charge
+                    <span>Add labour charge</span>
                   </button>
                 )
               }
             >
               <div className="space-y-3">
-                {/* Empty State */}
                 {!labourCharges.length && (
-                  <div className="flex flex-col items-center justify-center py-8 gap-2 bg-gray-100 rounded-xl p-4">
+                  <div className="flex flex-col items-center justify-center py-8 gap-2 bg-gray-100 dark:bg-gray-900 rounded-xl p-4">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center">
                       <svg
-                        className="w-5 h-5 text-gray-300"
+                        className="w-5 h-5 text-gray-300 dark:text-gray-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -2068,25 +2077,23 @@ export default function ServiceForm({
                         />
                       </svg>
                     </div>
-                    <p className="text-xs text-gray-400 font-medium">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                       No labour charges added
                     </p>
                   </div>
                 )}
 
-                {/* Labour Rows */}
                 {labourCharges.map((item, idx) => (
                   <div
                     key={idx}
-                    className="space-y-2 bg-gray-100 rounded-xl relative p-4 animate-in fade-in zoom-in-95 duration-200"
+                    className="space-y-2 bg-gray-100 dark:bg-gray-900 rounded-xl relative p-4 animate-in fade-in zoom-in-95 duration-200"
                   >
                     <div className="flex items-start gap-2">
                       <div className="flex-1">
-                        {/* Labour Name Input */}
                         <div className="relative">
                           <input
                             type="text"
-                            placeholder="e.g. Clutch Repair"
+                            placeholder="e.g. Clutch Repair/Wheel Alignment/Oil Change etc."
                             value={item.laborType}
                             onChange={(e) => {
                               if (!readOnly && canEditEverything) {
@@ -2096,12 +2103,11 @@ export default function ServiceForm({
                               }
                             }}
                             disabled={readOnly || !canEditEverything}
-                            className="border border-gray-100 rounded-lg px-3 py-2 text-sm w-full bg-white outline-none focus:ring-1 focus:ring-gray-900 transition capitalize font-bold"
+                            className="border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-sm w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-600 outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-400 transition capitalize font-bold disabled:opacity-60"
                           />
                         </div>
                       </div>
 
-                      {/* Delete Action */}
                       {!readOnly && canEditEverything && (
                         <button
                           type="button"
@@ -2132,9 +2138,8 @@ export default function ServiceForm({
 
                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-2 sm:gap-3 items-start sm:items-center">
                       <div className="hidden sm:block" />
-                      {/* Price Input */}
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xs">
                           ₹
                         </span>
                         <input
@@ -2148,7 +2153,7 @@ export default function ServiceForm({
                             }
                           }}
                           disabled={readOnly || !canEditEverything}
-                          className="border border-gray-100 rounded-lg pl-7 pr-3 py-2 text-sm w-full bg-white font-bold outline-none focus:ring-1 focus:ring-gray-900 transition"
+                          className="border border-gray-100 dark:border-gray-700 rounded-lg pl-7 pr-3 py-2 text-sm w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-bold outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-400 transition disabled:opacity-60"
                         />
                       </div>
                     </div>
@@ -2158,7 +2163,8 @@ export default function ServiceForm({
                 {/* Footer: Total & Notes */}
                 <div className="mt-4 space-y-4">
                   {labourCharges.length > 0 && (
-                    <div className="flex justify-between items-center bg-gray-900 text-white p-4 rounded-xl shadow-lg">
+                    <div className="flex justify-between items-center bg-zinc-800 text-zinc-100 p-4 rounded-xl shadow-lg">
+                      {" "}
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         <span className="text-xs font-bold uppercase tracking-wider opacity-80">
@@ -2175,19 +2181,18 @@ export default function ServiceForm({
                     </div>
                   )}
 
-                  <hr />
+                  <hr className="border-gray-100 dark:border-gray-800" />
 
                   <Section
                     title="Mechanic Notes"
                     subtitle="Internal observations and recommendations"
                     action={
-                      // Optional: Add a "Clear" button or just leave empty to match the header style
                       !readOnly &&
                       notes && (
                         <button
                           type="button"
                           onClick={() => setNotes("")}
-                          className="text-[11px] font-bold text-gray-500 hover:text-red-500 transition-colors"
+                          className="text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                         >
                           Clear Notes
                         </button>
@@ -2195,10 +2200,9 @@ export default function ServiceForm({
                     }
                   >
                     <div className="space-y-3">
-                      {/* The Note Card */}
-                      <div className="space-y-2 bg-gray-100 rounded-xl relative p-4">
+                      <div className="space-y-2 bg-gray-100 dark:bg-gray-900 rounded-xl relative p-4">
                         <div className="flex flex-col gap-2">
-                          <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                          <label className="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">
                             Internal Comments
                           </label>
 
@@ -2211,15 +2215,20 @@ export default function ServiceForm({
                               disabled={readOnly}
                               placeholder="Describe any additional work done or parts that may need replacement soon..."
                               rows={4}
-                              className={`w-full border border-gray-100 rounded-lg px-4 py-3 text-sm bg-white font-medium 
+                              className={`w-full border rounded-lg px-4 py-3 text-sm font-medium 
                               outline-none transition-all resize-none leading-relaxed
-                              ${readOnly ? "text-gray-700 cursor-default border-transparent shadow-none" : "text-gray-900 shadow-sm focus:ring-1 focus:ring-gray-900 focus:border-transparent"}`}
+                              placeholder:text-gray-400 dark:placeholder:text-gray-600
+                              ${
+                                readOnly
+                                  ? "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-default border-transparent shadow-none"
+                                  : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-100 dark:border-gray-700 shadow-sm focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent"
+                              }`}
                             />
 
                             {!readOnly && (
                               <div className="absolute right-3 bottom-3 opacity-20 pointer-events-none">
                                 <svg
-                                  className="w-4 h-4 text-gray-900"
+                                  className="w-4 h-4 text-gray-900 dark:text-gray-100"
                                   fill="currentColor"
                                   viewBox="0 0 24 24"
                                 >
@@ -2231,10 +2240,9 @@ export default function ServiceForm({
                         </div>
                       </div>
 
-                      {/* Footer Info */}
                       {readOnly && !notes && (
-                        <div className="py-4 text-center border-2 border-dashed border-gray-100 rounded-xl">
-                          <p className="text-xs text-gray-400 font-medium">
+                        <div className="py-4 text-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl">
+                          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                             No notes recorded for this service.
                           </p>
                         </div>
@@ -2262,7 +2270,7 @@ export default function ServiceForm({
                       { partId: "", name: "", quantity: 1, priceAtTime: 0 },
                     ])
                   }
-                  className="text-[12px] font-bold text-white bg-gray-900 rounded-lg px-3 py-2 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-95 transition-all duration-200 flex items-center gap-1.5"
+                  className="text-[12px] font-bold text-zinc-100 bg-zinc-800 hover:bg-zinc-700 hover:shadow-lg transition-all flex items-center gap-1.5 rounded-lg px-3 py-2 active:scale-95 duration-200"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -2282,12 +2290,12 @@ export default function ServiceForm({
               )
             }
           >
-            <div className="space-y-2 bg-gray-100 rounded-xl p-4">
+            <div className="space-y-2 bg-gray-100 dark:bg-gray-900 rounded-xl p-4">
               {!partsUsed.length && (
                 <div className="flex flex-col items-center justify-center py-8 gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
                     <svg
-                      className="w-5 h-5 text-gray-300"
+                      className="w-5 h-5 text-gray-300 dark:text-gray-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -2300,10 +2308,10 @@ export default function ServiceForm({
                       />
                     </svg>
                   </div>
-                  <p className="text-xs text-gray-400 font-medium">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                     No parts added yet
                   </p>
-                  <p className="text-[11px] text-gray-300">
+                  <p className="text-[11px] text-gray-300 dark:text-gray-600">
                     Add parts from your inventory
                   </p>
                 </div>
@@ -2314,7 +2322,7 @@ export default function ServiceForm({
                   <>
                     <div
                       key={idx}
-                      className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-3"
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm space-y-3"
                     >
                       <div className="flex items-start gap-2">
                         <div className="flex-1">
@@ -2345,14 +2353,13 @@ export default function ServiceForm({
                             ))}
                             <option
                               value="manual_entry"
-                              className="text-blue-600 font-bold"
+                              className="text-blue-600 dark:text-blue-400 font-bold"
                             >
                               + Custom / Other Part
                             </option>
                           </StyledSelect>
                         </div>
 
-                        {/* Delete Action */}
                         {!readOnly && (
                           <button
                             type="button"
@@ -2361,15 +2368,7 @@ export default function ServiceForm({
                                 partsUsed.filter((_, i) => i !== idx),
                               )
                             }
-                            className="
-                             w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                             text-gray-500 dark:text-gray-400
-                             hover:text-red-600 dark:hover:text-red-400
-                             hover:bg-red-50 dark:hover:bg-red-900/20
-                              border border-transparent
-                             hover:border-red-200 dark:hover:border-red-800
-                              active:scale-90
-                              transition-all duration-200"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-200 dark:hover:border-red-800 active:scale-90 transition-all duration-200"
                             title="Remove part"
                           >
                             <svg
@@ -2388,10 +2387,9 @@ export default function ServiceForm({
                           </button>
                         )}
                       </div>
-                      {/* Custom Part Name Entry */}
                       {item.partId === "manual_entry" && (
-                        <div className="flex items-center gap-2 px-1 animate-in fade-in slide-in-from-top-1 duration-200 bg-white border border-gray-200 rounded-md mb-2 p-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                        <div className="flex items-center gap-2 px-1 animate-in fade-in slide-in-from-top-1 duration-200 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md mb-2 p-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                           <input
                             type="text"
                             placeholder="Enter custom part name..."
@@ -2404,13 +2402,13 @@ export default function ServiceForm({
                               }
                             }}
                             disabled={readOnly}
-                            className="w-full text-sm py-1 outline-none bg-transparent capitalize border-b border-dashed border-gray-200 focus:border-blue-400"
+                            className="w-full text-sm py-1 outline-none bg-transparent capitalize text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 border-b border-dashed border-gray-200 dark:border-gray-500 focus:border-blue-400 dark:focus:border-blue-400"
                           />
                         </div>
                       )}
                       <div className="grid grid-cols-2 sm:grid-cols-[100px_1fr] gap-3 items-center">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase sm:hidden">
+                          <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase sm:hidden">
                             Qty:
                           </span>
                           <FieldInput
@@ -2435,7 +2433,7 @@ export default function ServiceForm({
                         </div>
 
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200 text-xs">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200 dark:text-gray-600 text-xs">
                             ₹
                           </span>
                           <input
@@ -2452,9 +2450,9 @@ export default function ServiceForm({
                               }
                             }}
                             disabled={readOnly}
-                            className={`border border-gray-200 rounded-lg pl-6 pr-3 py-2.5 text-sm w-full bg-gray-50 focus:bg-white font-semibold outline-none transition ${
+                            className={`border border-gray-200 dark:border-gray-600 rounded-lg pl-6 pr-3 py-2.5 text-sm w-full bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 text-gray-900 dark:text-gray-100 font-semibold outline-none transition disabled:opacity-60 ${
                               item.partId === "manual_entry"
-                                ? "ring-1 ring-blue-100"
+                                ? "ring-1 ring-blue-100 dark:ring-blue-900"
                                 : ""
                             }`}
                           />
@@ -2479,12 +2477,12 @@ export default function ServiceForm({
           <p
             className={`text-sm font-medium transition-colors duration-200 ${
               isBlocked
-                ? "text-red-600 font-bold"
+                ? "text-red-600 dark:text-red-400 font-bold"
                 : isDisabled && !readOnly
-                  ? "text-red-500"
+                  ? "text-red-500 dark:text-red-400"
                   : !isDisabled && !readOnly
-                    ? "text-emerald-600"
-                    : "text-gray-400"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-gray-400 dark:text-gray-500"
             }`}
           >
             {readOnly
@@ -2505,13 +2503,12 @@ export default function ServiceForm({
       </div>
 
       {/* ══ FIXED FOOTER ═════════════════════════════════ */}
-      <div className="shrink-0 px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-end gap-4">
-        {/* Button Group */}
+      <div className="shrink-0 px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 flex items-center justify-end gap-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 text-sm font-semibold text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 active:scale-95 transition-all"
+            className="px-5 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 transition-all"
           >
             {readOnly ? "Close" : "Discard"}
           </button>
@@ -2523,11 +2520,10 @@ export default function ServiceForm({
               disabled={isDisabled}
               className={`group relative flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl border select-none transition-all duration-200 shadow-sm h-10 min-w-35 ${
                 isDisabled
-                  ? "bg-slate-100 text-slate-400 border-slate-200/60 cursor-not-allowed dark:bg-slate-900/40 dark:text-slate-600 dark:border-slate-800/80"
-                  : "bg-slate-900 text-white border-transparent hover:bg-slate-800 active:scale-[0.98] dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-700/60 cursor-not-allowed"
+                  : "bg-slate-800 text-slate-100 border-transparent hover:bg-blue-700 hover:shadow-lg active:scale-[0.98]"
               }`}
             >
-              {/* Smooth collapsing icon wrapper */}
               <div
                 className={`flex items-center justify-center transition-all duration-200 ${
                   isDisabled
@@ -2535,7 +2531,6 @@ export default function ServiceForm({
                     : "w-4 h-4 opacity-100 scale-100"
                 }`}
               >
-                {/* SVG: Inherits 'stroke-current' from parent button text color */}
                 <svg
                   className="w-4 h-4 shrink-0 stroke-current group-hover:scale-110 transition-transform duration-200"
                   fill="none"
@@ -2550,7 +2545,6 @@ export default function ServiceForm({
                 </svg>
               </div>
 
-              {/* Text Span: Cleanly inherits dark:text-slate-900 when active in dark mode */}
               <span className="whitespace-nowrap font-medium tracking-wide">
                 {isEditing ? "Save changes" : "Save Service Records"}
               </span>

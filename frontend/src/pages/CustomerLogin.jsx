@@ -5,15 +5,14 @@ import {
   Mail,
   ArrowLeft,
   CheckCircle2,
-  AlertCircle,
-  Loader2,
+  Clock,
   Car,
   Wrench,
-  Clock,
 } from "lucide-react";
 import axios from "axios";
 import { seedSessionHistory } from "../utils/authHistory";
 import { io } from "socket.io-client";
+import { FormInput, FormError, FormButton } from "../components/layout/Form/forms";
 
 const normalizeSocketUrl = (value) => {
   if (!value) return "";
@@ -279,55 +278,39 @@ export default function CustomerLogin() {
                   onSubmit={handleSendOTP}
                   className="space-y-5"
                 >
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="customer-email"
-                      className="block text-sm font-semibold text-slate-300"
-                    >
-                      Registered Email <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                      <input
-                        id="customer-email"
-                        type="email"
-                        required
-                        autoComplete="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="john@example.com"
-                        className="w-full h-12 pl-11 pr-4 rounded-xl border border-slate-800 bg-[#0e1117] text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                      />
-                    </div>
-                  </div>
+                  <FormInput
+                    id="customer-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="john@example.com"
+                    label="Registered Email"
+                    labelClassName="text-sm font-semibold text-slate-300 mb-1.5"
+                    leftIcon={<Mail className="w-4 h-4 text-slate-500" />}
+                    inputClassName="h-12 pl-11 pr-4 border-slate-800 bg-[#0e1117] text-slate-100 placeholder-slate-600 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
 
                   {error && (
-                    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/5 border border-rose-500/20">
-                      <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-                      <p className="text-sm text-rose-400 leading-normal">
-                        {error}
-                      </p>
-                    </div>
+                    <FormError
+                      message={error}
+                      isBanner
+                      className="bg-rose-500/5 border-rose-500/20 text-rose-400"
+                    />
                   )}
 
-                  <button
+                  <FormButton
                     id="customer-send-otp-btn"
                     type="submit"
-                    disabled={loading}
-                    className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-600/10 transition-all"
+                    loading={loading}
+                    loadingText="Sending code…"
+                    variant="blue"
+                    icon={<Mail className="w-4 h-4" />}
+                    size="lg"
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Sending code…</span>
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="w-4 h-4" />
-                        <span>Send Login Code</span>
-                      </>
-                    )}
-                  </button>
+                    Send Login Code
+                  </FormButton>
                 </motion.form>
               )}
 
@@ -354,52 +337,40 @@ export default function CustomerLogin() {
                     </p>
                   </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="customer-otp"
-                      className="block text-sm font-semibold text-slate-300"
-                    >
-                      One-Time Password <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      id="customer-otp"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      required
-                      value={otp}
-                      onChange={(e) =>
-                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                      }
-                      placeholder="000000"
-                      className="w-full h-14 rounded-xl border border-slate-800 bg-[#0e1117] text-center text-2xl font-black tracking-[0.6rem] text-slate-100 placeholder-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    />
-                  </div>
+                  <FormInput
+                    id="customer-otp"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    required
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="000000"
+                    label="One-Time Password"
+                    labelClassName="text-sm font-semibold text-slate-300 mb-1.5"
+                    inputClassName="h-14 border-slate-800 bg-[#0e1117] text-center text-2xl font-black tracking-[0.6rem] text-slate-100 placeholder-slate-800 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
 
                   {error && (
-                    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-500/5 border border-rose-500/20">
-                      <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" />
-                      <p className="text-sm text-rose-400 leading-normal">
-                        {error}
-                      </p>
-                    </div>
+                    <FormError
+                      message={error}
+                      isBanner
+                      className="bg-rose-500/5 border-rose-500/20 text-rose-400"
+                    />
                   )}
 
-                  <button
+                  <FormButton
                     id="customer-verify-btn"
                     type="submit"
-                    disabled={loading}
-                    className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    loading={loading}
+                    loadingText="Verifying identity…"
+                    variant="blue"
+                    size="lg"
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Verifying identity…</span>
-                      </>
-                    ) : (
-                      "Login Now"
-                    )}
-                  </button>
+                    Login Now
+                  </FormButton>
 
                   <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 mt-2">
                     <button
@@ -446,11 +417,11 @@ export default function CustomerLogin() {
                     }`}
                   >
                     {registrationStatus.status === "rejected" ? (
-                      <AlertCircle className="w-6 h-6" />
+                      <FormError message=" " isBanner className="bg-transparent border-none p-0 w-6 h-6 text-rose-400 shrink-0" />
                     ) : registrationStatus.status === "approved" ? (
-                      <CheckCircle2 className="w-6 h-6" />
+                      <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                     ) : (
-                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
                     )}
                   </div>
 
@@ -535,7 +506,7 @@ export default function CustomerLogin() {
           {/* Footer Routing Link Section */}
           <div className="px-6 sm:px-8 py-4 bg-[#11141a] border-t border-slate-800/60 text-center">
             <p className="text-xs text-slate-500">
-              Not registered yet?
+              Not registered yet?{" "}
               <Link
                 to="/portal"
                 className="font-semibold text-blue-400 hover:text-blue-300 transition-colors"

@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  Send,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Phone,
   Mail,
   ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
   Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { FormInput, FormButton, FormError } from "../../components/layout/Form/forms";
 
 const normalizeSocketUrl = (value) => {
   if (!value) return "";
@@ -34,7 +31,6 @@ const PortalLogin = ({ isOpen, onClose, prefilledEmail }) => {
   const [email, setEmail] = useState(prefilledEmail || "");
   const [otp, setOtp] = useState("");
   const [registrationStatus, setRegistrationStatus] = useState(null); // { status, reason, customerName, garageName }
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen && prefilledEmail) {
@@ -226,6 +222,7 @@ const PortalLogin = ({ isOpen, onClose, prefilledEmail }) => {
       setLoading(false);
     }
   };
+
   const Label = ({ children, required, hint, error }) => (
     <label
       className={`flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-widest mb-1.5 ${error ? "text-red-600" : "text-gray-900"}`}
@@ -283,37 +280,35 @@ const PortalLogin = ({ isOpen, onClose, prefilledEmail }) => {
                   >
                     Registered Email
                   </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      required
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="john@example.com"
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
-                    />
-                  </div>
+                  <FormInput
+                    required
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="john@example.com"
+                    leftIcon={<Mail className="w-5 h-5 text-slate-400" />}
+                    inputClassName="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
+                  />
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="text-sm font-bold">{error}</p>
-                  </div>
+                  <FormError
+                    message={error}
+                    isBanner
+                    className="bg-red-50 text-red-600 rounded-2xl border border-red-100"
+                  />
                 )}
 
-                <button
+                <FormButton
                   disabled={loading}
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition-all"
+                  variant="blue"
+                  loading={loading}
+                  loadingText=""
+                  className="py-5 rounded-3xl font-bold text-lg"
                 >
-                  {loading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    "Send Login Code"
-                  )}
-                </button>
+                  Send Login Code
+                </FormButton>
               </motion.form>
             )}
 
@@ -341,34 +336,34 @@ const PortalLogin = ({ isOpen, onClose, prefilledEmail }) => {
                 </div>
 
                 <div className="max-w-xs mx-auto">
-                  <input
+                  <FormInput
                     required
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="000000"
-                    className="w-full text-center text-4xl font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
+                    inputClassName="w-full text-center text-4xl font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
                   />
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="text-sm font-bold">{error}</p>
-                  </div>
+                  <FormError
+                    message={error}
+                    isBanner
+                    className="bg-red-50 text-red-600 rounded-2xl border border-red-100"
+                  />
                 )}
 
-                <button
+                <FormButton
                   disabled={loading}
                   type="submit"
-                  className="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-blue-600 transition-all shadow-xl shadow-slate-200"
+                  variant="dark"
+                  loading={loading}
+                  loadingText=""
+                  className="py-5 rounded-3xl font-bold text-lg shadow-xl shadow-slate-200"
                 >
-                  {loading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    "Login Now"
-                  )}
-                </button>
+                  Login Now
+                </FormButton>
 
                 <button
                   type="button"

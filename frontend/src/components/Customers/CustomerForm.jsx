@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useToast } from "../../context/ToastContext";
+import { FormInput, FormTextarea, FormLabel, FormRow } from "../layout/Form/forms";
 
 const STATUS_OPTIONS = ["Active", "Inactive", "Blocked"];
 
@@ -13,28 +14,6 @@ const STATUS_DOT = {
   Inactive: "bg-gray-400",
   Blocked: "bg-red-400",
 };
-
-const Label = ({ children, hint, required }) => (
-  <label className="block text-sm text-gray-700 mb-1">
-    {children}
-    {required && <span className="text-red-600 ml-0.5">*</span>}
-    {hint && <span className="text-xs text-gray-500 ml-1">({hint})</span>}
-  </label>
-);
-
-// ✅ FIXED: Explicitly extracting and attaching the native name prop
-const Input = ({ className = "", error, name, ...props }) => (
-  <div>
-    <input
-      name={name}
-      className={`w-full border ${error ? "border-red-500 bg-red-50" : "border-gray-200"} rounded-lg px-3 py-2 text-sm text-gray-900 bg-white
-        placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 ${error ? "focus:ring-red-200" : "focus:ring-gray-300"}
-        disabled:bg-gray-100 disabled:text-gray-900 transition ${className}`}
-      {...props}
-    />
-    {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
-  </div>
-);
 
 const Divider = () => <hr className="border-gray-100" />;
 
@@ -59,10 +38,8 @@ export default function CustomerForm({
 
   const [errors, setErrors] = useState({});
 
-  // ✅ FIXED: Completely safe conditional properties map
   useEffect(() => {
     if (!customerData) {
-      // Clear form back to pristine defaults if data is removed or reset
       setFormData({
         name: "",
         email: "",
@@ -233,44 +210,41 @@ export default function CustomerForm({
           <p className="text-xs font-medium text-gray-900 uppercase tracking-wider mb-3">
             Identity & contact
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-gray-100 rounded-xl p-3 sm:p-4">
-            <div>
-              <Label required>Full name</Label>
-              <Input
-                name="name"
-                value={formData.name}
-                onChange={(e) =>
-                  handleInputChange("name", capitalizeWords(e.target.value))
-                }
-                placeholder="Enter your name"
-                disabled={isReadOnly}
-                error={errors.name}
-              />
-            </div>
-            <div>
-              <Label required>Email</Label>
-              <Input
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="xyz@gmail.com"
-                disabled={isReadOnly}
-                error={errors.email}
-              />
-            </div>
-            <div>
-              <Label required>Phone</Label>
-              <Input
-                name="phone"
-                value={formData.phone}
-                onChange={handlePhone}
-                placeholder="+91 00000 00000"
-                disabled={isReadOnly}
-                error={errors.phone}
-              />
-            </div>
-          </div>
+          <FormRow cols={3} gap="gap-3 sm:gap-4" className="bg-gray-100 rounded-xl p-3 sm:p-4">
+            <FormInput
+              name="name"
+              value={formData.name}
+              onChange={(e) =>
+                handleInputChange("name", capitalizeWords(e.target.value))
+              }
+              placeholder="Enter your name"
+              disabled={isReadOnly}
+              error={errors.name}
+              label="Full name"
+              required
+            />
+            <FormInput
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              placeholder="xyz@gmail.com"
+              disabled={isReadOnly}
+              error={errors.email}
+              label="Email"
+              required
+            />
+            <FormInput
+              name="phone"
+              value={formData.phone}
+              onChange={handlePhone}
+              placeholder="+91 00000 00000"
+              disabled={isReadOnly}
+              error={errors.phone}
+              label="Phone"
+              required
+            />
+          </FormRow>
         </div>
 
         <Divider />
@@ -281,41 +255,35 @@ export default function CustomerForm({
             Address
           </p>
           <div className="space-y-4 bg-gray-100 rounded-xl p-4">
-            <div>
-              <Label>Street Address</Label>
-              <Input
-                name="street"
-                value={formData.address.street}
+            <FormInput
+              name="street"
+              value={formData.address.street}
+              onChange={setAddress}
+              placeholder="Iskcon"
+              disabled={isReadOnly}
+              error={errors.street}
+              label="Street Address"
+            />
+            <FormRow cols={2}>
+              <FormInput
+                name="city"
+                value={formData.address.city}
                 onChange={setAddress}
-                placeholder="Iskcon"
+                placeholder="Ahmedabad"
                 disabled={isReadOnly}
-                error={errors.street}
+                error={errors.city}
+                label="City"
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>City</Label>
-                <Input
-                  name="city"
-                  value={formData.address.city}
-                  onChange={setAddress}
-                  placeholder="Ahmedabad"
-                  disabled={isReadOnly}
-                  error={errors.city}
-                />
-              </div>
-              <div>
-                <Label>ZIP / Postal</Label>
-                <Input
-                  name="zip"
-                  value={formData.address.zip}
-                  onChange={setAddress}
-                  placeholder="380001"
-                  disabled={isReadOnly}
-                  error={errors.zip}
-                />
-              </div>
-            </div>
+              <FormInput
+                name="zip"
+                value={formData.address.zip}
+                onChange={setAddress}
+                placeholder="380001"
+                disabled={isReadOnly}
+                error={errors.zip}
+                label="ZIP / Postal"
+              />
+            </FormRow>
           </div>
         </div>
 
@@ -327,19 +295,15 @@ export default function CustomerForm({
             Notes
           </p>
           <div className="space-y-4 bg-gray-100 rounded-xl p-4">
-            <div>
-              <Label>Internal notes</Label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => handleInputChange("notes", e.target.value)}
-                disabled={isReadOnly}
-                rows={4}
-                placeholder="Preferences, history, or context..."
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white
-                  placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300
-                  disabled:bg-gray-50 disabled:text-gray-400 resize-none transition"
-              />
-            </div>
+            <FormTextarea
+              value={formData.notes}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
+              disabled={isReadOnly}
+              rows={4}
+              placeholder="Preferences, history, or context..."
+              label="Internal notes"
+              textareaClassName="border-gray-200 focus:ring-2 focus:ring-gray-300 disabled:bg-gray-50 disabled:text-gray-400"
+            />
           </div>
         </div>
 

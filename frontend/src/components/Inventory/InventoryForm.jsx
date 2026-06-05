@@ -4,6 +4,7 @@ import NumberInput from "../../components/UI/NumberInput";
 import SelectDropdown from "../../components/UI/SelectDropdown";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { FormTextarea } from "../layout/Form/forms";
 
 const CATEGORY_OPTIONS = [
   "Engine",
@@ -421,12 +422,13 @@ export default function InventoryForm({
         {activeTab === "notes" && (
           <Section title="Notes">
             <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
-              <textarea
+              <FormTextarea
                 value={formData.notes}
                 onChange={(e) => set("notes", e.target.value)}
                 rows={6}
                 readOnly={readOnly}
-                className={`w-full rounded-xl p-3 text-sm outline-none transition resize-none
+                disabled={readOnly}
+                textareaClassName={`w-full rounded-xl p-3 text-sm outline-none transition resize-none
                 border border-slate-300 dark:border-slate-600
               bg-white dark:bg-slate-900
               text-slate-900 dark:text-slate-100

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../components/UI/Modal";
 import { Minus, Plus, Check } from "lucide-react";
+import { FormSelect, FormButton, FormLabel } from "../layout/Form/forms";
 
 export default function StockUpdateModal({
   isOpen,
@@ -56,7 +57,7 @@ export default function StockUpdateModal({
       >
         {/* Header Section */}
         <div className="px-6 pt-6 pb-4 border-b bg-gray-800">
-          <h2 className="text-lg font-bold capitalize text-gray-800 truncate">
+          <h2 className="text-lg font-bold capitalize text-gray-850 truncate">
             {itemData?.name || "Select Item"}
           </h2>
           <div className="flex justify-between items-center mt-1">
@@ -70,9 +71,9 @@ export default function StockUpdateModal({
         {/* Adjustment Controls */}
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-gray-400 mb-3">
+            <FormLabel className="block text-[11px] uppercase tracking-wider font-bold text-gray-400 mb-3">
               Adjustment Quantity
-            </label>
+            </FormLabel>
 
             <div className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-2xl p-2 shadow-inner">
               <button
@@ -109,21 +110,18 @@ export default function StockUpdateModal({
           </div>
 
           {/* Reason Selection */}
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider font-bold text-gray-400 mb-2">
-              Reason for Change
-            </label>
-            <select
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
-            >
-              <option value="Manual Adjustment">Manual Adjustment</option>
-              <option value="Restock">New Shipment / Restock</option>
-              <option value="Damaged Goods">Damaged / Scrapped</option>
-              <option value="Correction">Inventory Correction</option>
-            </select>
-          </div>
+          <FormSelect
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            label="Reason for Change"
+            labelClassName="block text-[11px] uppercase tracking-wider font-bold text-gray-400 mb-2"
+            selectClassName="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+          >
+            <option value="Manual Adjustment">Manual Adjustment</option>
+            <option value="Restock">New Shipment / Restock</option>
+            <option value="Damaged Goods">Damaged / Scrapped</option>
+            <option value="Correction">Inventory Correction</option>
+          </FormSelect>
 
           {/* New Stock Preview */}
           <div
@@ -140,13 +138,15 @@ export default function StockUpdateModal({
 
         {/* Form Footer Actions */}
         <div className="flex p-2 gap-2 bg-gray-50 border-t">
-          <button
+          <FormButton
             type="button"
             onClick={onClose}
+            variant="secondary"
             className="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-950/50 hover:text-gray-700 rounded-xl transition-all"
+            fullWidth={false}
           >
             Cancel
-          </button>
+          </FormButton>
           <button
             type="submit"
             disabled={isInvalid || isSubmitting}

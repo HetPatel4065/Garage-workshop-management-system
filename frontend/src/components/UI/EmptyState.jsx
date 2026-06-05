@@ -17,19 +17,19 @@ const EmptyState = ({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center space-y-5 rounded-4xl border border-dashed border-slate-700/50 bg-slate-950/90 px-8 py-16 text-center text-slate-100 shadow-[0_40px_120px_rgba(15,23,42,0.24)] transition-colors dark:border-slate-600/70 dark:bg-slate-950 ${className}`}
+      className={`flex flex-col items-center justify-center space-y-5 rounded-4xl border border-dashed border-slate-200 bg-slate-50 px-8 py-16 text-center text-slate-900 shadow-[0_40px_120px_rgba(15,23,42,0.12)] transition-colors dark:border-slate-600/70 dark:bg-slate-950/90 dark:text-slate-100 ${className}`}
     >
-      <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-900/90 border border-slate-700/70">
+      <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-100 border border-slate-200 dark:bg-slate-900/90 dark:border-slate-700/70">
         {iconElement}
       </div>
       <div className="space-y-3 max-w-xl">
         {title && (
-          <p className="text-xl font-black tracking-tight text-white">
+          <p className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
             {title}
           </p>
         )}
         {description && (
-          <p className="mx-auto text-sm leading-6 text-slate-400">
+          <p className="mx-auto text-sm leading-6 text-slate-500 dark:text-slate-400">
             {description}
           </p>
         )}
