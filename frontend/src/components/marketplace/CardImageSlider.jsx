@@ -6,26 +6,25 @@ import { FaCar } from "react-icons/fa";
 const VARIANT_CONFIG = {
   portal: {
     wrapper:
-      "relative aspect-video w-full overflow-hidden bg-slate-900 group/slider",
+      "relative aspect-video w-full overflow-hidden bg-slate-900 group/slider select-none rounded-xl shadow-md border border-slate-200/10",
     btnLeft:
-      "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 z-10 cursor-auto",
+      "absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 text-white hover:bg-slate-950/80 hover:scale-105 active:scale-95 opacity-0 group-hover/slider:opacity-100 transition-all duration-300 z-30 cursor-pointer backdrop-blur-xs",
     btnRight:
-      "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-300 z-10 cursor-auto",
+      "absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 text-white hover:bg-slate-950/80 hover:scale-105 active:scale-95 opacity-0 group-hover/slider:opacity-100 transition-all duration-300 z-30 cursor-pointer backdrop-blur-xs",
     chevronSize: "w-4 h-4",
-    // Flush counter layout for top right corner
     counter:
-      "absolute top-0 right-0 rounded-bl-md bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-white backdrop-blur-xs z-10",
+      "absolute top-3 right-3 bg-slate-950/70 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold tracking-wider text-slate-200 rounded-md shadow-sm border border-white/10 tabular-nums",
   },
   listing: {
-    wrapper: "relative w-full h-full overflow-hidden bg-slate-900 group/slider",
+    wrapper:
+      "relative w-full h-full overflow-hidden bg-slate-900 group/slider select-none",
     btnLeft:
-      "absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-250 z-10 cursor-auto",
+      "absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-slate-950/60 text-white hover:bg-slate-950/80 hover:scale-105 active:scale-95 opacity-0 group-hover/slider:opacity-100 transition-all duration-250 z-30 cursor-pointer backdrop-blur-xs",
     btnRight:
-      "absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/60 opacity-0 group-hover/slider:opacity-100 transition-opacity duration-250 z-10 cursor-auto",
+      "absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-slate-950/60 text-white hover:bg-slate-950/80 hover:scale-105 active:scale-95 opacity-0 group-hover/slider:opacity-100 transition-all duration-250 z-30 cursor-pointer backdrop-blur-xs",
     chevronSize: "w-3.5 h-3.5",
-    // Flush counter layout for top right corner
     counter:
-      "absolute top-0 right-0 rounded-bl-md bg-black/60 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-white backdrop-blur-xs z-10",
+      "absolute top-0 right-0 bg-slate-950/70 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold tracking-wider text-slate-200 rounded-bl-lg border-l border-b border-white/10 tabular-nums",
   },
 };
 
@@ -55,16 +54,16 @@ export default function CardImageSlider({
   if (!photos || photos.length === 0) {
     if (variant === "portal") {
       return (
-        <div className="w-full aspect-video bg-slate-100 flex items-center justify-center text-slate-400">
-          <FaCar className="w-12 h-12" />
+        <div className="w-full aspect-video bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex items-center justify-center text-slate-400 dark:text-zinc-600 transition-colors">
+          <FaCar className="w-12 h-12 opacity-80" />
         </div>
       );
     }
 
     return (
-      <div className="w-full h-full bg-slate-100 dark:bg-zinc-800 flex flex-col items-center justify-center text-slate-400 dark:text-zinc-650">
-        <EmptyIcon className="w-8 h-8 opacity-45" />
-        <span className="text-[10px] font-bold mt-1 tracking-wider uppercase">
+      <div className="w-full h-full bg-slate-100 dark:bg-zinc-900 flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500 border border-slate-200/50 dark:border-zinc-800/50 transition-colors">
+        <EmptyIcon className="w-8 h-8 opacity-40 animate-pulse" />
+        <span className="text-[10px] font-black mt-2 tracking-widest uppercase">
           No photos uploaded
         </span>
       </div>
@@ -91,11 +90,12 @@ export default function CardImageSlider({
 
   return (
     <div className={styles.wrapper}>
-      {/* Slider Core Image */}
+      {/* 1. Underlying Image Layer */}
       <img
         src={imgSrc}
-        alt={`${title} - Photo ${safeIdx + 1}`}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover/slider:scale-103"
+        alt={`${title || "Car Image"} - Photo ${safeIdx + 1}`}
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/slider:scale-105 z-10"
+        loading="lazy"
         onError={(e) => {
           e.currentTarget.onerror = null;
           e.currentTarget.src =
@@ -103,28 +103,43 @@ export default function CardImageSlider({
         }}
       />
 
-      {/* Watermark Element */}
-      {watermarkText && (
-        <div className="absolute left-3 bottom-3 rounded-md bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.25em] text-white shadow-xl shadow-black/20 backdrop-blur-sm mix-blend-difference">
-          {watermarkText}
-        </div>
-      )}
-
-      {/* Conditional Arrow Controls & Top Corner Image Counter */}
-      {photos.length > 1 && (
-        <>
-          <button type="button" onClick={prevSlide} className={styles.btnLeft}>
-            <ChevronLeft className={styles.chevronSize} />
-          </button>
-
-          <button type="button" onClick={nextSlide} className={styles.btnRight}>
-            <ChevronRight className={styles.chevronSize} />
-          </button>
-
-          {/* Numerical Counter Indicator in top right corner */}
+      {/* 2. Interface Elements Overlay Matrix */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        {/* Top-Right Area: Image Counter */}
+        {photos.length > 1 && (
           <div className={styles.counter}>
             {safeIdx + 1} / {photos.length}
           </div>
+        )}
+
+        {/* Bottom-Left Area: Clear Watermark Pillar */}
+        {watermarkText && (
+          <div className="absolute left-3 bottom-3 rounded-lg bg-slate-950/80 px-3 py-1.5 text-[10px] font-bold tracking-[0.15em] text-white shadow-xl backdrop-blur-md border border-white/10 max-w-[50%] truncate select-none">
+            {watermarkText}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Interactive Navigation Elements Layer */}
+      {photos.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={prevSlide}
+            className={styles.btnLeft}
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className={styles.chevronSize} />
+          </button>
+
+          <button
+            type="button"
+            onClick={nextSlide}
+            className={styles.btnRight}
+            aria-label="Next photo"
+          >
+            <ChevronRight className={styles.chevronSize} />
+          </button>
         </>
       )}
     </div>

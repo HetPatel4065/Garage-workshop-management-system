@@ -385,7 +385,7 @@ const PortalDashboard = ({ garageSettings }) => {
 
         {/* Admin Preview Mode sub-bar (Renders inside header container to fix empty vertical layout gaps) */}
         {isStaffPortalSession && (
-          <div className="bg-amber-50 dark:bg-amber-950/20 border-t border-amber-200 dark:border-amber-900/30 px-4 sm:px-6 py-2.5 transition-colors duration-300">
+          <div className="relative w-full bg-linear-to-r from-indigo-100 via-indigo-100/80 to-indigo-200/50 dark:from-indigo-950/40 dark:via-indigo-950/60 dark:to-indigo-900/20 border-b border-amber-400/80 dark:border-amber-900/80 px-4 sm:px-6 py-2 transition-all duration-300 shadow-sm backdrop-blur-sm">
             <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-3">
               {/* Left: Indicator Badge */}
               <div className="flex items-center gap-2 text-amber-800 dark:text-amber-400 shrink-0">

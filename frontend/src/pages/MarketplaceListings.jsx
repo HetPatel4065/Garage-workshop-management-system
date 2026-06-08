@@ -4,6 +4,7 @@ import { useToast } from "../context/ToastContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
+  RefreshCw,
   Plus,
   Tag,
   Trash2,
@@ -1038,7 +1039,7 @@ export default function MarketplaceListings({
       }
     />
   ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
       {filteredListings.map((item) => (
         <motion.div
           key={item._id}
@@ -1057,7 +1058,7 @@ export default function MarketplaceListings({
         >
           <div className="h-48 w-full bg-slate-100 dark:bg-zinc-800 relative overflow-hidden">
             <CardImageSlider photos={item.photos} title={item.title} />
-            <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-20">
+            <div className="absolute top-1 left-1.5 flex flex-col gap-1.5 z-20">
               {(() => {
                 const status = normalizeListingStatus(item.status);
                 if (status === "Sold") {
@@ -1089,7 +1090,7 @@ export default function MarketplaceListings({
               })()}
             </div>
             {isCustomer && token && (
-              <div className="absolute top-4 right-4 z-20" data-wishlist-btn>
+              <div className="absolute top-8 left-2 z-20" data-wishlist-btn>
                 <WishlistHeart
                   vehicleId={item._id}
                   wishlisted={!!item.isWishlisted}
@@ -1101,7 +1102,7 @@ export default function MarketplaceListings({
                 />
               </div>
             )}
-            <span className="absolute bottom-4 right-4 bg-zinc-950/80 backdrop-blur-md px-3.5 py-1.5 text-xs font-black text-emerald-400 rounded-xl shadow-md border border-zinc-800 z-20">
+            <span className="absolute top-7 right-0.5 bg-zinc-950/80 backdrop-blur-md px-3.5 py-1.5 text-xs font-black text-emerald-400 rounded-xl shadow-md border border-zinc-800 z-20">
               ₹{item.price.toLocaleString("en-IN")}
             </span>
           </div>
@@ -1125,7 +1126,7 @@ export default function MarketplaceListings({
                   <span className="inline-block text-[11px] uppercase font-bold text-slate-600 dark:text-zinc-300 bg-slate-50 dark:bg-zinc-800/30 px-2 py-1 rounded-lg border border-slate-100 dark:border-zinc-800">
                     {item.rtoCode ? item.rtoCode : ""}
                     {item.rtoCode && (item.regState || item.rtoState)
-                      ? " • "
+                      ? " | "
                       : ""}
                     {item.regState || item.rtoState || ""}
                   </span>
@@ -1332,8 +1333,10 @@ export default function MarketplaceListings({
           <>
             <>
               {/* Combined Layout Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:col-span-3">
+              {/* Outer Layout Matrix */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 items-stretch">
+                {/* Left: Tab Items Collection (Spans 3 columns on desktop, handles its own rows perfectly) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 lg:col-span-3 items-start content-start">
                   {listingFilterTabs.map((tab) => (
                     <ListingFilterTab
                       key={tab.value}
@@ -1347,21 +1350,23 @@ export default function MarketplaceListings({
                   ))}
                 </div>
 
-                {/* Sold Revenue Card - Takes up the 4th column slot on desktop */}
-                <div className="flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm h-full w-full">
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center shrink-0">
-                    <IndianRupeeIcon
-                      size={16}
-                      className="text-amber-600 dark:text-amber-400"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 leading-none mb-1">
-                      Sold Revenue
-                    </p>
-                    <p className="text-xl font-black text-slate-800 dark:text-white leading-none">
-                      ₹ {estimatedRevenue.toLocaleString("en-IN")}
-                    </p>
+                {/* Right: Sold Revenue Card (Spans 1 column, height matches the entire row natively) */}
+                <div className="lg:col-span-1">
+                  <div className="flex items-center gap-3 px-4 py-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm h-full w-full min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center shrink-0">
+                      <IndianRupeeIcon
+                        size={16}
+                        className="text-amber-600 dark:text-amber-400"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 leading-none mb-1.5 truncate">
+                        Sold Revenue
+                      </p>
+                      <p className="text-xl font-black text-slate-800 dark:text-white leading-none truncate select-all tabular-nums">
+                        ₹ {estimatedRevenue.toLocaleString("en-IN")}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
