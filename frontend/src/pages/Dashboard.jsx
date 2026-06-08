@@ -87,7 +87,7 @@ export default function Dashboard() {
     },
   });
   const [inspections, setInspections] = useState([]);
-  const [timeRange, setTimeRange] = useState("5");
+  const [timeRange, setTimeRange] = useState();
   const [loading, setLoading] = useState(true);
   const [showCharts, setShowCharts] = useState(false);
 
@@ -484,25 +484,32 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 mt-4">
-                {data.serviceBreakdown.map((item, i) => (
+              <div className="mt-4 grid grid-cols-1 gap-2 xs:grid-cols-2">
+                {data.serviceBreakdown.map((item) => (
                   <div
                     key={item.name}
-                    className="p-2 rounded-xl bg-slate-50 border border-slate-100"
+                    className="rounded-xl border border-slate-100 bg-slate-50 p-2"
                   >
-                    <div className="flex items-center gap-1.5 mb-0.5 text-[10px] font-bold text-slate-500 uppercase">
+                    <div className="mb-0.5 flex items-center gap-1.5 text-[10px] font-bold uppercase text-slate-500">
+                      {/* Status Dot */}
                       <div
-                        className="w-1.5 h-1.5 rounded-full"
+                        className="h-2 w-2 rounded-full"
                         style={{
                           backgroundColor:
                             STATUS_COLORS[item.name] || DEFAULT_COLOR,
                         }}
                       />
-                      <span className="truncate">{item.name}</span>
+
+                      {/* Service Name */}
+                      <span className="truncate  text-[12px] font-black uppercase text-slate-700">
+                        {item.name} {" : "}
+                      </span>
+
+                      {/* Service Value (Pushed to the right) */}
+                      <span className="ml-1 text-[12px] font-black text-slate-800">
+                        {item.value}
+                      </span>
                     </div>
-                    <span className="text-sm font-black text-slate-800">
-                      {item.value}
-                    </span>
                   </div>
                 ))}
               </div>

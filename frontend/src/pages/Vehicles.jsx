@@ -453,7 +453,7 @@ export default function Vehicles() {
         </div>
       </div>
       {/* Total count */}
-      <div className="mb-4 ml-1">
+      <div className="mt-4 border-t border-gray-100 p-4">
         <p className="text-sm font-medium text-slate-500">
           Total Vehicles:{" "}
           <span className="text-slate-900 font-bold">

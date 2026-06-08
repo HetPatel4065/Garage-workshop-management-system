@@ -1049,7 +1049,7 @@ export default function MarketplaceListings({
           onClick={(e) => {
             if (e.target.closest("[data-wishlist-btn]")) return;
             if (isCustomer) {
-              navigate(`/portal/marketplace/${item._id}`);
+              navigate(`/portal/marketplace/preownedcars/${item._id}`);
             }
           }}
           className={`bg-white dark:bg-zinc-900 rounded-md border border-slate-200/80 dark:border-zinc-800 overflow-hidden flex flex-col shadow-xs group hover:border-emerald-300 dark:hover:border-zinc-700 transition-all duration-300 ${
@@ -1057,54 +1057,62 @@ export default function MarketplaceListings({
           }`}
         >
           <div className="h-48 w-full bg-slate-100 dark:bg-zinc-800 relative overflow-hidden">
-            <CardImageSlider photos={item.photos} title={item.title} />
+            <CardImageSlider
+              photos={item.photos}
+              title={item.title}
+              watermarkText={
+                item.sellerName ||
+                item.garageName ||
+                user?.businessName ||
+                user?.garageName ||
+                item.brand ||
+                item.title
+              }
+            />
             <div className="absolute top-1 left-1.5 flex flex-col gap-1.5 z-20">
               {(() => {
                 const status = normalizeListingStatus(item.status);
                 if (status === "Sold") {
                   return (
-                    <span className="px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full shadow-md bg-zinc-800 text-zinc-300 border border-zinc-700/50">
+                    <span className="px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-full shadow-md bg-zinc-800 text-zinc-300 border border-zinc-700/50">
                       Sold
                     </span>
                   );
                 }
                 if (status === "Booked") {
                   return (
-                    <span className="px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full shadow-md bg-amber-500 text-zinc-950">
+                    <span className="px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-full shadow-md bg-amber-500 text-zinc-950">
                       Booked
                     </span>
                   );
                 }
                 if (status === "Hidden") {
                   return (
-                    <span className="px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full shadow-md bg-slate-700 text-slate-100">
+                    <span className="px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-full shadow-md bg-slate-700 text-slate-100">
                       Hidden
                     </span>
                   );
                 }
                 return (
-                  <span className="px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-full shadow-md bg-emerald-500 text-white">
+                  <span className="px-4 py-1.5 text-[9.5px] font-black uppercase tracking-wider rounded-full shadow-md bg-emerald-500 text-white">
                     Available
                   </span>
                 );
               })()}
             </div>
             {isCustomer && token && (
-              <div className="absolute top-8 left-2 z-20" data-wishlist-btn>
+              <div className="absolute top-1 right-1.5 z-20" data-wishlist-btn>
                 <WishlistHeart
                   vehicleId={item._id}
                   wishlisted={!!item.isWishlisted}
                   token={token}
                   portalPreviewCustomerId={portalPreviewCustomerId}
                   onChange={handleWishlistCardChange}
-                  size="sm"
+                  size="md"
                   alwaysVisible
                 />
               </div>
             )}
-            <span className="absolute top-7 right-0.5 bg-zinc-950/80 backdrop-blur-md px-3.5 py-1.5 text-xs font-black text-emerald-400 rounded-xl shadow-md border border-zinc-800 z-20">
-              ₹{item.price.toLocaleString("en-IN")}
-            </span>
           </div>
 
           <div className="p-5 flex-1 flex flex-col justify-between">
@@ -1113,11 +1121,20 @@ export default function MarketplaceListings({
                 <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">
                   {item.brand}
                 </span>
-                <span>{item.regYear}</span>
+                <span className="text-slate-900 dark:text-white font-mono">
+                  {item.regYear}
+                </span>
               </div>
-              <h3 className="font-extrabold text-lg capitalize text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors leading-snug line-clamp-1">
-                {item.title}
-              </h3>
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <h3 className="text-lg font-extrabold capitalize transition-colors duration-200 text-slate-900 dark:text-white leading-snug line-clamp-2">
+                  {item.title}
+                </h3>
+
+                <p className="text-lg font-black text-blue-600 dark:text-blue-400 whitespace-nowrap shrink-0">
+                  ₹{item.price.toLocaleString("en-IN")}
+                </p>
+              </div>
+
               <p className="text-sm font-bold capitalize text-slate-500 dark:text-zinc-400 mt-2 line-clamp-2 leading-relaxed">
                 {item.description}
               </p>
@@ -1179,7 +1196,7 @@ export default function MarketplaceListings({
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    navigate(`/portal/marketplace/${item._id}`);
+                    navigate(`/portal/marketplace/preownedcars/${item._id}`);
                   }}
                   className="w-full px-4 py-3 bg-slate-300 hover:bg-slate-500 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 rounded-xl text-sm font-bold transition-all border border-transparent flex items-center justify-center gap-2 cursor-auto shadow-sm active:scale-[0.98]"
                 >
@@ -1442,38 +1459,47 @@ export default function MarketplaceListings({
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 items-justify min-h-7.5 mt-2.5">
-                {Object.entries(filters).map(([key, value]) => {
-                  if (!value || key === "search") return null;
+              {Object.entries(filters).some(
+                ([key, value]) => value && key !== "search",
+              ) && (
+                <div className="flex flex-wrap gap-2 items-center mt-2.5">
+                  {Object.entries(filters).map(([key, value]) => {
+                    if (!value || key === "search") return null;
 
-                  let label = value;
-                  if (key === "priceMin") label = `Min ₹${value}`;
-                  if (key === "priceMax") label = `Max ₹${value}`;
-                  if (key === "yearMin") label = `From ${value}`;
-                  if (key === "yearMax") label = `To ${value}`;
-                  if (key === "kmMin") label = `Min ${value} km`;
-                  if (key === "kmMax") label = `Max ${value} km`;
+                    let label = value;
+                    if (key === "priceMin")
+                      label = `Min ₹${Number(value).toLocaleString("en-IN")}`;
+                    if (key === "priceMax")
+                      label = `Max ₹${Number(value).toLocaleString("en-IN")}`;
+                    if (key === "yearMin") label = `From ${value}`;
+                    if (key === "yearMax") label = `To ${value}`;
+                    if (key === "kmMin")
+                      label = `Min ${Number(value).toLocaleString("en-IN")} km`;
+                    if (key === "kmMax")
+                      label = `Max ${Number(value).toLocaleString("en-IN")} km`;
 
-                  if (value.includes(",")) {
-                    label = `${key}: ${value.split(",").length} selected`;
-                  }
+                    if (typeof value === "string" && value.includes(",")) {
+                      label = `${key}: ${value.split(",").length} selected`;
+                    }
 
-                  return (
-                    <div
-                      key={key}
-                      className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 dark:border-blue-800/50"
-                    >
-                      <span>{label}</span>
-                      <button
-                        onClick={() => clearFilter(key)}
-                        className="hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded-full p-0.5 transition-colors cursor-auto"
+                    return (
+                      <div
+                        key={key}
+                        className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 dark:border-blue-900/60"
                       >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+                        <span className="capitalize">{label}</span>
+                        <button
+                          type="button"
+                          onClick={() => clearFilter(key)}
+                          className="hover:bg-blue-200 dark:hover:bg-blue-800/60 rounded-full p-0.5 transition-colors cursor-pointer flex items-center justify-center text-blue-500 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-slate-50 dark:bg-zinc-950/50 min-h-0">

@@ -400,7 +400,7 @@ export default function GarageSidebar({
           "bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800",
           "overflow-hidden transition-[width] duration-300 ease-in-out",
           "shadow-xl lg:shadow-none",
-          isDesktop ? (collapsed ? "w-20" : "w-70") : "w-[85vw] max-w-80",
+          isDesktop ? (collapsed ? "w-20" : "w-68") : "w-[85vw] max-w-80",
         ].join(" ")}
       >
         {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -483,7 +483,7 @@ export default function GarageSidebar({
         {/* ── Main navigation ──────────────────────────────────────────────────── */}
         <nav
           ref={sidebarRef}
-          className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 scrollbar-thin"
+          className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-2.5 scrollbar-thin"
         >
           {NAV_SECTIONS.map((section, sIdx) => {
             const visibleItems = section.items.filter((item) => {

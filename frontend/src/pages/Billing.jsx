@@ -448,66 +448,81 @@ export default function Billing() {
       </div>
 
       {/* 📑 Tab Switcher */}
-      <div className="flex gap-6 mb-8 border-b border-gray-100 overflow-x-auto scrollbar-hide">
-        {[
-          {
-            id: "unbilled",
-            label: "Unbilled",
-            count: unbilledServices.length,
-            color: "amber",
-          },
-          {
-            id: "current",
-            label: "Current Invoices",
-            count: currentInvoices.length,
-            color: "blue",
-          },
-          {
-            id: "history",
-            label: "History",
-            count: historyInvoices.length,
-            color: "emerald",
-          },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`pb-4 text-sm font-bold transition-all relative group
-              ${
-                activeTab === tab.id
-                  ? tab.id === "unbilled"
-                    ? "text-amber-500"
-                    : tab.id === "current"
-                      ? "text-blue-500"
-                      : "text-emerald-500"
-                  : "text-gray-400 hover:text-gray-900"
-              }`}
-          >
-            <span className="flex items-center gap-2">
-              {tab.label}
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px]
-                ${
-                  activeTab === tab.id
-                    ? tab.id === "unbilled"
-                      ? "bg-amber-100"
-                      : tab.id === "current"
-                        ? "bg-blue-100"
-                        : "bg-emerald-100"
-                    : "bg-gray-100"
+      <div className="relative mb-8 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex gap-6 overflow-x-auto scrollbar-hide">
+          {[
+            {
+              id: "unbilled",
+              label: "Unbilled",
+              count: unbilledServices.length,
+              colorClass: {
+                textActive: "text-amber-600 dark:text-amber-400",
+                bgActive:
+                  "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300",
+                underline: "bg-amber-600 dark:bg-amber-400",
+              },
+            },
+            {
+              id: "current",
+              label: "Current Invoices",
+              count: currentInvoices.length,
+              colorClass: {
+                textActive: "text-blue-600 dark:text-blue-400",
+                bgActive:
+                  "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300",
+                underline: "bg-blue-600 dark:bg-blue-400",
+              },
+            },
+            {
+              id: "history",
+              label: "History",
+              count: historyInvoices.length,
+              colorClass: {
+                textActive: "text-emerald-600 dark:text-emerald-400",
+                bgActive:
+                  "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300",
+                underline: "bg-emerald-600 dark:bg-emerald-400",
+              },
+            },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`pb-4 text-sm font-bold transition-all duration-300 relative group cursor-pointer shrink-0 outline-none ${
+                  isActive
+                    ? tab.colorClass.textActive
+                    : "text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
-                {tab.count}
-              </span>
-            </span>
-            {activeTab === tab.id && (
-              <div
-                className={`absolute bottom-0 left-0 right-0 h-1 rounded-full
-                ${tab.id === "unbilled" ? "bg-amber-600" : tab.id === "current" ? "bg-blue-600" : "bg-emerald-600"}`}
-              />
-            )}
-          </button>
-        ))}
+                <span className="flex items-center gap-2">
+                  {tab.label}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-all duration-300 ${
+                      isActive
+                        ? tab.colorClass.bgActive
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </span>
+
+                {/* Underline Bar Component with Smooth Width & Opacity Animations */}
+                <div
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300 transform origin-left ${
+                    tab.colorClass.underline
+                  } ${
+                    isActive
+                      ? "opacity-100 scale-x-100"
+                      : "opacity-0 scale-x-0 group-hover:opacity-40 group-hover:scale-x-70"
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 📦 Content Area */}

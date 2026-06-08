@@ -271,16 +271,16 @@ export default function Inventory() {
               <button
                 onClick={handleAdd}
                 className="
-            flex items-center gap-2
-            px-5 py-3
-            bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-700
-            text-white
-            rounded-2xl
-            text-sm font-bold
-            transition-all duration-300
-            shadow-md hover:shadow-xl
-            h-10.5
-          "
+                  flex items-center gap-2
+                  px-5 py-3
+                  bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-700
+                  text-white
+                  rounded-2xl
+                  text-sm font-bold
+                  transition-all duration-300
+                  shadow-md hover:shadow-xl
+                  h-10.5
+                "
               >
                 <Plus size={17} />
                 Add Items

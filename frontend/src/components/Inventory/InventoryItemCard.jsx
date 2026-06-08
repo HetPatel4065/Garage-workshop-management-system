@@ -122,7 +122,7 @@ export default function InventoryItemCard({
           <>
             <button
               onClick={() => onUpdateStock(item)}
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-amber-700 dark:bg-amber-950/50 bg-amber-50 border border-amber-100 rounded-xl hover:bg-amber-100 transition active:scale-95"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border border-amber-100 dark:border-amber-900/60 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/40 transition active:scale-95"
             >
               <svg
                 className="w-3.5 h-3.5"

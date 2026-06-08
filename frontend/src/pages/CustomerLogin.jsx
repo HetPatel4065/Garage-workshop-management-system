@@ -353,7 +353,7 @@ export default function CustomerLogin() {
                     }
                     placeholder="000000"
                     label="One-Time Password"
-                    labelClassName="text-sm font-semibold text-slate-300 mb-1.5"
+                    labelClassName="text-md font-semibold text-slate-300 mb-1.5"
                     inputClassName="h-14 border-slate-800 bg-[#0e1117] text-center text-2xl font-black tracking-[0.6rem] text-slate-100 placeholder-slate-800 focus:ring-blue-500/20 focus:border-blue-500"
                   />
 

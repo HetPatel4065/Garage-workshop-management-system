@@ -137,25 +137,26 @@ export default function StockUpdateModal({
         </div>
 
         {/* Form Footer Actions */}
-        <div className="flex p-2 gap-2 bg-gray-50 border-t">
+        <div className="flex p-2 gap-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
           <FormButton
             type="button"
             onClick={onClose}
             variant="secondary"
-            className="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-950/50 hover:text-gray-700 rounded-xl transition-all"
+            className="flex-1 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl transition-all"
             fullWidth={false}
           >
             Cancel
           </FormButton>
-          <button
+
+          <FormButton
             type="submit"
             disabled={isInvalid || isSubmitting}
-            className={`flex-2 py-3 text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] ${
-              isInvalid
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+            className={`flex-2 py-3 text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
+              isInvalid || isSubmitting
+                ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 pointer-events-none shadow-none"
                 : amount > 0
-                  ? "bg-emerald-500 text-white  hover:bg-emerald-600"
-                  : "bg-red-500 text-white hover:bg-red-600"
+                  ? "bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-400 text-white shadow-lg cursor-pointer active:scale-[0.98]"
+                  : "bg-red-500 hover:bg-red-600 dark:hover:bg-red-400 text-white shadow-lg cursor-pointer active:scale-[0.98]"
             }`}
           >
             {isSubmitting ? (
@@ -170,7 +171,7 @@ export default function StockUpdateModal({
                     : `Remove ${Math.abs(amount)} Units`}
               </>
             )}
-          </button>
+          </FormButton>
         </div>
       </form>
     </Modal>

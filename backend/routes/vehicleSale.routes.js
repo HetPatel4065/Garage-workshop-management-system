@@ -62,11 +62,11 @@ const upload = multer({
 // 🏪 PUBLIC / CUSTOMER MARKETPLACE ROUTES (optional auth enriches wishlist data)
 router.get("/marketplace", optionalAuth, getMarketplaceListings);
 router.get(
-  "/marketplace/:id/wishlist-count",
+  "/marketplace/preownedcars/:id/wishlist-count",
   optionalAuth,
   getMarketplaceWishlistCount,
 );
-router.get("/marketplace/:id", optionalAuth, getMarketplaceVehicleDetails);
+router.get("/marketplace/preownedcars/:id", optionalAuth, getMarketplaceVehicleDetails);
 
 const uploadPhotos = upload.fields([
   { name: "photos", maxCount: 100 },

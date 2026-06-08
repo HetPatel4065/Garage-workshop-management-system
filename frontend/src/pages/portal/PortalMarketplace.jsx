@@ -381,7 +381,9 @@ const PortalMarketplace = () => {
                     onClick={(e) => {
                       // Only navigate if the click is NOT on the wishlist heart
                       if (e.target.closest("[data-wishlist-btn]")) return;
-                      navigate(`/portal/marketplace/${vehicle._id}`);
+                      navigate(
+                        `/portal/marketplace/preownedcars/${vehicle._id}`,
+                      );
                     }}
                     className="group flex flex-col bg-white border border-slate-200/60 rounded-3xl overflow-hidden shadow-xs hover:-translate-y-1.5 hover:border-blue-200 hover:shadow-md transition-all duration-300 cursor-auto relative"
                   >

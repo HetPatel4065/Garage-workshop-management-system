@@ -116,7 +116,7 @@ const GarageDetailsModal = ({ isOpen, onClose, garage, onRegister }) => {
 
           {/* Garage Name & Badge */}
           <div className="text-center w-full">
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight mb-2 break-words">
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight mb-2 wrap-break-words">
               {garage.garageName}
             </h3>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[11px] font-black uppercase tracking-wider">

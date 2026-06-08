@@ -1,5 +1,11 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./context/AuthContext";
 import { getDashboardRoute, canAccessCustomerPortal } from "./utils/roles";
@@ -17,7 +23,38 @@ import StaffSignup from "./pages/StaffSignup";
 import Unauthorized from "./pages/Unauthorized";
 import ProtectedRoute from "./context/ProtectedRoutes";
 import PortalHome from "./pages/portal/PortalHome";
-import PortalDashboard from "./pages/portal/PortalDashboard";
+
+const DashboardLayout = lazy(() => import("./pages/portal/DashboardLayout"));
+const PortalDashboardOverview = lazy(() =>
+  import("./pages/portal/DashboardLayout").then((module) => ({
+    default: module.PortalDashboardOverview,
+  })),
+);
+const PortalDashboardVehicles = lazy(() =>
+  import("./pages/portal/DashboardLayout").then((module) => ({
+    default: module.PortalDashboardVehicles,
+  })),
+);
+const PortalDashboardJobCards = lazy(() =>
+  import("./pages/portal/DashboardLayout").then((module) => ({
+    default: module.PortalDashboardJobCards,
+  })),
+);
+const PortalDashboardServices = lazy(() =>
+  import("./pages/portal/DashboardLayout").then((module) => ({
+    default: module.PortalDashboardServices,
+  })),
+);
+const PortalDashboardInvoices = lazy(() =>
+  import("./pages/portal/DashboardLayout").then((module) => ({
+    default: module.PortalDashboardInvoices,
+  })),
+);
+const PortalDashboardPreOwnedCars = lazy(() =>
+  import("./pages/portal/DashboardLayout").then((module) => ({
+    default: module.PortalDashboardPreOwnedCars,
+  })),
+);
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -58,6 +95,11 @@ const PageTransition = ({ children }) => (
     {children}
   </motion.div>
 );
+
+const MarketplaceRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/portal/marketplace/preownedcars/${id}`} replace />;
+};
 
 function PublicOnlyRoute({ children }) {
   const { user, token, loading, isVerified } = useAuth();
@@ -305,16 +347,69 @@ function App() {
               element={
                 hasPortalAccess ? (
                   <PageTransition>
-                    <PortalDashboard />
+                    <DashboardLayout />
                   </PageTransition>
                 ) : (
                   <Navigate to="/portal" replace />
                 )
               }
-            />
+            >
+              <Route
+                index
+                element={
+                  <PageTransition>
+                    <PortalDashboardOverview />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="vehicles"
+                element={
+                  <PageTransition>
+                    <PortalDashboardVehicles />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="job-cards"
+                element={
+                  <PageTransition>
+                    <PortalDashboardJobCards />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="services"
+                element={
+                  <PageTransition>
+                    <PortalDashboardServices />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="invoices"
+                element={
+                  <PageTransition>
+                    <PortalDashboardInvoices />
+                  </PageTransition>
+                }
+              />
+              <Route
+                path="pre-owned-cars"
+                element={
+                  <PageTransition>
+                    <PortalDashboardPreOwnedCars />
+                  </PageTransition>
+                }
+              />
+            </Route>
 
             <Route
               path="/portal/marketplace/:id"
+              element={<MarketplaceRedirect />}
+            />
+            <Route
+              path="/portal/marketplace/preownedcars/:id"
               element={
                 hasPortalAccess ? (
                   <PageTransition>

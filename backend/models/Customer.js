@@ -36,17 +36,8 @@ const customerSchema = new mongoose.Schema(
     },
     isVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
-    vehicleNumber: {
-      type: String,
-      trim: true,
-    },
-    vehicleModel: {
-      type: String,
-      trim: true,
-    },
-    tags: [String],
     notes: String,
     customerId: {
       type: String,

@@ -392,22 +392,37 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     Verify your email
                   </h4>
                   <p className="text-slate-500">
-                    We've sent a 6-digit code to your email address
+                    We've sent a 6-digit code to your email address{" "}
                     <span className="font-bold text-slate-900">
                       {formData.email}
                     </span>
                   </p>
                 </div>
 
-                <div className="max-w-xs mx-auto">
+                {/* Adjusted container to contain the medium large styled input nicely */}
+                <div className="max-w-sm mx-auto px-4">
                   <FormInput
                     required
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     maxLength={6}
                     name="otp"
                     value={formData.otp}
-                    onChange={handleInputChange}
                     placeholder="000000"
-                    inputClassName="w-full h-15 text-center text-5xl placeholder:text-3xl placeholder:text-center font-black tracking-[1rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
+                    onChange={(e) => {
+                      const cleanValue = e.target.value.replace(/\D/g, "");
+                      handleInputChange({
+                        target: { name: "otp", value: cleanValue },
+                      });
+                    }}
+                    // Balanced size and letter spacing to fit beautifully in the input box
+                    inputClassName="w-full text-center font-black tracking-[0.6rem] pl-[0.6rem] py-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-3xl transition-all outline-none"
+                    style={{
+                      fontSize: "2.25rem", // Perfectly balanced size between too small and huge
+                      lineHeight: "1.2",
+                      height: "auto",
+                    }}
                   />
                 </div>
 
@@ -424,8 +439,6 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                     disabled={loading}
                     type="submit"
                     variant="dark"
-                    loading={loading}
-                    loadingText=""
                     className="py-5 rounded-3xl font-bold text-lg shadow-xl shadow-slate-200"
                   >
                     Verify & Register

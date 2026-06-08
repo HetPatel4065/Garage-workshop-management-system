@@ -134,9 +134,9 @@ const SectionHeader = ({ icon: Icon, title, accent = "blue", action }) => {
     <div className="flex items-left justify-between mb-5 pb-4 border-b border-slate-100 dark:border-zinc-800">
       <div className="flex items-center gap-2.5">
         <div
-          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${colors[accent]}`}
+          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${colors[accent]}`}
         >
-          <Icon className="w-4 h-4" />
+          <Icon className="w-5 h-5" />
         </div>
         <h3 className="font-black text-slate-900 dark:text-white text-base tracking-tight">
           {title}
@@ -795,7 +795,7 @@ const PortalVehicleDetails = () => {
     setError("");
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/${id}`,
+        `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/preownedcars/${id}`,
         { headers: authHeaders() },
       );
       if (res.data.success) {
@@ -820,7 +820,7 @@ const PortalVehicleDetails = () => {
     if (document.hidden) return;
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/${id}/wishlist-count`,
+        `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/preownedcars/${id}/wishlist-count`,
         { headers: authHeaders() },
       );
       if (res.data.success && typeof res.data.count === "number") {
@@ -897,7 +897,7 @@ const PortalVehicleDetails = () => {
       setTimeout(async () => {
         try {
           const res = await axios.get(
-            `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/${id}/wishlist-count`,
+            `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/preownedcars/${id}/wishlist-count`,
             { headers: authHeaders() },
           );
           if (res.data.success && typeof res.data.count === "number") {
@@ -1032,16 +1032,13 @@ const PortalVehicleDetails = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
-              onClick={() => navigate("/portal/dashboard")}
+              onClick={() => navigate("/portal/dashboard/pre-owned-cars")}
               className="shrink-0 w-9 h-9 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
               title="Back to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div className="min-w-0 hidden sm:block">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 flex items-center gap-1">
-                <CarFront className="w-3 h-3" /> Marketplace
-              </p>
               <p className="text-sm capitalize font-black text-slate-900 dark:text-white truncate leading-tight">
                 {vehicle.title}
               </p>

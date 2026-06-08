@@ -115,91 +115,7 @@ export const approveRequestedCustomer = async (req, res) => {
       return res.status(400).json({ error: "Request already approved" });
     }
 
-    // 1. Check if Customer already exists by phone OR email
-    let existingCustomer = await Customer.findOne({
-      ownerId,
-      $or: [{ phone: request.phone }, { email: request.email }]
-    });
-
-    let customerId;
-    if (existingCustomer) {
-      customerId = existingCustomer._id;
-      console.log("Linking to existing customer:", existingCustomer._id);
-    } else {
-      try {
-        let newCustomer = null;
-        let lastError = null;
-
-        for (let attempt = 0; attempt < 3; attempt += 1) {
-          try {
-            const nextCustomerId =
-              await Customer.generateNextCustomerId(ownerId);
-            newCustomer = await Customer.create({
-              name: request.customerName,
-              phone: request.phone,
-              email: request.email,
-              address: { street: request.location },
-              ownerId,
-              customerId: nextCustomerId,
-              status: "Pending",
-              isVerified: true,
-            });
-            break;
-          } catch (custErr) {
-            lastError = custErr;
-            if (custErr?.code !== 11000) {
-              throw custErr;
-            }
-          }
-        }
-
-        if (!newCustomer) {
-          throw lastError || new Error("Could not assign a unique customer ID");
-        }
-
-        customerId = newCustomer._id;
-        console.log("Created new customer:", customerId);
-      } catch (custErr) {
-        console.error("Customer Creation Failed:", custErr);
-
-        if (custErr?.code === 11000) {
-          const field = Object.keys(custErr.keyPattern || {})[0] || "field";
-          return res.status(400).json({
-            error:
-              field.includes("phone") || field.includes("email")
-                ? "A customer with this phone or email already exists for your garage."
-                : "Could not assign a unique customer ID. Please try again.",
-          });
-        }
-
-        return res.status(400).json({
-          error: `Failed to create customer record: ${custErr.message}`,
-        });
-      }
-    }
-
-    // 2. Create Vehicle
-    const modelParts = (request.vehicleModel || "").trim().split(/\s+/);
-    const make = modelParts[0] || "Unknown";
-    const model = modelParts.length > 1 ? modelParts.slice(1).join(" ") : "Generic";
-
-    try {
-      await Vehicle.create({
-        garageId: ownerId,
-        customerId: customerId,
-        customerName: request.customerName,
-        make: make.trim(),
-        model: model.trim(),
-        year: new Date().getFullYear(),
-        licensePlate: request.vehicleNumber.trim(),
-        status: "With Owner"
-      });
-      console.log("Vehicle created successfully");
-    } catch (vehErr) {
-      console.error("Vehicle Creation Failed:", vehErr);
-      return res.status(400).json({ error: `Failed to create vehicle record: ${vehErr.message}` });
-    }
-    // 3. Update Requested Customer
+    // Parse appointment date if provided
     let validDate = new Date();
     if (inspectionDate) {
       const parsed = new Date(inspectionDate);
@@ -208,6 +124,7 @@ export const approveRequestedCustomer = async (req, res) => {
       }
     }
 
+    // Only update the request status and appointment — do NOT create Customer or Vehicle
     const updatedRequest = await RequestedCustomer.findOneAndUpdate(
       { _id: req.params.id, ownerId },
       {
@@ -222,11 +139,8 @@ export const approveRequestedCustomer = async (req, res) => {
     if (!updatedRequest) {
       return res.status(404).json({ error: "Failed to update request status" });
     }
-    
-    // Assign back to request for the email logic below
-    Object.assign(request, updatedRequest.toObject());
 
-    // 4. Send Welcome Email & Notification (Async)
+    // Send Welcome Email (Async)
     try {
       const owner = await Owner.findById(ownerId);
       await sendWelcomeEmail(
@@ -242,17 +156,22 @@ export const approveRequestedCustomer = async (req, res) => {
     }
 
     // 🔔 Emit to customer for real-time status update
-    emitToCustomer(request.email, "registration_update", {
-      status: "approved",
-      appointmentDate: validDate,
-      appointmentTime: inspectionTime || "10:00 AM",
-      customerName: request.customerName,
-      garageName: owner?.garageName || "The Garage"
-    });
+    try {
+      const owner = await Owner.findById(ownerId);
+      emitToCustomer(request.email, "registration_update", {
+        status: "approved",
+        appointmentDate: validDate,
+        appointmentTime: inspectionTime || "10:00 AM",
+        customerName: request.customerName,
+        garageName: owner?.garageName || "The Garage"
+      });
+    } catch (emitErr) {
+      console.error("Non-blocking Emit Error:", emitErr);
+    }
 
-    res.status(200).json({ message: "Customer approved and moved to active records", request });
+    res.status(200).json({ message: "Request approved with appointment scheduled", request: updatedRequest });
   } catch (err) {
-    console.error("FULL APPROVAL ERROR:", err);
+    console.error("APPROVE REQUEST ERROR:", err);
     res.status(500).json({ error: err.message || "Internal server error during approval" });
   }
 };

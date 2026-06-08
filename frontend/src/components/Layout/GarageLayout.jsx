@@ -83,10 +83,7 @@ function AdminPreviewBanner({ garage, onExit }) {
       {/* Right Side: Action Button */}
       <button
         onClick={onExit}
-        /* FIXED: Adjusted white transparent background to dark/light adaptive variants and cursor-pointer */
-        className="px-3 py-1 rounded-lg text-xs font-bold transition-all active:scale-95 uppercase tracking-wider shrink-0 self-start sm:self-auto cursor-pointer border
-      bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-sm
-      dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
+        className="self-start px-3 py-1 text-xs font-bold uppercase tracking-wider transition-all rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95 shrink-0 sm:self-auto cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white"
       >
         Exit Preview
       </button>
@@ -191,7 +188,7 @@ export default function GarageLayout({ children }) {
       {/* Desktop sidebar spacer */}
       <div
         className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out ${
-          collapsed ? "w-20" : "w-70"
+          collapsed ? "w-20" : "w-68"
         }`}
       />
 

@@ -225,7 +225,7 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
         >
           <Eye size={14} />
           View Details
-        </button>
+        </button> 
 
         {/* Right-side actions */}
         <div className="flex items-center gap-2">
@@ -596,21 +596,10 @@ export default function RequestedCustomers() {
         </div>
       </div>
 
-      {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        {statCards.map((card) => (
-          <StatCard
-            key={card.value}
-            {...card}
-            active={statusFilter === card.value}
-            onClick={() => handleFilterChange(card.value)}
-          />
-        ))}
-      </div>
 
-      {/* ── Search ── */}
-      <div className="mb-4">
-        <SearchBar
+      {/* ── Stat Cards ── */}
+      <div className=" mb-6">
+         <SearchBar
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onSearch={(term) => {
@@ -623,6 +612,17 @@ export default function RequestedCustomers() {
           placeholder="Search by name, phone, email or vehicle..."
           className="w-full"
         />
+      </div>
+      {/* ── Search ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        {statCards.map((card) => (
+          <StatCard
+            key={card.value}
+            {...card}
+            active={statusFilter === card.value}
+            onClick={() => handleFilterChange(card.value)}
+          />
+        ))}
       </div>
 
       {/* ── Active Filter Chip ── */}
@@ -652,7 +652,7 @@ export default function RequestedCustomers() {
 
       {/* ── Count ── */}
       {!loading && filteredRequests.length > 0 && (
-        <div className="mb-3 px-1">
+      <div className="mt-4 border-t border-gray-100 p-4">
           <p className="text-sm font-medium text-gray-500">
             Total Requests:{" "}
             <span className="text-gray-900 font-bold">
@@ -662,7 +662,7 @@ export default function RequestedCustomers() {
         </div>
       )}
 
-      {/* ── Cards ── */}
+{/* ── Cards ── */}
       <div>
         {loading ? (
           [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
@@ -861,7 +861,7 @@ export default function RequestedCustomers() {
             <div className="mt-6 flex flex-col md:flex-row items-stretch md:items-center gap-3 shrink-0 pt-4 border-t border-slate-50">
               <button
                 onClick={() => setDetailsModalOpen(false)}
-                className="order-2 md:order-1 flex px-6 py-4 rounded-2xl font-bold text-[11.5px] text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-all active:scale-[0.90]"
+                className="order-2 md:order-1 flex px-6 py-4 rounded-2xl font-bold text-[13.5px] text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-all active:scale-[0.90]"
               >
                 Dismiss
               </button>

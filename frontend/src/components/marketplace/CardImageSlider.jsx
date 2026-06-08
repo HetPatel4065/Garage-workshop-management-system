@@ -103,24 +103,7 @@ export default function CardImageSlider({
         }}
       />
 
-      {/* 2. Interface Elements Overlay Matrix */}
-      <div className="absolute inset-0 pointer-events-none z-20">
-        {/* Top-Right Area: Image Counter */}
-        {photos.length > 1 && (
-          <div className={styles.counter}>
-            {safeIdx + 1} / {photos.length}
-          </div>
-        )}
-
-        {/* Bottom-Left Area: Clear Watermark Pillar */}
-        {watermarkText && (
-          <div className="absolute left-3 bottom-3 rounded-lg bg-slate-950/80 px-3 py-1.5 text-[10px] font-bold tracking-[0.15em] text-white shadow-xl backdrop-blur-md border border-white/10 max-w-[50%] truncate select-none">
-            {watermarkText}
-          </div>
-        )}
-      </div>
-
-      {/* 3. Interactive Navigation Elements Layer */}
+      {/* 2. Interactive Navigation Elements Layer */}
       {photos.length > 1 && (
         <>
           <button

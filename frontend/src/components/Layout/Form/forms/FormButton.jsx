@@ -2,7 +2,14 @@ import React from "react";
 
 const SpinnerIcon = () => (
   <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
     <path
       className="opacity-75"
       fill="currentColor"
@@ -16,7 +23,7 @@ export default function FormButton({
   type = "button",
   loading = false,
   loadingText = "Please wait…",
-  disabled,
+  disabled = false,
   icon,
   variant = "primary",
   size = "md",
@@ -24,6 +31,8 @@ export default function FormButton({
   className = "",
   ...props
 }) {
+  const isDisabled = disabled || loading;
+
   const sizeClasses = {
     sm: "h-9 px-4 text-xs",
     md: "h-11 px-5 text-sm",
@@ -33,16 +42,13 @@ export default function FormButton({
   const variantClasses = {
     primary:
       "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-400/25",
-    secondary:
-      "bg-slate-100 hover:bg-slate-200 text-slate-700",
+    secondary: "bg-slate-100 hover:bg-slate-200 text-slate-700",
     danger:
       "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-400/25",
     ghost:
       "bg-transparent hover:bg-slate-100 text-slate-600 border border-slate-200",
-    dark:
-      "bg-slate-900 hover:bg-black text-white shadow-lg shadow-slate-900/25",
-    blue:
-      "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-400/20",
+    dark: "bg-slate-900 hover:bg-black text-white shadow-lg shadow-slate-900/25",
+    blue: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-400/20",
     emerald:
       "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-400/25",
     violet:
@@ -52,13 +58,14 @@ export default function FormButton({
   return (
     <button
       type={type}
-      disabled={disabled || loading}
+      disabled={isDisabled}
       className={`
         inline-flex items-center justify-center gap-2 rounded-xl font-semibold
-        active:scale-[0.98] transition-all duration-150
-        disabled:opacity-60 disabled:cursor-not-allowed
+        transition-all duration-150
+        ${!isDisabled ? "active:scale-[0.98]" : ""}
         ${sizeClasses[size] || sizeClasses.md}
-        ${variantClasses[variant] || variantClasses.primary}
+        ${!isDisabled ? variantClasses[variant] || variantClasses.primary : ""}
+        ${isDisabled ? "opacity-60 cursor-not-allowed pointer-events-none" : ""}
         ${fullWidth ? "w-full" : ""}
         ${className}
       `}
@@ -71,7 +78,11 @@ export default function FormButton({
         </>
       ) : (
         <>
-          {icon && <span className="w-4 h-4 flex items-center justify-center">{icon}</span>}
+          {icon && (
+            <span className="w-4 h-4 flex items-center justify-center">
+              {icon}
+            </span>
+          )}
           {children}
         </>
       )}
