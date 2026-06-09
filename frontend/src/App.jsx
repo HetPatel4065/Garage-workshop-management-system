@@ -171,12 +171,22 @@ function App() {
       <Suspense
         fallback={
           <div className="fixed inset-0 z-9999 h-screen w-screen flex flex-col items-center justify-center bg-white dark:bg-zinc-950 transition-colors">
-            <div className="flex flex-col items-center gap-4">
-              {/* High contrast spinner track and indicator */}
-              <div className="w-12 h-12 border-4 border-zinc-800 border-t-white rounded-full animate-spin" />{" "}
-              <p className="mt-2 text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest animate-pulse">
-                Loading View...
-              </p>
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-4">
+                {/* Spinner */}
+                <div className="relative h-12 w-12">
+                  <div className="absolute inset-0 rounded-full border-4 border-slate-300 dark:border-slate-600"></div>
+
+                  <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-blue-500 dark:border-t-blue-400"></div>
+                </div>
+
+                {/* Text */}
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-white">
+                    Loading...
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         }

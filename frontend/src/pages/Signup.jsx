@@ -133,7 +133,7 @@ export default function Signup() {
 
                   {/* Text */}
                   <div className="flex-1 min-w-0 pt-0.5">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-start gap-2">
                       <p className="text-base font-bold text-slate-900">
                         {card.label}
                       </p>

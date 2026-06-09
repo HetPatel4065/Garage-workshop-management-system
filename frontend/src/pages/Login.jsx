@@ -1,18 +1,19 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Wrench,
-  Store,
-  HardHat,
-  ShieldCheck,
-  Car,
-  ChevronRight,
-} from "lucide-react";
+import { Wrench, HardHat, ShieldCheck, ChevronRight, Info } from "lucide-react";
 import { FaCar } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 
-// ─── Role card definitions ────────────────────────────────────────────────────
+// ─── Tooltip messages ──
+const TOOLTIP_MESSAGES = {
+  admin:
+    "No sign-up needed. Admin accounts are pre-provisioned by the system. Contact your system administrator for credentials.",
+  customer:
+    "No sign-up needed. Use your registered email or phone number to log in directly.",
+};
+
+// ─── Role card definitions ──
 const ROLE_CARDS = [
   {
     id: "owner",
@@ -30,6 +31,7 @@ const ROLE_CARDS = [
     tagColor:
       "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-transparent",
     tag: "Full Access",
+    tooltip: null,
   },
   {
     id: "staff",
@@ -47,6 +49,7 @@ const ROLE_CARDS = [
     tagColor:
       "text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-transparent",
     tag: "Requires Garage ID",
+    tooltip: null,
   },
   {
     id: "admin",
@@ -64,6 +67,11 @@ const ROLE_CARDS = [
     tagColor:
       "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-transparent",
     tag: "Elevated Access",
+    tooltip: TOOLTIP_MESSAGES.admin,
+    tooltipColor: "text-orange-500 dark:text-orange-400",
+    tooltipBg:
+      "bg-orange-50 dark:bg-orange-950/80 border-orange-200 dark:border-orange-800/60",
+    tooltipText: "text-orange-800 dark:text-orange-200",
   },
   {
     id: "customer",
@@ -80,13 +88,18 @@ const ROLE_CARDS = [
     hoverBorder: "hover:border-blue-300 dark:hover:border-blue-700",
     tagColor: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-transparent",
     tag: "Customer Portal",
+    tooltip: TOOLTIP_MESSAGES.customer,
+    tooltipColor: "text-blue-500 dark:text-blue-400",
+    tooltipBg:
+      "bg-blue-50 dark:bg-blue-950/80 border-blue-200 dark:border-blue-800/60",
+    tooltipText: "text-blue-800 dark:text-blue-200",
   },
 ];
 
-// ─── Animation variants ───────────────────────────────────────────────────────
+// ─── Animation variants ──
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const cardVariants = {
@@ -105,7 +118,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-200">
       <div className="w-full max-w-2xl">
-        {/* ── Brand header ─────────────────────────────────────── */}
+        {/* ── Brand header ── */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,69 +145,110 @@ export default function Login() {
           </p>
         </motion.div>
 
-        {/* ── Role cards grid ───────────────────────────────────── */}
+        {/* ── Role cards grid ── */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
         >
           {ROLE_CARDS.map((card) => {
             const Icon = card.icon;
+            const hasTooltip = !!card.tooltip;
+
             return (
-              <motion.button
+              <motion.div
                 key={card.id}
                 variants={cardVariants}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate(card.route, { replace: true })}
-                id={`role-select-${card.id}`}
-                className={`
-                  group relative w-full text-left bg-white dark:bg-[#121826] border border-slate-200 dark:border-slate-800/80
-                  ${card.hoverBorder} shadow-sm hover:shadow-lg dark:hover:shadow-black/30
-                  transition-all duration-200 overflow-hidden p-5
-                  focus:outline-none focus:ring-2 ${card.ring} focus:ring-offset-2 dark:focus:ring-offset-[#0b0f19]
-                `}
+                className="relative"
               >
-                {/* Gradient top bar */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-1 bg-linear-to-r ${card.gradient}`}
-                />
-
-                <div className="flex items-start gap-4">
-                  {/* Icon Wrapper */}
-                  <div
-                    className={`shrink-0 w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center`}
-                  >
-                    <Icon className={`w-5 h-5 ${card.iconColor}`} size={20} />
-                  </div>
-
-                  {/* Text */}
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-base font-bold text-slate-900 dark:text-slate-100">
-                        {card.label}
-                      </p>
-                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-0.5 transition-all shrink-0" />
-                    </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                      {card.description}
-                    </p>
-
-                    {/* Tag */}
-                    <span
-                      className={`inline-block mt-2.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${card.tagColor} border ${card.badgeBg}`}
+                {/* ── Info tooltip trigger (Admin & Customer only) ── */}
+                {hasTooltip && (
+                  <div className="group/tip absolute top-2.5 right-2.5 z-20">
+                    <button
+                      type="button"
+                      aria-label={`Info about ${card.label} login`}
+                      onClick={(e) => e.stopPropagation()}
+                      className={`w-5 h-5 flex items-center justify-center rounded-full ${card.tooltipColor} hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none`}
                     >
-                      {card.tag}
-                    </span>
+                      <Info className="w-3.5 h-3.5" strokeWidth={2.2} />
+                    </button>
+
+                    {/* Tooltip bubble — pure CSS, instant */}
+                    <div
+                      className={`
+                        pointer-events-none absolute right-0 top-6 w-56 rounded-xl border shadow-lg px-3 py-2.5
+                        opacity-0 -translate-y-1 scale-95
+                        group-hover/tip:opacity-100 group-hover/tip:translate-y-0 group-hover/tip:scale-100
+                        transition-[opacity,transform] duration-100 ease-out
+                        ${card.tooltipBg}
+                      `}
+                    >
+                      {/* Arrow */}
+                      <div
+                        className={`absolute -top-1.5 right-1.5 w-3 h-3 rotate-45 border-t border-l ${card.tooltipBg}`}
+                      />
+                      <p
+                        className={`text-[11px] leading-relaxed font-medium ${card.tooltipText}`}
+                      >
+                        {card.tooltip}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </motion.button>
+                )}
+
+                {/* ── Card button ── */}
+                <button
+                  onClick={() => navigate(card.route, { replace: true })}
+                  id={`role-select-${card.id}`}
+                  className={`
+                    group relative w-full text-left bg-white dark:bg-[#121826] border border-slate-200 dark:border-slate-800/80
+                    ${card.hoverBorder} shadow-sm hover:shadow-lg dark:hover:shadow-black/30
+                    hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.99]
+                    transition-[transform,box-shadow,border-color] duration-150 ease-out overflow-hidden p-5
+                    focus:outline-none focus:ring-2 ${card.ring} focus:ring-offset-2 dark:focus:ring-offset-[#0b0f19]
+                  `}
+                >
+                  {/* Gradient top bar */}
+                  <div
+                    className={`absolute top-0 left-0 right-0 h-1 bg-linear-to-r ${card.gradient}`}
+                  />
+
+                  <div className="flex items-start gap-4">
+                    {/* Icon Wrapper */}
+                    <div
+                      className={`shrink-0 w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center`}
+                    >
+                      <Icon className={`w-5 h-5 ${card.iconColor}`} size={20} />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="flex items-center justify-start gap-2">
+                        <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                          {card.label}
+                        </p>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-0.5 transition-all shrink-0" />
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                        {card.description}
+                      </p>
+
+                      {/* Tag */}
+                      <span
+                        className={`inline-block mt-2.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${card.tagColor} border ${card.badgeBg}`}
+                      >
+                        {card.tag}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              </motion.div>
             );
           })}
         </motion.div>
 
-        {/* ── Footer ───────────────────────────────────────────── */}
+        {/* ── Footer ── */}
         <footer className="mt-8 text-center space-y-2.5">
           <p className="text-xs text-slate-400 dark:text-slate-500">
             New to our system?{" "}
@@ -204,14 +258,6 @@ export default function Login() {
             >
               Create an account
             </Link>
-          </p>
-
-          <p className="text-xs text-slate-400 dark:text-slate-500 max-w-md mx-auto leading-normal">
-            <span className="font-medium text-slate-500 dark:text-slate-400">
-              Note:
-            </span>{" "}
-            For admin and customer accounts, sign up or registration is
-            <span className="font-bold underline">not required</span>.
           </p>
         </footer>
       </div>

@@ -42,11 +42,18 @@ function filterUrgentReminders(vehicles) {
 function PageLoadingFallback() {
   return (
     <div className="max-w-screen max-h-screen mx-auto flex flex-col items-center justify-center p-8 bg-slate-100 dark:bg-zinc-900 transition-colors">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-4 border-slate-300 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin" />
-        <p className="mt-2 text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest animate-pulse">
-          Loading View...
-        </p>
+      <div className="flex min-h-40 flex-col items-center justify-center gap-4">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full border-4 border-slate-300 dark:border-zinc-600"></div>
+
+          <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-blue-500"></div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-sm font-semibold text-slate-700 dark:text-white">
+            Loading...
+          </p>
+        </div>
       </div>
     </div>
   );
