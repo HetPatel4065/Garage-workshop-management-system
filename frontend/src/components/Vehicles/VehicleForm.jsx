@@ -1,5 +1,10 @@
 import React from "react";
-import { FormInput, FormSelect, FormLabel, FormRow } from "../layout/Form/forms";
+import {
+  FormInput,
+  FormSelect,
+  FormLabel,
+  FormRow,
+} from "../layout/Form/forms";
 
 export const FUEL_TYPES = ["Petrol", "Diesel", "Electric", "CNG", "Hybrid"];
 export const TRANSMISSION_TYPES = ["Automatic", "Manual"];
@@ -174,6 +179,7 @@ export default function VehicleForm({
               error={errors.chassisnumber}
               required
               label="Chassis No. (VIN)"
+              hint="Found on the driver-side door frame"
             />
           </FormRow>
         </div>

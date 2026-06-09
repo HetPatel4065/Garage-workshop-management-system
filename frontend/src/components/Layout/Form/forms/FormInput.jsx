@@ -64,7 +64,7 @@ export default function FormInput({
           placeholder={placeholder}
           required={required}
           disabled={disabled || readOnly}
-          className={`w-full transition-all text-md outline-none rounded-xl border
+          className={`w-full transition-all outline-none rounded-xl border
             ${ActiveIcon ? "pl-10" : "px-3.5"} 
             ${rightIcon || rightAction ? "pr-10" : "pr-3.5"}
             ${type === "number" ? "h-11 py-2" : "h-11"}

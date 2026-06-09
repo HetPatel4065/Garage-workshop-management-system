@@ -550,7 +550,7 @@ export default function RequestedCustomers() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950">
+    <div className="p-4 sm:p-6 bg-gray-100 max-w-screen h-screen mx-auto dark:bg-slate-950">
       {/* ── Header ── */}
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

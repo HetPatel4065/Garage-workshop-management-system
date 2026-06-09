@@ -33,7 +33,7 @@ const VehicleCard = ({ vehicle, isOpen, toggleExpand }) => {
           <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
             {/* Row 1: Make & Model */}
             <div className="flex items-baseline gap-2 min-w-0">
-            <h3 className="font-bold text-base sm:text-lg md:text-xl capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
+              <h3 className="font-bold text-base sm:text-lg md:text-xl capitalize text-slate-900 dark:text-white line-clamp-2 pr-1 leading-snug">
                 {vehicle.make} {vehicle.model}
               </h3>
             </div>
@@ -120,7 +120,8 @@ const VehicleCard = ({ vehicle, isOpen, toggleExpand }) => {
               </div>
 
               {/* Identity Details & Service Cards Layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
                 {/* Panel 1: Identity Card */}
                 <div className="p-4 sm:p-5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm">
                   <h4 className="text-[11px] sm:text-[12px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 sm:mb-4 flex items-center gap-2">

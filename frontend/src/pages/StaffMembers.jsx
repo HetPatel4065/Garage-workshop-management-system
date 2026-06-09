@@ -518,7 +518,7 @@ export default function StaffMembers() {
     "w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition";
 
   return (
-    <div className="min-h-[85vh] bg-gray-100 dark:bg-slate-900 p-4 sm:p-6 cursor-auto">
+    <div className="max-w-screen h-screen mx-auto bg-gray-100 dark:bg-slate-900 p-4 sm:p-6 cursor-auto">
       {/* ── HEADER ── */}
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

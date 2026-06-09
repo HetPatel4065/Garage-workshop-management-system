@@ -84,7 +84,6 @@ function ToggleItem({
             : "cursor-auto bg-slate-50 dark:bg-zinc-900 border-slate-100 dark:border-zinc-800 hover:border-blue-200 dark:hover:border-blue-800/50 hover:bg-white dark:hover:bg-zinc-800/80"
       }`}
     >
-
       <div className="relative z-10 flex items-center justify-between w-full">
         <div className="pr-4 min-w-0">
           <p
@@ -965,7 +964,7 @@ export default function Settings() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans p-4 sm:p-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-screen mx-auto">
         <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>

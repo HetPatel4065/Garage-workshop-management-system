@@ -103,7 +103,7 @@ export default function PortalHome() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "py-2 backdrop-blur-2xl border-b border-indigo-500/10 bg-transparent shadow-[0_4px_32px_rgba(99,102,241,0.08)] md:py-3"
+            ? "py-2 backdrop-blur-3xl border-b border-indigo-500/10 bg-transparent shadow-[0_4px_32px_rgba(99,102,241,0.08)] md:py-3"
             : "py-4 bg-transparent md:py-5"
         }`}
       >

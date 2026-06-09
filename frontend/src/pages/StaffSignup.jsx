@@ -214,7 +214,7 @@ export default function StaffSignup() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
+                  placeholder="Enter your full name "
                   label="Full Name"
                   leftIcon={<User className="w-4 h-4 text-violet-400" />}
                   inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white"
@@ -227,7 +227,7 @@ export default function StaffSignup() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="jane@example.com"
+                    placeholder="yourname@gmail.com"
                     label="Email Address"
                     leftIcon={<Mail className="w-4 h-4 text-violet-400" />}
                     inputClassName="border-violet-200 bg-violet-50/60 focus:ring-violet-400/30 focus:border-violet-400 focus:bg-white"

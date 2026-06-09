@@ -217,7 +217,7 @@ export default function CustomerForm({
               onChange={(e) =>
                 handleInputChange("name", capitalizeWords(e.target.value))
               }
-              placeholder="Enter your name"
+              placeholder="Enter your full name"
               disabled={isReadOnly}
               error={errors.name}
               label="Full name"
@@ -228,7 +228,7 @@ export default function CustomerForm({
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
-              placeholder="xyz@gmail.com"
+              placeholder="yourname@gmail.com"
               disabled={isReadOnly}
               error={errors.email}
               label="Email"

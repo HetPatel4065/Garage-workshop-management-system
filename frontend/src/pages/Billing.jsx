@@ -367,7 +367,7 @@ export default function Billing() {
         : filteredHistory;
 
   return (
-    <div className="max-w-7xl mx-auto bg-gray-100 p-4 sm:p-6 md:p-8">
+    <div className="max-w-screen h-screen mx-auto bg-gray-100 p-4 sm:p-6 md:p-8">
       {/* 🚀 Header */}
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

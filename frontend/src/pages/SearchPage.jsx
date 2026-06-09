@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import EmptyState from "../components/UI/EmptyState";
-import { Search } from "lucide-react";
+import { Search, Phone, Mail } from "lucide-react";
 
 export default function SearchPage() {
   const location = useLocation();
@@ -214,7 +214,7 @@ export default function SearchPage() {
   const hasResults = Object.values(results).some((arr) => arr.length > 0);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto bg-gray-100 dark:bg-zinc-900 rounded-xl transition-colors duration-200">
+    <div className="p-6 max-w-screen h-screen mx-auto bg-gray-100 dark:bg-zinc-900 rounded-xl transition-colors duration-200">
       {/* Header Container */}
       <div className="mb-8 pb-5 border-b-3  border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
@@ -283,12 +283,18 @@ export default function SearchPage() {
                     </h3>
                     {customer.phone && (
                       <p className="text-gray-600 dark:text-zinc-300 text-sm mt-1">
-                        📞 {customer.phone}
+                        <div className="flex items-center gap-2">
+                          <Phone size={16} className="text-slate-400" />
+                          <span>{customer.phone}</span>
+                        </div>
                       </p>
                     )}
                     {customer.email && (
                       <p className="text-gray-600 dark:text-zinc-300 text-sm">
-                        ✉️ {customer.email}
+                        <div className="flex items-center gap-2">
+                          <Mail size={16} className="text-slate-400" />
+                          <span>{customer.email}</span>
+                        </div>
                       </p>
                     )}
                     <p className="text-gray-400 dark:text-zinc-500 text-[10px] mt-2 font-medium uppercase tracking-wider">

@@ -245,13 +245,13 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="bg-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div className="w-full min-h-screen bg-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-y-auto">
       <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:gap-6 xl:flex-row xl:items-center xl:justify-between">
         {/* Left Side: Identity & Greetings */}
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex items-center">
             <span className="inline-flex items-center whitespace-nowrap rounded-md bg-blue-950/80 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-blue-500">
-              Hello & Welcome, {user?.name}
+              Hi, {user?.name}
             </span>
           </div>
 

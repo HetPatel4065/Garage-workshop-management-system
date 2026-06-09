@@ -30,7 +30,7 @@ const SECTIONS = [
     icon: Shield,
     content: `Welcome to GaragePro (referred to as "we", "our", "us", or "the Platform"). Your privacy is of paramount importance to us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our web-based garage management application, including any related services, databases, and portal features.
 
-By accessing or using the GaragePro platform, you agree to the collection and use of information in accordance with this Privacy Policy. If you do not agree with any terms of this policy, please do not access or register for our services.`,
+    By accessing or using the GaragePro platform, you agree to the collection and use of information in accordance with this Privacy Policy. If you do not agree with any terms of this policy, please do not access or register for our services.`,
   },
   {
     id: "info-collection",
@@ -38,11 +38,11 @@ By accessing or using the GaragePro platform, you agree to the collection and us
     icon: Database,
     content: `We collect several different types of information for various purposes to provide and improve our service to you:
 
-a) Personal Account Information: When registering as an Owner or Staff Member, we collect details such as your full name, email address, password, mobile number, and role selection.
-b) Business Profile Information: To configure your workspace, we collect your garage business name, logo, physical address, and GSTIN (if applicable).
-c) Customer & Vehicle Data: In the course of utilizing our workshop system, you may enter details about your customers (names, phone numbers, email addresses) and their vehicles (make, model, registration plate number, service history).
-d) System Operations Data: We collect details of services rendered, labor charges, job card statuses, billing details, and inventory spare parts tracking.
-e) Technical & Usage Data: We automatically record technical metrics, including IP addresses, browser types, session tokens, page views, and navigation logs to ensure optimal performance.`,
+    a) Personal Account Information: When registering as an Owner or Staff Member, we collect details such as your full name, email address, password, mobile number, and role selection.
+    b) Business Profile Information: To configure your workspace, we collect your garage business name, logo, physical address, and GSTIN (if applicable).
+    c) Customer & Vehicle Data: In the course of utilizing our workshop system, you may enter details about your customers (names, phone numbers, email addresses) and their vehicles (make, model, registration plate number, service history).
+    d) System Operations Data: We collect details of services rendered, labor charges, job card statuses, billing details, and inventory spare parts tracking.
+    e) Technical & Usage Data: We automatically record technical metrics, including IP addresses, browser types, session tokens, page views, and navigation logs to ensure optimal performance.`,
   },
   {
     id: "how-we-use",
@@ -50,11 +50,11 @@ e) Technical & Usage Data: We automatically record technical metrics, including 
     icon: Eye,
     content: `GaragePro uses the collected data to power your workshop operations and support service quality:
 
-• To Provision Services: Setting up your account, compiling dashboard metrics, tracking job cards, managing inventory thresholds, and preparing billing invoices.
-• To Automate Reminders: Triggering scheduled service alerts, SMS, or WhatsApp reminders to your customers (with your consent).
-• System Protection: Protecting system integrity, preventing fraudulent login attempts, and securing multi-role access controls.
-• Enhancing Performance: Running internal diagnostics to optimize page loads, fix software glitches, and streamline user workflows.
-• Customer Service: Troubleshooting user accounts, responding to advisor enquiries, and handling support calls.`,
+    • To Provision Services: Setting up your account, compiling dashboard metrics, tracking job cards, managing inventory thresholds, and preparing billing invoices.
+    • To Automate Reminders: Triggering scheduled service alerts, SMS, or WhatsApp reminders to your customers (with your consent).
+    • System Protection: Protecting system integrity, preventing fraudulent login attempts, and securing multi-role access controls.
+    • Enhancing Performance: Running internal diagnostics to optimize page loads, fix software glitches, and streamline user workflows.
+    • Customer Service: Troubleshooting user accounts, responding to advisor enquiries, and handling support calls.`,
   },
   {
     id: "data-security",
@@ -62,10 +62,10 @@ e) Technical & Usage Data: We automatically record technical metrics, including 
     icon: Lock,
     content: `The security of your data is a top priority. We implement state-of-the-art security safeguards to prevent unauthorized access:
 
-- Local & Cloud Encryption: All transmissions are secured using SSL/TLS encryption. Sensitive databases are stored in encrypted environments.
-- Role-Based Permissions: Access to inventory, billing, and settings is gated by cryptographic tokens, preventing advisors or technicians from accessing unauthorized business operations.
-- Daily Automated Backups: Customer list databases, service histories, and settings are backed up automatically every 24 hours to secure offsite servers.
-- Password Safety: User passwords are encrypted natively. We do not store plain-text passwords and encourage the activation of Two-Factor Authentication (2FA).`,
+    - Local & Cloud Encryption: All transmissions are secured using SSL/TLS encryption. Sensitive databases are stored in encrypted environments.
+    - Role-Based Permissions: Access to inventory, billing, and settings is gated by cryptographic tokens, preventing advisors or technicians from accessing unauthorized business operations.
+    - Daily Automated Backups: Customer list databases, service histories, and settings are backed up automatically every 24 hours to secure offsite servers.
+    - Password Safety: User passwords are encrypted natively. We do not store plain-text passwords and encourage the activation of Two-Factor Authentication (2FA).`,
   },
   {
     id: "cookies-tracking",
@@ -73,9 +73,9 @@ e) Technical & Usage Data: We automatically record technical metrics, including 
     icon: Globe,
     content: `We use cookies and equivalent web storage technologies (SessionStorage and LocalStorage) to keep you logged in and preserve your workspace preferences:
 
-• Session Identifiers: We store active session tokens (e.g. portal_token, garage_token) temporarily to remember your authentication status and role access.
-• Interface Preferences: We store configuration variables such as Sidebar collapse state and UI theme state (light/dark mode) to preserve your preferences.
-• Control Options: You can configure your browser to reject cookies. However, doing so will prevent you from logging in and utilizing our secure cloud dashboard.`,
+    • Session Identifiers: We store active session tokens (e.g. portal_token, garage_token) temporarily to remember your authentication status and role access.
+    • Interface Preferences: We store configuration variables such as Sidebar collapse state and UI theme state (light/dark mode) to preserve your preferences.
+    • Control Options: You can configure your browser to reject cookies. However, doing so will prevent you from logging in and utilizing our secure cloud dashboard.`,
   },
   {
     id: "your-rights",
@@ -83,10 +83,10 @@ e) Technical & Usage Data: We automatically record technical metrics, including 
     icon: FileText,
     content: `As an owner or customer on the platform, you maintain absolute control over your records:
 
-- Access & Export: You can view and download CSV lists of your inventory, customer records, and invoice sheets at any time.
-- Rectification: You can update your business name, logo, address, and profile credentials directly from the Profile and Settings pages.
-- Deletion: If you decide to deactivate a staff account or delete a customer profile, the changes are processed instantly across your active workspace.
-- Account Termination: To fully remove your garage workspace and purge all associated customer records from our database, you may contact our administrator support.`,
+    - Access & Export: You can view and download CSV lists of your inventory, customer records, and invoice sheets at any time.
+    - Rectification: You can update your business name, logo, address, and profile credentials directly from the Profile and Settings pages.
+    - Deletion: If you decide to deactivate a staff account or delete a customer profile, the changes are processed instantly across your active workspace.
+    - Account Termination: To fully remove your garage workspace and purge all associated customer records from our database, you may contact our administrator support.`,
   },
   {
     id: "policy-updates",
@@ -94,7 +94,7 @@ e) Technical & Usage Data: We automatically record technical metrics, including 
     icon: Calendar,
     content: `We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date at the top.
 
-You are advised to review this Privacy Policy periodically for any adjustments. Changes to this Privacy Policy are effective immediately upon being published on this page.`,
+    You are advised to review this Privacy Policy periodically for any adjustments. Changes to this Privacy Policy are effective immediately upon being published on this page.`,
   },
   {
     id: "contact-support",
@@ -102,9 +102,9 @@ You are advised to review this Privacy Policy periodically for any adjustments. 
     icon: Mail,
     content: `If you have any questions, clarifications, or complaints regarding this Privacy Policy, please feel free to reach out to our dedicated support desk:
 
-• Support Email: support@garageapp.com
-• Phone Assistance: +91 99789 72413 (Mon-Sat, 9 AM - 7 PM)
-• Head Office: GaragePro Ecosystem Ltd., Ahmedabad - 380059`,
+    • Support Email: support@garageapp.com
+    • Phone Assistance: +91 99789 72413 (Mon-Sat, 9 AM - 7 PM)
+    • Head Office: GaragePro Ecosystem Ltd., Ahmedabad - 380059`,
   },
 ];
 

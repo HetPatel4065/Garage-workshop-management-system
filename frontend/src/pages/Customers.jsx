@@ -323,7 +323,7 @@ export default function Customers() {
     <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div>
+          <div> 
             <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Customer Management
             </p>
@@ -348,16 +348,16 @@ export default function Customers() {
               <button
                 onClick={handleAdd}
                 className="
-            flex items-center gap-2
-            px-5 py-3
-            bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-700
-            text-white
-            rounded-2xl
-            text-sm font-bold
-            transition-all duration-300
-            shadow-md hover:shadow-xl
-            h-10.5
-          "
+                flex items-center gap-2
+                px-5 py-3
+                bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-700
+                text-white
+                rounded-2xl
+                text-sm font-bold
+                transition-all duration-300
+                shadow-md hover:shadow-xl
+                h-10.5
+                "
               >
                 <Plus size={17} />
                 Add Customer

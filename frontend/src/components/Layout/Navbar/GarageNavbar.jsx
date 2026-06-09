@@ -542,9 +542,7 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* ================================================================== */}
-      {/* Desktop / tablet header                                             */}
-      {/* ================================================================== */}
+      {/*  Desktop / tablet header  */}
       <header
         className={`
           h-16 sm:h-20 flex items-center px-4 sm:px-8 sticky top-0 transition-all duration-300 z-40
@@ -638,7 +636,7 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
 
           {/* ── Action icons + user menu ── */}
           <div
-            className="flex items-center gap-1 sm:gap-3 shrink-0"
+            className="flex items-center gap-1 sm:gap-2 shrink-0"
             ref={dropdownRef}
           >
             {/* Mobile search toggle */}
@@ -668,13 +666,13 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
             </button>
 
             {/* Divider */}
-            <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
+            <div className="w-0.5 h-20 bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
 
             {/* User menu */}
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-3 p-1 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300 group"
+                className="flex items-center gap-3 p-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300 group"
               >
                 {/* Name + role (hidden on mobile) */}
                 <div className="hidden sm:block text-right">
@@ -702,7 +700,7 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 p-1.5 shadow-2xl ring-1 ring-slate-100 dark:ring-black/50 z-50"
+                    className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-md border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 p-1.5 shadow-2xl ring-1 ring-slate-100 dark:ring-black/50 z-50"
                   >
                     {/* Mobile-only user profile header */}
                     <div className="px-3 py-2.5 mb-1 sm:hidden">
@@ -723,7 +721,7 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                             setMenuOpen(false);
                             navigate("/portal/dashboard");
                           }}
-                          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-zinc-400 transition-all hover:bg-blue-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+                          className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 dark:text-zinc-400 transition-all hover:bg-blue-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 dark:bg-zinc-800 transition-colors group-hover:bg-blue-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                             <ExternalLink size={16} />

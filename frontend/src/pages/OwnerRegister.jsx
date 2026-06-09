@@ -128,7 +128,7 @@ export default function OwnerRegister() {
       <div className="absolute top-[-10%] right-[-10%] w-140 h-140 rounded-full bg-emerald-50/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-10%] w-140 h-140 rounded-full bg-teal-500/10 blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-xl bg-zinc-900/60 backdrop-blur-2xl rounded-[2.5rem] border border-zinc-800/80 shadow-[0_24px_80px_rgba(0,0,0,0.5)] overflow-hidden p-8 sm:p-12 relative z-10">
+      <div className="w-full max-w-xl bg-zinc-900/60 backdrop-blur-3xl rounded-[2.5rem] border border-zinc-800/80 shadow-[0_24px_80px_rgba(0,0,0,0.5)] overflow-hidden p-8 sm:p-12 relative z-10">
         <AnimatePresence mode="wait">
           {error && !lead ? (
             // ── Error State ──
