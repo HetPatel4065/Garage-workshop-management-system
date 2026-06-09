@@ -1091,7 +1091,11 @@ export const getMarketplaceVehicleDetails = async (req, res) => {
       customerId
         ? getWishlistedIdsForCustomer(customerId, vehicleIds)
         : Promise.resolve(new Set()),
-      Wishlist.countDocuments({ vehicleSaleId: vehicle._id }),
+      // only count wishlist docs that have a valid customerId to avoid stray records
+      Wishlist.countDocuments({
+        vehicleSaleId: vehicle._id,
+        customerId: { $exists: true, $ne: null },
+      }),
       customerId
         ? Booking.findOne({ vehicleSaleId: vehicle._id, customerId })
             .sort({ requestedAt: -1 })
@@ -1129,7 +1133,10 @@ export const getMarketplaceVehicleDetails = async (req, res) => {
 export const getMarketplaceWishlistCount = async (req, res) => {
   try {
     const { id } = req.params;
-    const count = await Wishlist.countDocuments({ vehicleSaleId: id });
+    const count = await Wishlist.countDocuments({
+      vehicleSaleId: id,
+      customerId: { $exists: true, $ne: null },
+    });
     res.status(200).json({ success: true, count });
   } catch (error) {
     console.error("GET WISHLIST COUNT ERROR:", error);

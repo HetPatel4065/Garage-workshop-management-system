@@ -98,7 +98,7 @@ const PageTransition = ({ children }) => (
 
 const MarketplaceRedirect = () => {
   const { id } = useParams();
-  return <Navigate to={`/portal/marketplace/preownedcars/${id}`} replace />;
+  return <Navigate to={`/portal/marketplace/pre-owned-cars/${id}`} replace />;
 };
 
 function PublicOnlyRoute({ children }) {
@@ -409,7 +409,7 @@ function App() {
               element={<MarketplaceRedirect />}
             />
             <Route
-              path="/portal/marketplace/preownedcars/:id"
+              path="/portal/marketplace/pre-owned-cars/:id"
               element={
                 hasPortalAccess ? (
                   <PageTransition>

@@ -32,31 +32,110 @@ const brandModels = {
     "Swift",
     "Baleno",
     "Wagon R",
-    "Alto",
+    "Alto K10",
     "Dzire",
     "Brezza",
     "Ertiga",
     "Fronx",
     "Grand Vitara",
+    "Celerio",
+    "S-Presso",
+    "Ignis",
+    "Ciaz",
+    "XL6",
+    "Jimny",
+    "Invicto",
+    "Eeco",
+    "e Vitara" // First All-Electric SUV launch
   ],
   Hyundai: [
     "i20",
+    "i20 N Line",
     "Creta",
+    "Creta N Line",
     "Venue",
-    "Grand i10",
+    "Venue N Line",
+    "Grand i10 Nios",
     "Verna",
     "Aura",
     "Tucson",
     "Exter",
+    "Alcazar",
+    "Ioniq 5" // Premium EV
   ],
-  Tata: ["Nexon", "Punch", "Tiago", "Altroz", "Harrier", "Safari"],
-  Mahindra: ["Thar", "XUV700", "Scorpio", "Bolero", "XUV300"],
-  Kia: ["Seltos", "Sonet", "Carens"],
-  Toyota: ["Fortuner", "Innova", "Glanza", "Hyryder"],
-  Honda: ["City", "Amaze", "Elevate"],
-  Volkswagen: ["Polo", "Virtus", "Taigun"],
-  Skoda: ["Slavia", "Kushaq"],
-  MG: ["Hector", "Astor", "Comet EV"],
+  Tata: [
+    "Nexon", 
+    "Nexon EV",
+    "Punch", 
+    "Punch EV",
+    "Tiago", 
+    "Tiago EV",
+    "Altroz", 
+    "Harrier", 
+    "Safari",
+    "Tigor",
+    "Tigor EV",
+    "Curvv", // SUV-Coupe offering
+    "Curvv EV"
+  ],
+  Mahindra: [
+    "Thar", 
+    "Thar ROXX", // 5-Door variant
+    "XUV700", // Often badged as XUV 7XO line transitions
+    "Scorpio-N", 
+    "Scorpio Classic",
+    "Bolero", 
+    "Bolero Neo",
+    "XUV 3XO", // The updated XUV300 facelift
+    "XUV400 EV",
+    "XEV 9e", // New flagship electric lineup
+    "BE 6"
+  ],
+  Kia: [
+    "Seltos", 
+    "Sonet", 
+    "Carens",
+    "EV6",
+    "EV9"
+  ],
+  Toyota: [
+    "Fortuner", 
+    "Innova Crysta", 
+    "Innova Hycross",
+    "Glanza", 
+    "Urban Cruiser Hyryder",
+    "Taisor", // Baleno/Fronx-based crossover offering
+    "Hilux",
+    "Camry",
+    "Vellfire"
+  ],
+  Honda: [
+    "City", 
+    "City Hybrid (e:HEV)",
+    "Amaze", 
+    "Elevate"
+  ],
+  Volkswagen: [
+    "Virtus", 
+    "Taigun",
+    "Tiguan",
+    "ID.4" // EV additions
+  ],
+  Skoda: [
+    "Slavia", 
+    "Kushaq",
+    "Kodiaq",
+    "Kylaq" // Sub-4m compact SUV addition
+  ],
+  MG: [
+    "Hector", 
+    "Hector Plus",
+    "Astor", 
+    "Comet EV",
+    "ZS EV",
+    "Gloster",
+    "Windsor EV" // Crossover EV offering
+  ]
 };
 
 // Accordion modified to look like an independent card block matching Cardekho layout mechanics
@@ -239,19 +318,19 @@ export default function VehicleFiltersSidebar({
                   rtoCode: e.target.value || undefined,
                 }))
               }
-              className="w-full bg-slate-50 dark:bg-zinc-950/40 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-zinc-100 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-zinc-950/40 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:bg-white dark:focus:bg-zinc-900/20 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 dark:focus:ring-blue-950/10 transition-all"
             />
             <input
               type="text"
               placeholder="State (e.g. Gujarat)"
-              value={filters.rtoState || ""}
+              value={filters.regState || ""}
               onChange={(e) =>
                 setFilters((prev) => ({
                   ...prev,
-                  rtoState: e.target.value || undefined,
+                  regState: e.target.value || undefined,
                 }))
               }
-              className="w-full bg-slate-50 dark:bg-zinc-950/40 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-zinc-100 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-zinc-950/40 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:bg-white dark:focus:bg-zinc-900/20 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 dark:focus:ring-blue-950/10 transition-all"
             />
           </div>
         </div>

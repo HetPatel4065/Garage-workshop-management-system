@@ -143,6 +143,34 @@ const PortalMarketplace = () => {
     });
   };
 
+  // 🔍 FIXED: Listen for wishlist changes and update counts in the list
+  useEffect(() => {
+    let pending = null;
+    const handler = (e) => {
+      try {
+        const { vehicleId, source, count } = e.detail || {};
+        if (!vehicleId || typeof count !== "number") return;
+        // Ignore optimistic updates; only update on confirmed changes
+        if (source === "optimistic") return;
+
+        // Update the vehicle count in the list
+        setVehicles((prev) =>
+          prev.map((v) =>
+            v._id === vehicleId ? { ...v, wishlistCount: count } : v,
+          ),
+        );
+      } catch (err) {
+        // ignore
+      }
+    };
+
+    window.addEventListener("wishlist:changed", handler);
+    return () => {
+      if (pending) clearTimeout(pending);
+      window.removeEventListener("wishlist:changed", handler);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f8faff] font-sans selection:bg-blue-100 selection:text-blue-600">
       {/* 🔮 Sticky Luxury Header */}
@@ -382,7 +410,7 @@ const PortalMarketplace = () => {
                       // Only navigate if the click is NOT on the wishlist heart
                       if (e.target.closest("[data-wishlist-btn]")) return;
                       navigate(
-                        `/portal/marketplace/preownedcars/${vehicle._id}`,
+                        `/portal/marketplace/pre-owned-cars/${vehicle._id}`,
                       );
                     }}
                     className="group flex flex-col bg-white border border-slate-200/60 rounded-3xl overflow-hidden shadow-xs hover:-translate-y-1.5 hover:border-blue-200 hover:shadow-md transition-all duration-300 cursor-auto relative"

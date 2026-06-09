@@ -21,9 +21,7 @@ import {
   Calendar,
   Clock,
   Copy,
-  Download,
   ExternalLink,
-  Eye,
   FileText,
   Fuel,
   Gauge,
@@ -40,26 +38,20 @@ import {
   Share2,
   ShieldCheck,
   Star,
-  TrendingUp,
   User,
   Users,
   X,
   Zap,
   ZoomIn,
   ZoomOut,
-  Milestone,
   UserCheck,
   Wrench,
-  CarFront,
   Settings2,
   Navigation,
   Award,
-  BadgeDollarSign,
   Layers,
   ListChecks,
-  SlidersHorizontal,
   Activity,
-  BarChart2,
   ThumbsUp,
   AlertTriangle,
   ClipboardList,
@@ -69,8 +61,6 @@ import {
   Sparkles,
   Wind,
   Shield,
-  Anchor,
-  Radio,
   Thermometer,
   MonitorSmartphone,
   Tv2,
@@ -78,18 +68,20 @@ import {
   Armchair,
   CircleDot,
   PlugZap,
-  LogIn,
   Handshake,
   BookOpen,
-  CreditCard,
   HelpCircle,
-  BadgeAlert,
   CheckCheck,
   ArrowRight,
   Timer,
-  Hash,
+  MapPinned,
+  MapPinIcon,
+  PhoneCall,
+  PhoneIncomingIcon,
+  CalendarClock,
+  Workflow,
 } from "lucide-react";
-import { FaCar } from "react-icons/fa";
+import { FaCar, FaHandshake, } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import ThemeToggle from "../../components/theme/ThemeToggle";
@@ -803,6 +795,7 @@ const PortalVehicleDetails = () => {
         setVehicle(v);
         setWhatsappLink(res.data.whatsappLink);
         setBookingRequest(res.data.bookingRequest || null);
+        // 🔍 FIXED: Use count directly from backend - no heuristics
         const count = v.wishlistCount ?? 0;
         wishlistCountRef.current = count;
         setWishlistCount(count);
@@ -824,15 +817,17 @@ const PortalVehicleDetails = () => {
         { headers: authHeaders() },
       );
       if (res.data.success && typeof res.data.count === "number") {
-        if (res.data.count !== wishlistCountRef.current) {
-          wishlistCountRef.current = res.data.count;
-          setWishlistCount(res.data.count);
+        // 🔍 FIXED: Use count directly from backend
+        const serverCount = res.data.count;
+        if (serverCount !== wishlistCountRef.current) {
+          wishlistCountRef.current = serverCount;
+          setWishlistCount(serverCount);
         }
       }
     } catch {
       // silent
     }
-  }, [id, authHeaders]);
+  }, [id, authHeaders, isWishlisted]);
 
   useEffect(() => {
     if (!token) {
@@ -894,40 +889,65 @@ const PortalVehicleDetails = () => {
         message ||
           (nextWishlisted ? "❤ Added to wishlist" : "Removed from wishlist"),
       );
-      setTimeout(async () => {
-        try {
-          const res = await axios.get(
-            `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/preownedcars/${id}/wishlist-count`,
-            { headers: authHeaders() },
-          );
-          if (res.data.success && typeof res.data.count === "number") {
-            wishlistCountRef.current = res.data.count;
-            setWishlistCount(res.data.count);
-          }
-        } catch {
-          // silent
-        }
-      }, 1200);
     },
     [id, authHeaders],
   );
 
   useEffect(() => {
+    let pending = null;
+    const refreshCount = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/vehicle-sales/marketplace/preownedcars/${id}/wishlist-count`,
+          { headers: authHeaders() },
+        );
+        if (res.data.success && typeof res.data.count === "number") {
+          // 🔍 FIXED: Use count directly from backend
+          const serverCount = res.data.count;
+          if (serverCount !== wishlistCountRef.current) {
+            wishlistCountRef.current = serverCount;
+            setWishlistCount(serverCount);
+          }
+        }
+      } catch (err) {
+        // silent
+      }
+    };
+
     const handler = (e) => {
       try {
-        const { vehicleId, wishlisted } = e.detail || {};
+        const { vehicleId, source, count } = e.detail || {};
         if (!vehicleId || vehicleId !== id) return;
-        const prev = wishlistCountRef.current || 0;
-        const next = wishlisted ? prev + 1 : Math.max(0, prev - 1);
-        wishlistCountRef.current = next;
-        setWishlistCount(next);
+        // Ignore optimistic updates; only refresh on confirmed/rollback
+        if (source === "optimistic") return;
+        // If server included a count with the event, use it immediately
+        if (typeof count === "number") {
+          // 🔍 FIXED: Use count directly from server response
+          const serverCount = count;
+          if (serverCount !== wishlistCountRef.current) {
+            wishlistCountRef.current = serverCount;
+            setWishlistCount(serverCount);
+          }
+          return;
+        }
+
+        // debounce refresh to coalesce multiple events
+        if (pending) clearTimeout(pending);
+        pending = setTimeout(() => {
+          pending = null;
+          void refreshCount();
+        }, 300);
       } catch (err) {
         // ignore
       }
     };
+
     window.addEventListener("wishlist:changed", handler);
-    return () => window.removeEventListener("wishlist:changed", handler);
-  }, [id]);
+    return () => {
+      if (pending) clearTimeout(pending);
+      window.removeEventListener("wishlist:changed", handler);
+    };
+  }, [id, authHeaders, isWishlisted]);
 
   /* ── LOADING ── */
   if (loading)
@@ -942,7 +962,7 @@ const PortalVehicleDetails = () => {
         </div>
         <div className="text-center">
           <p className="text-slate-800 dark:text-zinc-200 font-black text-sm flex items-center gap-2 justify-center">
-            <CarFront className="w-4 h-4 text-blue-500" /> Loading Vehicle
+            <FaCar className="w-4 h-4 text-blue-500" /> Loading Vehicle
           </p>
           <p className="text-slate-400 dark:text-zinc-500 font-medium text-xs mt-1">
             Fetching listing details…
@@ -1254,14 +1274,14 @@ const PortalVehicleDetails = () => {
                 />
                 {vehicle.drivetrain && (
                   <StatCard
-                    icon={Anchor}
+                    icon={Workflow}
                     label="Drivetrain"
                     value={vehicle.drivetrain}
                   />
                 )}
                 {vehicle.topSpeed && (
                   <StatCard
-                    icon={TrendingUp}
+                    icon={Gauge}
                     label="Top Speed"
                     value={
                       vehicle?.topSpeed ? (
@@ -1340,7 +1360,7 @@ const PortalVehicleDetails = () => {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {/* Brand Badge */}
                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
-                  <CarFront className="w-3 h-3" /> {vehicle.brand}
+                  <FaCar className="w-3 h-3" /> {vehicle.brand}
                 </span>
 
                 {/* Status Badge */}
@@ -1432,7 +1452,7 @@ const PortalVehicleDetails = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full auto-rows-fr">
                 {[
                   { icon: Award, label: "Brand", value: vehicle.brand },
-                  { icon: CarFront, label: "Model", value: vehicle.model },
+                  { icon: FaCar, label: "Model", value: vehicle.model },
                   vehicle.variant && {
                     icon: Layers,
                     label: "Variant",
@@ -1451,7 +1471,17 @@ const PortalVehicleDetails = () => {
                   },
                   { icon: Fuel, label: "Fuel Type", value: vehicle.fuelType },
                   {
-                    icon: SlidersHorizontal,
+                    icon: () => (
+                      <svg
+                        className="w-3.5 h-3.5 text-gray-500"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        aria-hidden="true"
+                        role="img"
+                      >
+                        <path d="M12.76 15.74H2.93c-.86 0-1.56-.7-1.56-1.56s.7-1.56 1.56-1.56h1.82a1.694 1.694 0 011.5-2.47h.18l1.08-4.69a3.088 3.088 0 01-1.23-2.47 3.1 3.1 0 016.2.01 3.1 3.1 0 01-2.2 2.96l-.96 4.2h.12c.93 0 1.69.76 1.69 1.69 0 .28-.07.54-.19.78h1.82c.86 0 1.56.7 1.56 1.56s-.7 1.56-1.56 1.56zm-9.83-2.11a.56.56 0 100 1.12h9.84a.56.56 0 100-1.12H2.93zm3.32-2.47c-.38 0-.69.31-.69.69s.31.69.69.69h3.19c.38 0 .69-.31.69-.69s-.31-.69-.69-.69H6.25zm1.21-1h.83l.93-4.07a2.64 2.64 0 01-.8-.15l-.97 4.21zM9.38.9a2.1 2.1 0 100 4.2 2.1 2.1 0 000-4.2z"></path>
+                      </svg>
+                    ),
                     label: "Transmission",
                     value: vehicle.transmission,
                   },
@@ -1468,7 +1498,7 @@ const PortalVehicleDetails = () => {
                   },
                   { icon: Palette, label: "Color", value: vehicle.color },
                   vehicle.bodyType && {
-                    icon: CarFront,
+                    icon: FaCar,
                     label: "Body Type",
                     value: vehicle.bodyType,
                   },
@@ -1508,7 +1538,7 @@ const PortalVehicleDetails = () => {
                   (vehicle.rtoState || vehicle.regState) && (
                     <div className="col-span-1 sm:col-span-2">
                       <StatCard
-                        icon={Navigation}
+                        icon={MapPinned}
                         accent={true}
                         label="RTO Info"
                         value={[
@@ -1540,8 +1570,7 @@ const PortalVehicleDetails = () => {
                   <div className="min-w-0 flex-1">
                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 flex items-center gap-1">
                       <Building className="w-3 h-3" />
-                      {vehicle.sellerType ||
-                        (isGarage ? "Garage Dealer" : "Private Seller")}
+                      {`${isGarage && "From Garage"}`}
                     </p>
                     <h4 className="font-black capitalize text-slate-800 dark:text-zinc-100 text-base flex items-center gap-1.5 mt-0.5 leading-tight">
                       {vehicle.sellerName ||
@@ -1561,7 +1590,7 @@ const PortalVehicleDetails = () => {
                     </h4>
                     {(vehicle.sellerLocation || vehicle.ownerId?.city) && (
                       <p className="text-xs font-medium capitalize text-slate-400 dark:text-zinc-500 mt-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />{" "}
+                        <MapPinIcon className="w-3 h-3" />{" "}
                         {vehicle.sellerLocation || vehicle.ownerId.city}
                       </p>
                     )}
@@ -1570,7 +1599,7 @@ const PortalVehicleDetails = () => {
 
                 <div className="space-y-1">
                   <ContactRow
-                    icon={Phone}
+                    icon={PhoneIncomingIcon}
                     label="Mobile Number"
                     value={
                       vehicle.sellerPhone ||
@@ -1646,7 +1675,7 @@ const PortalVehicleDetails = () => {
                               : "bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-zinc-900"
                           }`}
                         >
-                          <Handshake className="w-4 h-4" />
+                          <FaHandshake className="w-4 h-4" />
                           Booking Request
                         </button>
                         {vehicle.testDriveAvailable && (
@@ -1660,7 +1689,7 @@ const PortalVehicleDetails = () => {
                                 : "bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-zinc-900"
                             }`}
                           >
-                            <Navigation className="w-4 h-4" />
+                            <CalendarClock className="w-4 h-4" />
                             Test Drive
                           </button>
                         )}
@@ -1685,12 +1714,12 @@ const PortalVehicleDetails = () => {
                           </>
                         ) : bookingType === "test-drive" ? (
                           <>
-                            <Navigation className="w-4 h-4" />
+                            <CalendarClock className="w-4 h-4" />
                             Request Test Drive
                           </>
                         ) : (
                           <>
-                            <Handshake className="w-4 h-4" />
+                            <FaHandshake className="w-4 h-4" />
                             Request Booking
                           </>
                         )}

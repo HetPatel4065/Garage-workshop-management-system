@@ -1049,7 +1049,7 @@ export default function MarketplaceListings({
           onClick={(e) => {
             if (e.target.closest("[data-wishlist-btn]")) return;
             if (isCustomer) {
-              navigate(`/portal/marketplace/preownedcars/${item._id}`);
+              navigate(`/portal/marketplace/pre-owned-cars/${item._id}`);
             }
           }}
           className={`bg-white dark:bg-zinc-900 rounded-md border border-slate-200/80 dark:border-zinc-800 overflow-hidden flex flex-col shadow-xs group hover:border-emerald-300 dark:hover:border-zinc-700 transition-all duration-300 ${
@@ -1196,7 +1196,7 @@ export default function MarketplaceListings({
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    navigate(`/portal/marketplace/preownedcars/${item._id}`);
+                    navigate(`/portal/marketplace/pre-owned-cars/${item._id}`);
                   }}
                   className="w-full px-4 py-3 bg-slate-300 hover:bg-slate-500 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 rounded-xl text-sm font-bold transition-all border border-transparent flex items-center justify-center gap-2 cursor-auto shadow-sm active:scale-[0.98]"
                 >

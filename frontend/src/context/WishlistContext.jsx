@@ -120,7 +120,8 @@ export const WishlistProvider = ({ children }) => {
         );
 
         if (res.data.success) {
-          // Broadcast confirmed server response
+          // 🔍 FIXED: Always include count in confirmed response
+          // Broadcast confirmed server response with count
           try {
             window.dispatchEvent(
               new CustomEvent("wishlist:changed", {
@@ -128,6 +129,10 @@ export const WishlistProvider = ({ children }) => {
                   vehicleId,
                   wishlisted: res.data.wishlisted,
                   source: "confirmed",
+                  count:
+                    typeof res.data.count === "number"
+                      ? res.data.count
+                      : undefined,
                 },
               }),
             );
@@ -138,10 +143,12 @@ export const WishlistProvider = ({ children }) => {
             success: true,
             wishlisted: res.data.wishlisted,
             message: res.data.message,
+            count: res.data.count,
           };
         } else {
           // Rollback on API error
           setWishlistIds(wishlistIds);
+          // 🔍 FIXED: Keep old state for rollback
           try {
             window.dispatchEvent(
               new CustomEvent("wishlist:changed", {
