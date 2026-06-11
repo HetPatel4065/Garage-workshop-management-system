@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Owner from "../models/Owner.js";
+import bcrypt from "bcryptjs";
 import Advisor from "../models/Advisor.js";
 import Mechanic from "../models/Mechanic.js";
 import GarageSettings from "../models/GarageSettings.js";
@@ -12,6 +13,30 @@ import fs from "fs/promises";
 import { logActivity } from "../utils/activityLogger.js";
 
 const resolveUserByIdAcrossCollections = async (id) => {
+  if (typeof id === "string" && id.includes("_co_")) {
+    const [parentOwnerId, idxStr] = id.split("_co_");
+    const idx = parseInt(idxStr);
+    const parentOwner = await Owner.findById(parentOwnerId).select("+password");
+    if (parentOwner && parentOwner.coOwners && parentOwner.coOwners[idx]) {
+      const co = parentOwner.coOwners[idx];
+      const coObj = {
+        _id: id,
+        name: co.name,
+        email: co.email,
+        password: co.password,
+        role: "owner",
+        isCoOwner: true,
+        garageId: parentOwner.garageId,
+        garageName: parentOwner.garageName,
+        address: parentOwner.address,
+        mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
+        isActive: parentOwner.isActive,
+        permissions: parentOwner.permissions || ["all"],
+        toObject: function() { return this; }
+      };
+      return coObj;
+    }
+  }
   let user = await User.findById(id).select("+password");
   if (!user) user = await Owner.findById(id).select("+password");
   if (!user) user = await Advisor.findById(id).select("+password");
@@ -128,6 +153,7 @@ export const register = async (req, res) => {
       let finalMobileNumber = mobileNumber;
       let finalLogo = undefined;
       let createSettings = false;
+      let isCoOwnerAdded = false;
 
       let existingVerificationStatus = "Pending";
       const garageId = targetGarageId || req.body.garageId;
@@ -136,6 +162,7 @@ export const register = async (req, res) => {
         // skip garage creation
         const existingGarage = await Owner.findOne({
           garageId: garageId,
+          isCoOwner: { $ne: true }
         });
         if (!existingGarage) {
           return res
@@ -148,12 +175,47 @@ export const register = async (req, res) => {
           email,
           garageId: existingGarage.garageId,
         });
-        if (alreadyOwnerOfGarage) {
+        const alreadyCoOwnerOfGarage = existingGarage.coOwners?.some(
+          (co) => co.email.toLowerCase() === email.toLowerCase()
+        );
+        if (alreadyOwnerOfGarage || alreadyCoOwnerOfGarage) {
           return res.status(400).json({
             error: "This user is already an Owner of the selected Garage",
           });
         }
 
+        // Add to the coOwners array of the existing primary owner document (no new database entry in Owner table)
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        existingGarage.coOwners = existingGarage.coOwners || [];
+        existingGarage.coOwners.push({
+          name,
+          email,
+          mobileNumber,
+          password: hashedPassword,
+        });
+
+        await existingGarage.save();
+
+        const idx = existingGarage.coOwners.length - 1;
+        user = {
+          _id: `${existingGarage._id}_co_${idx}`,
+          name,
+          email,
+          mobileNumber,
+          role: "owner",
+          isCoOwner: true,
+          garageId: existingGarage.garageId,
+          garageName: existingGarage.garageName,
+          address: existingGarage.address,
+          logo: existingGarage.logo,
+          verificationStatus: existingGarage.verificationStatus || "Verified",
+          isActive: existingGarage.isActive,
+          toObject: function() { return this; }
+        };
+
+        isCoOwnerAdded = true;
         garageIdToUse = existingGarage.garageId;
         finalGarageName = existingGarage.garageName;
         finalAddress = existingGarage.address;
@@ -192,66 +254,68 @@ export const register = async (req, res) => {
         createSettings = true;
       }
 
-      const existingOwnerCount = await Owner.countDocuments({
-        garageId: garageIdToUse,
-      });
-
-      const garageData = {
-        ...userData,
-        garageId: garageIdToUse,
-        garageName: finalGarageName,
-        address: finalAddress,
-        mobileNumber: finalMobileNumber,
-        logo: finalLogo,
-        isCoOwner: existingOwnerCount > 0,
-        verificationStatus: existingVerificationStatus,
-      };
-
-      if (req.file) {
-        // configure cloudinary
-        if (process.env.CLOUDINARY_URL) {
-          cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
-        } else {
-          cloudinary.config({
-            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET,
-          });
-        }
-        try {
-          const uploaded = await cloudinary.uploader.upload(req.file.path, {
-            folder: `garage_logos/${garageIdToUse}`,
-          });
-          if (uploaded && uploaded.secure_url) {
-            garageData.logo = uploaded.secure_url;
-          }
-        } catch (err) {
-          console.error("Cloudinary upload failed for owner logo:", err);
-          garageData.logo = req.file.path.replace(/\\/g, "/");
-        }
-        try {
-          await fs.unlink(req.file.path);
-        } catch (err) {
-          // ignore
-        }
-      }
-
-      user = await Owner.create(garageData);
-
-      // ⚙️ INITIALIZE DEFAULT SETTINGS FOR NEW OWNER ONLY IF NEW GARAGE
-      if (createSettings) {
-        await GarageSettings.create({
-          ownerId: user._id,
-          garageName: user.garageName,
-          contactNumber: user.mobileNumber,
-          businessAddress: user.address,
-          notifications: {
-            emailReports: true, // Default to true so they get reports
-            serviceReminders: true, // Default to true
-            lowStock: true,
-            reminderSchedule: [-7, -3, 0, 3],
-          },
+      if (!isCoOwnerAdded) {
+        const existingOwnerCount = await Owner.countDocuments({
+          garageId: garageIdToUse,
         });
+
+        const garageData = {
+          ...userData,
+          garageId: garageIdToUse,
+          garageName: finalGarageName,
+          address: finalAddress,
+          mobileNumber: finalMobileNumber,
+          logo: finalLogo,
+          isCoOwner: existingOwnerCount > 0,
+          verificationStatus: existingVerificationStatus,
+        };
+
+        if (req.file) {
+          // configure cloudinary
+          if (process.env.CLOUDINARY_URL) {
+            cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+          } else {
+            cloudinary.config({
+              cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+              api_key: process.env.CLOUDINARY_API_KEY,
+              api_secret: process.env.CLOUDINARY_API_SECRET,
+            });
+          }
+          try {
+            const uploaded = await cloudinary.uploader.upload(req.file.path, {
+              folder: `garage_logos/${garageIdToUse}`,
+            });
+            if (uploaded && uploaded.secure_url) {
+              garageData.logo = uploaded.secure_url;
+            }
+          } catch (err) {
+            console.error("Cloudinary upload failed for owner logo:", err);
+            garageData.logo = req.file.path.replace(/\\/g, "/");
+          }
+          try {
+            await fs.unlink(req.file.path);
+          } catch (err) {
+            // ignore
+          }
+        }
+
+        user = await Owner.create(garageData);
+
+        // ⚙️ INITIALIZE DEFAULT SETTINGS FOR NEW OWNER ONLY IF NEW GARAGE
+        if (createSettings) {
+          await GarageSettings.create({
+            ownerId: user._id,
+            garageName: user.garageName,
+            contactNumber: user.mobileNumber,
+            businessAddress: user.address,
+            notifications: {
+              emailReports: true, // Default to true so they get reports
+              serviceReminders: true, // Default to true
+              lowStock: true,
+              reminderSchedule: [-7, -3, 0, 3],
+            },
+          });
+        }
       }
     } else if (role === "advisor") {
       user = await Advisor.create(userData);
@@ -333,6 +397,35 @@ export const login = async (req, res) => {
     if (!user) user = await Mechanic.findOne({ email }).select("+password");
 
     if (!user) {
+      const parentOwner = await Owner.findOne({ "coOwners.email": email.toLowerCase() }).select("+password");
+      if (parentOwner) {
+        const co = parentOwner.coOwners.find(c => c.email.toLowerCase() === email.toLowerCase());
+        if (co) {
+          user = {
+            _id: `${parentOwner._id}_co_${parentOwner.coOwners.indexOf(co)}`,
+            name: co.name,
+            email: co.email,
+            password: co.password,
+            role: "owner",
+            isCoOwner: true,
+            garageId: parentOwner.garageId,
+            garageName: parentOwner.garageName,
+            address: parentOwner.address,
+            mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
+            isActive: parentOwner.isActive,
+            comparePassword: async function(candidatePassword) {
+              if (!candidatePassword || !this.password) return false;
+              return await bcrypt.compare(candidatePassword, this.password);
+            },
+            toObject: function() {
+              return { ...this };
+            }
+          };
+        }
+      }
+    }
+
+    if (!user) {
       console.warn("Login Failed: User not found", { email });
       return res
         .status(401)
@@ -343,7 +436,43 @@ export const login = async (req, res) => {
       console.warn("Login Failed: Account inactive", { email });
       return res
         .status(403)
-        .json({ error: "Your account is inactive. Please contact the owner." });
+        .json({ error: "Your garage has been susupended. Please contact the Administrator." });
+    }
+
+    // Check if user's garage is suspended (only for non-admin users)
+    if (user.role !== "admin") {
+      let garageSuspended = false;
+      if (user.role === "owner") {
+        if (user.garageId) {
+          const primaryOwner = await Owner.findOne({
+            garageId: user.garageId,
+            isCoOwner: { $ne: true },
+          });
+          if (primaryOwner && primaryOwner.isActive === false) {
+            garageSuspended = true;
+          }
+        }
+      } else {
+        const primaryOwnerId = user.ownerId;
+        if (primaryOwnerId) {
+          let primaryOwner = await Owner.findById(primaryOwnerId);
+          if (!primaryOwner) {
+            primaryOwner = await User.findById(primaryOwnerId);
+          }
+          if (primaryOwner && primaryOwner.isActive === false) {
+            garageSuspended = true;
+          }
+        }
+      }
+
+      if (garageSuspended) {
+        console.warn("Login Failed: Garage suspended", { email });
+        const errMsg = user.role === "owner" &&
+           "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
+        return res
+          .status(403)
+          .json({ error: errMsg });
+      }
     }
 
     const isMatch = await user.comparePassword(password);
@@ -539,7 +668,45 @@ export const refreshToken = async (req, res) => {
       return res.status(401).json({ error: "Account no longer exists" });
     }
 
+    if (user.isActive === false) {
+      return res.status(403).json({ error: "Account is inactive" });
+    }
+
     const role = String(user.role || "").toLowerCase();
+
+    // Check if user's garage is suspended
+    if (role !== "admin") {
+      let garageSuspended = false;
+      if (role === "owner") {
+        if (user.garageId) {
+          const primaryOwner = await Owner.findOne({
+            garageId: user.garageId,
+            isCoOwner: { $ne: true },
+          });
+          if (primaryOwner && primaryOwner.isActive === false) {
+            garageSuspended = true;
+          }
+        }
+      } else {
+        const primaryOwnerId = user.ownerId;
+        if (primaryOwnerId) {
+          let primaryOwner = await Owner.findById(primaryOwnerId);
+          if (!primaryOwner) {
+            primaryOwner = await User.findById(primaryOwnerId);
+          }
+          if (primaryOwner && primaryOwner.isActive === false) {
+            garageSuspended = true;
+          }
+        }
+      }
+
+      if (garageSuspended) {
+        const errMsg = role === "owner"
+          ? "Access denied. Your garage has been suspended by the administrator."
+          : "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
+        return res.status(403).json({ error: errMsg });
+      }
+    }
     const permissions = Array.isArray(user.permissions) ? user.permissions : [];
     const extraClaims =
       role === "admin" && decoded.effectiveOwnerId
@@ -619,11 +786,12 @@ export const getStaff = async (req, res) => {
               mobileNumber: co.mobileNumber,
               role: "owner",
               isCoOwner: true,
+              parentOwnerId: obj._id,        // needed for admin toggle endpoint
               garageId: obj.garageId,
               garageName: obj.garageName,
               address: obj.address,
               verificationStatus: obj.verificationStatus,
-              isActive: obj.isActive,
+              isActive: co.isActive !== undefined ? co.isActive : true,  // co-owner's own status
               createdAt: co.createdAt || obj.createdAt,
             });
           });
@@ -911,11 +1079,14 @@ export const completeOwnerOnboarding = async (req, res) => {
     if (lead.garageId) {
       const existingOwner = await Owner.findOne({ garageId: garageIdToUse });
       if (existingOwner) {
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(password, salt);
         existingOwner.coOwners = existingOwner.coOwners || [];
         existingOwner.coOwners.push({
           name: lead.ownerName,
           email: lead.email,
           mobileNumber: lead.mobileNumber,
+          password: hashedPassword,
         });
         await existingOwner.save();
         owner = existingOwner;

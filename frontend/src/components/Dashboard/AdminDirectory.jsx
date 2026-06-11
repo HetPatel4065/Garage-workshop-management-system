@@ -333,7 +333,7 @@ export default function AdminDirectory() {
                 <div className="flex justify-between items-start mb-3.5 gap-2">
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${garage.isActive ? "bg-emerald-500" : "bg-rose-500"}`}
+                      className={`h-2.5 w-2.5 rounded-full animate-pulse ${garage.isActive ? "bg-emerald-500" : "bg-rose-500"}`}
                     />
                     <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
                       {garage.isActive ? "Active" : "Suspended"}

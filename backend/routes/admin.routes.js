@@ -3,6 +3,7 @@ import { auth, requireRole } from "../middleware/auth.middleware.js";
 import {
   getGarages,
   toggleGarageStatus,
+  toggleOwnerMemberStatus,
   updateVerificationStatus,
   deleteGarage,
   sendAnnouncement,
@@ -17,6 +18,7 @@ router.use(requireRole("admin"));
 // Route mappings
 router.get("/garages", getGarages);
 router.patch("/garages/:id/status", toggleGarageStatus);
+router.patch("/garages/:id/member-status", toggleOwnerMemberStatus);
 router.patch("/garages/:id/verification", updateVerificationStatus);
 router.delete("/garages/:id", deleteGarage);
 router.post("/garages/:id/announcement", sendAnnouncement);

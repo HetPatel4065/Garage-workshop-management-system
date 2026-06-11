@@ -21,9 +21,38 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Search across all staff collections with explicit role tracking
-    let user = await User.findById(decoded.id).select("-password");
-    let detectedRole = user?.role || null;
+    let user = null;
+    let detectedRole = null;
 
+    if (typeof decoded.id === "string" && decoded.id.includes("_co_")) {
+      const [parentOwnerId, idxStr] = decoded.id.split("_co_");
+      const idx = parseInt(idxStr);
+      const parentOwner = await Owner.findById(parentOwnerId).select("-password");
+      if (parentOwner && parentOwner.coOwners && parentOwner.coOwners[idx]) {
+        const co = parentOwner.coOwners[idx];
+        user = {
+          _id: decoded.id,
+          name: co.name,
+          email: co.email,
+          role: "owner",
+          isCoOwner: true,
+          garageId: parentOwner.garageId,
+          garageName: parentOwner.garageName,
+          address: parentOwner.address,
+          logo: parentOwner.logo,
+          mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
+          isActive: parentOwner.isActive,
+          permissions: parentOwner.permissions || ["all"],
+          toObject: function() { return this; }
+        };
+        detectedRole = "owner";
+      }
+    }
+
+    if (!user) {
+      user = await User.findById(decoded.id).select("-password");
+      if (user) detectedRole = user.role || null;
+    }
     if (!user) {
       user = await Owner.findById(decoded.id).select("-password");
       if (user) detectedRole = "owner";
@@ -163,6 +192,44 @@ const auth = async (req, res, next) => {
       }
     }
 
+    // 🛡️ ACTIVE STATUS & GARAGE SUSPENSION CHECK
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Access denied. Your account is inactive." });
+    }
+
+    if (userObj.role !== "admin") {
+      let garageSuspended = false;
+      if (userObj.role === "owner") {
+        if (user.garageId) {
+          const primaryOwner = await Owner.findOne({
+            garageId: user.garageId,
+            isCoOwner: { $ne: true },
+          }).sort({ createdAt: 1 });
+          if (primaryOwner && primaryOwner.isActive === false) {
+            garageSuspended = true;
+          }
+        }
+      } else {
+        const primaryOwnerId = userObj.effectiveOwnerId;
+        if (primaryOwnerId) {
+          let primaryOwner = await Owner.findById(primaryOwnerId);
+          if (!primaryOwner) {
+            primaryOwner = await User.findById(primaryOwnerId);
+          }
+          if (primaryOwner && primaryOwner.isActive === false) {
+            garageSuspended = true;
+          }
+        }
+      }
+
+      if (garageSuspended) {
+        const msg = userObj.role === "owner"
+          ? "Access denied. Your garage has been suspended by the administrator."
+          : "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
+        return res.status(403).json({ message: msg });
+      }
+    }
+
     req.user = userObj;
     next();
   } catch (error) {
@@ -236,9 +303,38 @@ const optionalAuth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    let user = await User.findById(decoded.id).select("-password");
-    let detectedRole = user?.role || null;
+    let user = null;
+    let detectedRole = null;
 
+    if (typeof decoded.id === "string" && decoded.id.includes("_co_")) {
+      const [parentOwnerId, idxStr] = decoded.id.split("_co_");
+      const idx = parseInt(idxStr);
+      const parentOwner = await Owner.findById(parentOwnerId).select("-password");
+      if (parentOwner && parentOwner.coOwners && parentOwner.coOwners[idx]) {
+        const co = parentOwner.coOwners[idx];
+        user = {
+          _id: decoded.id,
+          name: co.name,
+          email: co.email,
+          role: "owner",
+          isCoOwner: true,
+          garageId: parentOwner.garageId,
+          garageName: parentOwner.garageName,
+          address: parentOwner.address,
+          logo: parentOwner.logo,
+          mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
+          isActive: parentOwner.isActive,
+          permissions: parentOwner.permissions || ["all"],
+          toObject: function() { return this; }
+        };
+        detectedRole = "owner";
+      }
+    }
+
+    if (!user) {
+      user = await User.findById(decoded.id).select("-password");
+      if (user) detectedRole = user.role || null;
+    }
     if (!user) {
       user = await Owner.findById(decoded.id).select("-password");
       if (user) detectedRole = "owner";

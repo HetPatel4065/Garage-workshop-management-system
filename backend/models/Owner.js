@@ -45,6 +45,8 @@ const ownerSchema = new mongoose.Schema(
         name: { type: String, trim: true },
         email: { type: String, trim: true },
         mobileNumber: { type: String, trim: true },
+        password: { type: String },
+        isActive: { type: Boolean, default: true },
       },
     ],
     address: {
@@ -90,6 +92,10 @@ const ownerSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    isGarageSuspended: {
+      type: Boolean,
+      default: false,
     },
     verificationStatus: {
       type: String,

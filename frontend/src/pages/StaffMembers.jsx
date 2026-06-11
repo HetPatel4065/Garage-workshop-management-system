@@ -400,13 +400,67 @@ export default function StaffMembers() {
       addToast("You cannot deactivate your own account", "error");
       return;
     }
+
     const newStatus = !member.isActive;
+
+    // Optimistic update
     setStaff((prev) =>
       prev.map((m) =>
         m._id === member._id ? { ...m, isActive: newStatus } : m,
       ),
     );
+
     try {
+      // ── Owner / Co-owner: only admin can toggle, use dedicated endpoint ──
+      if (member.role === "owner") {
+        if (user?.role !== "admin") {
+          addToast("Only admins can activate or deactivate owners", "error");
+          // revert
+          setStaff((prev) =>
+            prev.map((m) =>
+              m._id === member._id ? { ...m, isActive: !newStatus } : m,
+            ),
+          );
+          return;
+        }
+
+        // Determine the garageId (parent owner doc _id) for the endpoint
+        const garageDocId = member.isCoOwner
+          ? member.parentOwnerId   // co-owner stores parentOwnerId
+          : member._id;             // primary owner IS the garage doc
+
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/admin/garages/${garageDocId}/member-status`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              memberId: member._id.toString(), // composite id for co-owners
+              isActive: newStatus,
+            }),
+          },
+        );
+        const data = await res.json();
+        if (!res.ok) {
+          setStaff((prev) =>
+            prev.map((m) =>
+              m._id === member._id ? { ...m, isActive: !newStatus } : m,
+            ),
+          );
+          throw new Error(data.error || "Failed to update owner status");
+        }
+        addToast(
+          `${member.isCoOwner ? "Co-owner" : "Owner"} ${newStatus ? "activated" : "deactivated"} successfully`,
+          newStatus ? "success" : "error",
+        );
+        fetchStaff(true);
+        return;
+      }
+
+      // ── Mechanic / Advisor: use existing staff endpoint ──
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/auth/staff/${member._id}`,
         {
@@ -436,6 +490,7 @@ export default function StaffMembers() {
       addToast(err.message, "error");
     }
   };
+
 
   // ── DELETE ──
   const openDelete = (member) => {
@@ -757,8 +812,13 @@ export default function StaffMembers() {
                       </p>
                       <div className="flex items-center gap-2">
                         <button
-                          disabled={!canManage || member._id === user?._id}
+                          disabled={
+                            !canManage ||
+                            member._id === user?._id ||
+                            (member.role === "owner" && user?.role !== "admin")
+                          }
                           onClick={() => handleToggleStatus(member)}
+                          title={member.role === "owner" && user?.role !== "admin" ? "Only admins can toggle owner status" : undefined}
                           className={`relative inline-flex h-5 w-10 shrink-0 cursor-auto items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${member.isActive !== false ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
                         >
                           <span
@@ -903,9 +963,12 @@ export default function StaffMembers() {
                             <div className="flex items-center gap-2">
                               <button
                                 disabled={
-                                  !canManage || member._id === user?._id
+                                  !canManage ||
+                                  member._id === user?._id ||
+                                  (member.role === "owner" && user?.role !== "admin")
                                 }
                                 onClick={() => handleToggleStatus(member)}
+                                title={member.role === "owner" && user?.role !== "admin" ? "Only admins can toggle owner status" : undefined}
                                 className={`relative inline-flex h-5 w-10 shrink-0 cursor-auto items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${member.isActive !== false ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}
                               >
                                 <span

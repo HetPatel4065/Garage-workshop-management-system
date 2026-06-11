@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Wrench } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -23,6 +23,8 @@ export default function OwnerLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuspendedModal, setShowSuspendedModal] = useState(false);
+  const [suspendedMessage, setSuspendedMessage] = useState("");
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -40,7 +42,12 @@ export default function OwnerLogin() {
       // Owners do not need a Garage ID to authenticate
       await login(email, password, undefined);
     } catch (err) {
-      setError(err.message || "Failed to sign in. Check your credentials.");
+      if (err.message && err.message.toLowerCase().includes("suspended")) {
+        setSuspendedMessage(err.message);
+        setShowSuspendedModal(true);
+      } else {
+        setError(err.message || "Failed to sign in. Check your credentials.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -200,6 +207,43 @@ export default function OwnerLogin() {
           </Link>
         </div>
       </motion.div>
+
+      {/* 🛡️ Suspension Modal Popup */}
+      <AnimatePresence>
+        {showSuspendedModal && (
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="bg-white rounded-2xl shadow-2xl border border-red-100 max-w-md w-full overflow-hidden"
+            >
+              {/* Top Accent bar */}
+              <div className="h-1.5 w-full bg-red-500" />
+              
+              <div className="p-6 text-center">
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-4">
+                  <span className="text-red-500 text-3xl">⚠️</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  Garage Suspended
+                </h3>
+                <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                  {suspendedMessage}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowSuspendedModal(false)}
+                  className="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-colors shadow-xs"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

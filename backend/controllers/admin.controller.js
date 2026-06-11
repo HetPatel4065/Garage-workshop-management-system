@@ -94,7 +94,7 @@ export const getGarages = async (req, res) => {
   }
 };
 
-// 🔒 TOGGLE GARAGE ACTIVE STATUS (SUSPEND/ACTIVATE)
+// 🔒 TOGGLE GARAGE ACTIVE STATUS (SUSPEND/ACTIVATE WHOLE GARAGE)
 export const toggleGarageStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -108,7 +108,7 @@ export const toggleGarageStatus = async (req, res) => {
 
     const owner = await Owner.findByIdAndUpdate(
       id,
-      { $set: { isActive } },
+      { $set: { isActive, isGarageSuspended: !isActive } },
       { new: true },
     ).select("-password");
 
@@ -127,6 +127,65 @@ export const toggleGarageStatus = async (req, res) => {
     res.status(500).json({ error: "Failed to update garage status" });
   }
 };
+
+// 👤 TOGGLE INDIVIDUAL OWNER OR CO-OWNER ACTIVE STATUS
+// PUT /api/admin/garages/:id/member-status
+// body: { memberId: "<ownerId OR parentOwnerId_co_<idx>", isActive: true|false }
+export const toggleOwnerMemberStatus = async (req, res) => {
+  try {
+    const { id } = req.params; // primary owner's _id (garage doc)
+    const { memberId, isActive } = req.body;
+
+    if (!memberId || typeof isActive !== "boolean") {
+      return res
+        .status(400)
+        .json({ error: "memberId and isActive (boolean) are required" });
+    }
+
+    // ── Co-owner embedded in coOwners array ──────────────────────────
+    if (typeof memberId === "string" && memberId.includes("_co_")) {
+      const [parentOwnerId, idxStr] = memberId.split("_co_");
+      const idx = parseInt(idxStr);
+
+      const primaryOwner = await Owner.findById(parentOwnerId);
+      if (!primaryOwner || !primaryOwner.coOwners?.[idx]) {
+        return res.status(404).json({ error: "Co-owner not found" });
+      }
+
+      primaryOwner.coOwners[idx].isActive = isActive;
+      await primaryOwner.save();
+
+      return res.status(200).json({
+        message: `Co-owner has been ${isActive ? "activated" : "deactivated"}`,
+        coOwner: {
+          _id: memberId,
+          name: primaryOwner.coOwners[idx].name,
+          email: primaryOwner.coOwners[idx].email,
+          isActive,
+        },
+      });
+    }
+
+    // ── Primary owner document ────────────────────────────────────────
+    const owner = await Owner.findByIdAndUpdate(
+      memberId,
+      { $set: { isActive } },
+      { new: true },
+    ).select("-password");
+
+    if (!owner)
+      return res.status(404).json({ error: "Owner not found" });
+
+    return res.status(200).json({
+      message: `Owner has been ${isActive ? "activated" : "deactivated"}`,
+      owner,
+    });
+  } catch (err) {
+    console.error("Failed to toggle member status:", err);
+    res.status(500).json({ error: "Failed to update member status" });
+  }
+};
+
 
 // 🛡️ UPDATE GARAGE VERIFICATION STATUS
 export const updateVerificationStatus = async (req, res) => {
