@@ -5,6 +5,7 @@ import {
   sendEmail,
   buildServiceReminderEmail,
 } from "../utils/notifications.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const getNotifications = async (req, res) => {
   try {

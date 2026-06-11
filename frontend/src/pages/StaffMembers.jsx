@@ -155,6 +155,8 @@ export default function StaffMembers() {
 
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [garages, setGarages] = useState([]);
+  const [loadingGarages, setLoadingGarages] = useState(false);
   const location = useLocation();
   const queryParam = new URLSearchParams(location.search).get("q") || "";
   const [roleFilter, setRoleFilter] = useState("all");
@@ -169,6 +171,31 @@ export default function StaffMembers() {
     }
   }, [queryParam]);
 
+  useEffect(() => {
+    if (user?.role === "admin") {
+      const fetchGaragesForSelection = async () => {
+        setLoadingGarages(true);
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/admin/garages?limit=1000`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          if (res.ok) {
+            const data = await res.json();
+            setGarages(data.garages || []);
+          }
+        } catch (err) {
+          console.error("Failed to fetch garages:", err);
+        } finally {
+          setLoadingGarages(false);
+        }
+      };
+      fetchGaragesForSelection();
+    }
+  }, [user, token]);
+
   // Add modal
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addForm, setAddForm] = useState({
@@ -177,6 +204,7 @@ export default function StaffMembers() {
     role: "mechanic",
     mobileNumber: "",
     password: "",
+    targetGarageId: "",
   });
   const [isAdding, setIsAdding] = useState(false);
 
@@ -222,6 +250,9 @@ export default function StaffMembers() {
 
   const filteredStaff = staff
     .filter((m) => {
+      // Owners should only see advisors and mechanics, not other owners
+      if (user?.role === "owner" && m.role === "owner") return false;
+
       const query = (isTyping ? searchQuery : activeSearch).toLowerCase();
       const matchSearch =
         m.name?.toLowerCase().includes(query) ||
@@ -236,11 +267,14 @@ export default function StaffMembers() {
       return (a.name || "").localeCompare(b.name || "");
     });
 
+  const visibleStaff =
+    user?.role === "owner" ? staff.filter((m) => m.role !== "owner") : staff;
+
   const stats = {
-    total: staff.length,
-    mechanics: staff.filter((m) => m.role === "mechanic").length,
-    advisors: staff.filter((m) => m.role === "advisor").length,
-    owners: staff.filter((m) => m.role === "owner").length,
+    total: visibleStaff.length,
+    mechanics: visibleStaff.filter((m) => m.role === "mechanic").length,
+    advisors: visibleStaff.filter((m) => m.role === "advisor").length,
+    owners: visibleStaff.filter((m) => m.role === "owner").length,
   };
 
   const STAFF_STATS_CONFIG = [
@@ -413,8 +447,9 @@ export default function StaffMembers() {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
-      const endpoint =
-        user?.role === "admin"
+      const endpoint = deleteTarget._id?.toString().includes("_co_")
+        ? `${import.meta.env.VITE_API_URL}/auth/staff/${deleteTarget._id}`
+        : user?.role === "admin"
           ? `${import.meta.env.VITE_API_URL}/auth/remove-user/${deleteTarget._id}`
           : `${import.meta.env.VITE_API_URL}/auth/staff/${deleteTarget._id}`;
       const res = await fetch(endpoint, {
@@ -443,6 +478,7 @@ export default function StaffMembers() {
       role: "mechanic",
       mobileNumber: "",
       password: "",
+      targetGarageId: "",
     });
     setAddModalOpen(true);
   };
@@ -450,9 +486,29 @@ export default function StaffMembers() {
   const handleAddStaff = async () => {
     const trimmedName = addForm.name.trim();
     const trimmedEmail = addForm.email.trim();
-    const { role, password } = addForm;
-    if (!trimmedName || !trimmedEmail || !password) {
-      addToast("Please fill in all required fields", "error");
+    const { role, password, targetGarageId } = addForm;
+    // Co-owners don't need email/password — they share primary owner's credentials
+    if (addForm.role === "owner") {
+      if (!trimmedName || !trimmedEmail) {
+        addToast("Please enter the co-owner's name and email", "error");
+        return;
+      }
+    } else {
+      if (!trimmedName || !trimmedEmail || !password) {
+        addToast("Please fill in all required fields", "error");
+        return;
+      }
+    }
+    // Admin must always select a garage for any staff role
+    if (user?.role === "admin" && !targetGarageId) {
+      addToast(
+        "Please select a garage to assign this staff member to",
+        "error",
+      );
+      return;
+    }
+    if (role === "owner" && !targetGarageId) {
+      addToast("Please select a garage for the owner", "error");
       return;
     }
     setIsAdding(true);
@@ -466,15 +522,28 @@ export default function StaffMembers() {
         body: JSON.stringify({
           name: trimmedName,
           email: trimmedEmail,
-          password,
+          password: role === "owner" ? `placeholder_${Date.now()}` : password,
           role,
           mobileNumber: addForm.mobileNumber.trim(),
-          ownerId: user?.effectiveOwnerId || user?._id,
+          ownerId:
+            user?.role !== "admin"
+              ? user?.effectiveOwnerId || user?._id
+              : undefined,
+          targetGarageId: targetGarageId || undefined,
         }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add staff");
-      addToast("Staff member added successfully", "success");
+
+      if (data.sharedCredentials) {
+        addToast(
+          `Co-owner added! They should login with: ${data.loginEmail}`,
+          "success",
+        );
+      } else {
+        addToast("Staff member added successfully", "success");
+      }
       setAddModalOpen(false);
       fetchStaff();
     } catch (err) {
@@ -518,7 +587,7 @@ export default function StaffMembers() {
     "w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 dark:focus:border-blue-500 transition";
 
   return (
-    <div className="max-w-screen h-screen mx-auto bg-gray-100 dark:bg-slate-900 p-4 sm:p-6 cursor-auto">
+    <div className="max-w-screen min-h-screen mx-auto bg-gray-100 dark:bg-slate-900 p-4 sm:p-6 cursor-auto">
       {/* ── HEADER ── */}
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -744,7 +813,7 @@ export default function StaffMembers() {
 
           {/* DESKTOP: TABLE VIEW */}
           <div className="hidden md:block rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="overflow-x-auto scrollbar-hide [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden">
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
                   <tr className="bg-slate-50/80 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
@@ -918,7 +987,7 @@ export default function StaffMembers() {
       {!loading && filteredStaff.length > 0 && (
         <div className="rounded-xl px-4 sm:px-6 mt-5 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
           <p className="text-xs font-semibold text-slate-400 dark:text-slate-500">
-            Showing {filteredStaff.length} of {staff.length} team members
+            Showing {filteredStaff.length} of {visibleStaff.length} team members
           </p>
         </div>
       )}
@@ -983,7 +1052,9 @@ export default function StaffMembers() {
               className={inputCls}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div
+            className={`grid gap-4 ${addForm.role === "owner" ? "grid-cols-1" : "grid-cols-2"}`}
+          >
             <div className="space-y-1.5">
               <Label required>System Role</Label>
               <select
@@ -996,17 +1067,64 @@ export default function StaffMembers() {
                 {user?.role === "admin" && <option value="owner">Owner</option>}
               </select>
             </div>
-            <div className="space-y-1.5">
-              <Label required>Password</Label>
-              <input
-                value={addForm.password}
-                onChange={handleInputChange(setAddForm, "password")}
-                placeholder="••••••••"
-                type="password"
-                className={inputCls}
-              />
-            </div>
+            {addForm.role !== "owner" && (
+              <div className="space-y-1.5">
+                <Label required>Password</Label>
+                <input
+                  value={addForm.password}
+                  onChange={handleInputChange(setAddForm, "password")}
+                  placeholder="••••••••"
+                  type="password"
+                  className={inputCls}
+                />
+              </div>
+            )}
           </div>
+          {/* Admin must always pick a garage; for owners this is only when role=owner */}
+          {(user?.role === "admin" || addForm.role === "owner") && (
+            <div className="space-y-1.5">
+              <Label required>
+                {addForm.role === "owner"
+                  ? "Assign to Garage"
+                  : "Assign to Garage"}
+              </Label>
+              {loadingGarages ? (
+                <div className={`${inputCls} text-slate-400`}>
+                  Loading garages...
+                </div>
+              ) : (
+                <select
+                  value={addForm.targetGarageId}
+                  onChange={handleInputChange(setAddForm, "targetGarageId")}
+                  className={inputCls}
+                  required
+                >
+                  <option value="">-- Select Garage --</option>
+                  {Array.from(
+                    new Map(garages.map((g) => [g.garageId, g])).values(),
+                  ).map((g) => (
+                    <option key={g.garageId} value={g.garageId}>
+                      {g.garageName} (ID: {g.garageId})
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {/* ✅ Warning shown when admin picks a garage for a co-owner */}
+              {addForm.role === "owner" && addForm.targetGarageId && (
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex gap-2 mt-2">
+                  <AlertTriangle
+                    size={15}
+                    className="text-amber-500 shrink-0 mt-0.5"
+                  />
+                  <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                    This co-owner will use their own email but the primary
+                    owner's password to login. No separate password needed.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </Modal>
 

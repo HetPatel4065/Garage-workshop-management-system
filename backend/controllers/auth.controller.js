@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
+import { logActivity } from "../utils/activityLogger.js";
 
 const resolveUserByIdAcrossCollections = async (id) => {
   let user = await User.findById(id).select("+password");
@@ -40,30 +41,61 @@ export const register = async (req, res) => {
       address,
       mobileNumber,
       ownerId,
+      targetGarageId,
     } = req.body;
 
-    // 🛡️ Comprehensive Uniqueness Check (Unified + Legacy collections)
-    const alreadyExists =
-      (await User.findOne({ email })) ||
-      (await Owner.findOne({ email })) ||
-      (await Advisor.findOne({ email })) ||
-      (await Mechanic.findOne({ email }));
+    // Skip duplicate check if this is a co-owner registration (has targetGarageId + role owner)
+    const isCoOwnerRegistration =
+      role === "owner" && (targetGarageId || req.body.garageId);
 
-    if (alreadyExists) {
-      console.warn("Register Attempt Denied: Email already exists", { email });
-      return res
-        .status(400)
-        .json({ error: "Email already registered in system" });
+    if (!isCoOwnerRegistration) {
+      const alreadyExists =
+        (await User.findOne({ email })) ||
+        (await Owner.findOne({ email })) ||
+        (await Advisor.findOne({ email })) ||
+        (await Mechanic.findOne({ email }));
+
+      if (alreadyExists) {
+        console.warn("Register Attempt Denied: Email already exists", {
+          email,
+        });
+        return res
+          .status(400)
+          .json({ error: "Email already registered in system" });
+      }
     }
-
     // 🔗 LINKAGE VALIDATION: Ensure ownerId is a valid ObjectId or null
     let validatedOwnerId = null;
     if (role !== "owner") {
-      if (ownerId && mongoose.Types.ObjectId.isValid(ownerId)) {
-        validatedOwnerId = ownerId;
+      // 🏢 Admin can specify a target garage by garageId (10-digit) to assign staff to correct garage
+      if (targetGarageId && String(targetGarageId).length === 10) {
+        // Resolve the PRIMARY owner (oldest) of the target garage
+        const primaryOwner = await Owner.findOne({
+          garageId: targetGarageId,
+        }).sort({ createdAt: 1 });
+        if (!primaryOwner) {
+          return res
+            .status(400)
+            .json({ error: "Selected garage does not exist" });
+        }
+        validatedOwnerId = primaryOwner._id;
+      } else if (ownerId && mongoose.Types.ObjectId.isValid(ownerId)) {
+        // If ownerId is a valid MongoDB ObjectId, verify it belongs to a primary owner
+        const ownerRecord = await Owner.findById(ownerId);
+        if (ownerRecord) {
+          // Always resolve to primary owner to ensure consistent staff lookup
+          const primaryOwner = await Owner.findOne({
+            garageId: ownerRecord.garageId,
+          }).sort({ createdAt: 1 });
+          validatedOwnerId = primaryOwner ? primaryOwner._id : ownerId;
+        } else {
+          validatedOwnerId = ownerId;
+        }
       } else if (ownerId && String(ownerId).length === 10) {
         // Resolve 10-digit Dashboard PIN -> Actual Mongo _id via Native DB Lookup
-        const ownerMatch = await Owner.findOne({ garageId: ownerId });
+        const ownerMatch = await Owner.findOne({ garageId: ownerId }).sort({
+          createdAt: 1,
+        });
 
         if (!ownerMatch) {
           return res.status(400).json({
@@ -90,23 +122,89 @@ export const register = async (req, res) => {
 
     let user;
     if (role === "owner") {
-      // Generate 10-digit Garage ID natively
-      let newGarageId;
-      let isUnique = false;
-      while (!isUnique) {
-        newGarageId = Math.floor(
-          1000000000 + Math.random() * 9000000000,
-        ).toString();
-        const existing = await Owner.findOne({ garageId: newGarageId });
-        if (!existing) isUnique = true;
+      let garageIdToUse;
+      let finalGarageName = garageName;
+      let finalAddress = address;
+      let finalMobileNumber = mobileNumber;
+      let finalLogo = undefined;
+      let createSettings = false;
+
+      let existingVerificationStatus = "Pending";
+      const garageId = targetGarageId || req.body.garageId;
+      if (garageId) {
+        // use existing garage
+        // skip garage creation
+        const existingGarage = await Owner.findOne({
+          garageId: garageId,
+        });
+        if (!existingGarage) {
+          return res
+            .status(400)
+            .json({ error: "Selected Garage does not exist" });
+        }
+
+        // Prevent duplicate Owner-Garage assignments
+        const alreadyOwnerOfGarage = await Owner.findOne({
+          email,
+          garageId: existingGarage.garageId,
+        });
+        if (alreadyOwnerOfGarage) {
+          return res.status(400).json({
+            error: "This user is already an Owner of the selected Garage",
+          });
+        }
+
+        garageIdToUse = existingGarage.garageId;
+        finalGarageName = existingGarage.garageName;
+        finalAddress = existingGarage.address;
+        finalMobileNumber = existingGarage.mobileNumber;
+        finalLogo = existingGarage.logo;
+        existingVerificationStatus =
+          existingGarage.verificationStatus || "Verified";
+        createSettings = false;
+      } else if (req.user?.role === "admin") {
+        return res.status(400).json({
+          error: "Please select an existing Garage for the new Owner.",
+        });
+      } else {
+        // Prevent duplicate Garage creation
+        const existingGarageByName = await Owner.findOne({
+          garageName: {
+            $regex: new RegExp("^" + (garageName || "").trim() + "$", "i"),
+          },
+        });
+        if (existingGarageByName) {
+          return res.status(400).json({
+            error:
+              "A Garage with this name already exists. Please choose a different name or contact the administrator.",
+          });
+        }
+
+        // Generate 10-digit Garage ID natively
+        let isUnique = false;
+        while (!isUnique) {
+          garageIdToUse = Math.floor(
+            1000000000 + Math.random() * 9000000000,
+          ).toString();
+          const existing = await Owner.findOne({ garageId: garageIdToUse });
+          if (!existing) isUnique = true;
+        }
+        createSettings = true;
       }
+
+      const existingOwnerCount = await Owner.countDocuments({
+        garageId: garageIdToUse,
+      });
 
       const garageData = {
         ...userData,
-        garageId: newGarageId,
-        garageName,
-        address,
-        mobileNumber,
+        garageId: garageIdToUse,
+        garageName: finalGarageName,
+        address: finalAddress,
+        mobileNumber: finalMobileNumber,
+        logo: finalLogo,
+        isCoOwner: existingOwnerCount > 0,
+        verificationStatus: existingVerificationStatus,
       };
 
       if (req.file) {
@@ -122,7 +220,7 @@ export const register = async (req, res) => {
         }
         try {
           const uploaded = await cloudinary.uploader.upload(req.file.path, {
-            folder: `garage_logos/${newGarageId}`,
+            folder: `garage_logos/${garageIdToUse}`,
           });
           if (uploaded && uploaded.secure_url) {
             garageData.logo = uploaded.secure_url;
@@ -140,19 +238,21 @@ export const register = async (req, res) => {
 
       user = await Owner.create(garageData);
 
-      // ⚙️ INITIALIZE DEFAULT SETTINGS FOR NEW OWNER
-      await GarageSettings.create({
-        ownerId: user._id,
-        garageName: user.garageName,
-        contactNumber: user.mobileNumber,
-        businessAddress: user.address,
-        notifications: {
-          emailReports: true, // Default to true so they get reports
-          serviceReminders: true, // Default to true
-          lowStock: true,
-          reminderSchedule: [-7, -3, 0, 3],
-        },
-      });
+      // ⚙️ INITIALIZE DEFAULT SETTINGS FOR NEW OWNER ONLY IF NEW GARAGE
+      if (createSettings) {
+        await GarageSettings.create({
+          ownerId: user._id,
+          garageName: user.garageName,
+          contactNumber: user.mobileNumber,
+          businessAddress: user.address,
+          notifications: {
+            emailReports: true, // Default to true so they get reports
+            serviceReminders: true, // Default to true
+            lowStock: true,
+            reminderSchedule: [-7, -3, 0, 3],
+          },
+        });
+      }
     } else if (role === "advisor") {
       user = await Advisor.create(userData);
     } else if (role === "mechanic") {
@@ -171,6 +271,29 @@ export const register = async (req, res) => {
         type: "info",
         link: "/staff-members",
       });
+    }
+    // ✅ Log when an authenticated user (owner/admin) creates any staff, including co-owners
+    if (req.user) {
+      try {
+        // For owner role additions: use the target garage's garageId so the log
+        // is recorded under the correct garage (important for admin-initiated additions)
+        let overrideGarageId = null;
+        if (role === "owner") {
+          // user is the newly created Owner document — it has garageId
+          overrideGarageId = user.garageId || null;
+        }
+        await logActivity(
+          req,
+          "create",
+          "Staff",
+          `Added ${role} "${name}"`,
+          user._id,
+          {},
+          overrideGarageId,
+        );
+      } catch (logErr) {
+        console.warn("Activity log failed for staff creation:", logErr.message);
+      }
     }
 
     console.log("Register Success:", {
@@ -289,7 +412,9 @@ export const login = async (req, res) => {
     if (user.role === "admin" && garageId) {
       const ownerMatch = await Owner.findOne({
         garageId: String(garageId),
-      }).select("_id");
+      })
+        .sort({ createdAt: 1 })
+        .select("_id");
       if (!ownerMatch) {
         console.warn("Admin Login Failed: Target Garage ID not found", {
           email,
@@ -344,14 +469,23 @@ export const login = async (req, res) => {
     }
 
     //  ATTACH GARAGE DETAILS (For staff members + admin context post-login)
-    const effectiveOwnerId =
+    let effectiveOwnerId =
       userObj.role === "owner"
         ? userObj._id
         : userObj.role === "admin"
           ? effectiveOwnerIdForToken
           : user.ownerId || userObj.ownerId;
 
-    if (userObj.role !== "owner" && effectiveOwnerId) {
+    if (userObj.role === "owner") {
+      const primaryOwner = await Owner.findOne({
+        garageId: userObj.garageId,
+      }).sort({ createdAt: 1 });
+      if (primaryOwner) {
+        effectiveOwnerId = primaryOwner._id;
+      }
+    }
+
+    if (effectiveOwnerId) {
       let ownerDetails = await User.findById(effectiveOwnerId).select(
         "garageName address logo mobileNumber garageId",
       );
@@ -435,26 +569,65 @@ export const getStaff = async (req, res) => {
       staffQueries.push(Mechanic.find({ ownerId }));
     } else if (requestedRole === "advisor") {
       staffQueries.push(Advisor.find({ ownerId }));
+    } else if (requestedRole === "owner") {
+      let garageId;
+      const primaryOwnerObj = await Owner.findById(ownerId);
+      if (primaryOwnerObj) {
+        garageId = primaryOwnerObj.garageId;
+      }
+      if (garageId) {
+        staffQueries.push(Owner.find({ garageId }));
+      } else {
+        staffQueries.push(Owner.findById(ownerId));
+      }
     } else {
+      let garageId;
+      const primaryOwnerObj = await Owner.findById(ownerId);
+      if (primaryOwnerObj) {
+        garageId = primaryOwnerObj.garageId;
+      }
+
       staffQueries = [
         User.find({ ownerId }),
         Advisor.find({ ownerId }),
         Mechanic.find({ ownerId }),
       ];
-      // Only include the Owner in the list if the requester is an admin and no specific role requested
-      if (req.user.role === "admin") {
+      if (garageId) {
+        staffQueries.push(Owner.find({ garageId }));
+      } else {
         staffQueries.push(Owner.findById(ownerId));
       }
     }
 
     const staffResults = await Promise.all(staffQueries);
-    const flattenedStaff = staffResults
+    const flattenedStaff = [];
+
+    staffResults
       .flat()
       .filter(Boolean)
-      .map((member) => {
-        const obj = member.toObject();
+      .forEach((member) => {
+        const obj = member.toObject ? member.toObject() : member;
         delete obj.password;
-        return obj;
+        flattenedStaff.push(obj);
+
+        if (obj.role === "owner" && Array.isArray(obj.coOwners)) {
+          obj.coOwners.forEach((co, idx) => {
+            flattenedStaff.push({
+              _id: `${obj._id}_co_${idx}`,
+              name: co.name,
+              email: co.email,
+              mobileNumber: co.mobileNumber,
+              role: "owner",
+              isCoOwner: true,
+              garageId: obj.garageId,
+              garageName: obj.garageName,
+              address: obj.address,
+              verificationStatus: obj.verificationStatus,
+              isActive: obj.isActive,
+              createdAt: co.createdAt || obj.createdAt,
+            });
+          });
+        }
       });
 
     res.status(200).json(flattenedStaff);
@@ -473,16 +646,33 @@ export const removeStaff = async (req, res) => {
       return res.status(400).json({ error: "Cannot remove owner account" });
     }
 
+    if (staffId.includes("_co_")) {
+      const [pOwnerId, idxStr] = staffId.split("_co_");
+      const idx = parseInt(idxStr);
+      const owner = await Owner.findById(pOwnerId);
+      if (owner && Array.isArray(owner.coOwners) && owner.coOwners[idx]) {
+        owner.coOwners.splice(idx, 1);
+        await owner.save();
+        return res.status(200).json({ message: "Co-owner removed" });
+      }
+    }
+
     const results = await Promise.all([
       User.findOneAndDelete({ _id: staffId, ownerId }),
       Advisor.findOneAndDelete({ _id: staffId, ownerId }),
       Mechanic.findOneAndDelete({ _id: staffId, ownerId }),
+      Owner.findOneAndDelete({ _id: staffId, isCoOwner: true }), // allow removing co-owners
     ]);
 
     const removed = results.some((r) => r !== null);
     if (!removed) {
       return res.status(404).json({ error: "Staff member not found" });
     }
+
+    // ✅ Get the actual removed member for a meaningful log
+    const removedMember = results.find((r) => r !== null);
+    const action = `Removed ${removedMember?.role || "staff"} "${removedMember?.name || staffId}"`;
+    await logActivity(req, "delete", "Staff", action, staffId);
 
     res.status(200).json({ message: "Staff member removed" });
   } catch (error) {
@@ -499,6 +689,29 @@ export const updateStaff = async (req, res) => {
 
     if (!name?.trim()) {
       return res.status(400).json({ error: "Name is required" });
+    }
+
+    if (staffId.includes("_co_")) {
+      const [pOwnerId, idxStr] = staffId.split("_co_");
+      const idx = parseInt(idxStr);
+      const owner = await Owner.findById(pOwnerId);
+      if (owner && Array.isArray(owner.coOwners) && owner.coOwners[idx]) {
+        owner.coOwners[idx].name = name.trim();
+        if (email?.trim()) owner.coOwners[idx].email = email.trim();
+        if (mobileNumber?.trim())
+          owner.coOwners[idx].mobileNumber = mobileNumber.trim();
+        await owner.save();
+
+        const obj = {
+          _id: staffId,
+          name: owner.coOwners[idx].name,
+          email: owner.coOwners[idx].email,
+          mobileNumber: owner.coOwners[idx].mobileNumber,
+          role: "owner",
+          isCoOwner: true,
+        };
+        return res.status(200).json(obj);
+      }
     }
 
     const updatePayload = { name: name.trim() };
@@ -534,6 +747,15 @@ export const updateStaff = async (req, res) => {
 
     const obj = updated.toObject();
     delete obj.password;
+
+    // ✅ Distinguish between toggle and edit
+    const isToggle = req.body.hasOwnProperty("isActive");
+    const description = isToggle
+      ? `${req.body.isActive ? "Activated" : "Deactivated"} ${obj.role} "${obj.name}"`
+      : `Updated ${obj.role} "${obj.name}"`;
+
+    await logActivity(req, "update", "Staff", description, updated._id);
+
     res.status(200).json(obj);
   } catch (error) {
     console.error("UPDATE STAFF ERROR:", error);
@@ -647,43 +869,102 @@ export const completeOwnerOnboarding = async (req, res) => {
         .json({ error: "This email is already registered in the system" });
     }
 
-    // Generate unique 10-digit Garage ID
-    let newGarageId;
-    let isUnique = false;
-    while (!isUnique) {
-      newGarageId = Math.floor(
-        1000000000 + Math.random() * 9000000000,
-      ).toString();
-      const existing = await Owner.findOne({ garageId: newGarageId });
-      if (!existing) isUnique = true;
+    let garageIdToUse;
+    let finalGarageName = lead.garageName;
+    let finalAddress = lead.city;
+    let finalMobileNumber = lead.mobileNumber;
+    let finalLogo = undefined;
+    let createSettings = false;
+
+    const garageId = lead.garageId;
+    if (garageId) {
+      // use existing garage
+      // skip garage creation
+      const existingOwnerForGarage = await Owner.findOne({
+        garageId: garageId,
+      });
+      if (existingOwnerForGarage) {
+        // Additional owner being added to same garage — copy garage details
+        garageIdToUse = existingOwnerForGarage.garageId;
+        finalGarageName = existingOwnerForGarage.garageName;
+        finalAddress = existingOwnerForGarage.address;
+        finalMobileNumber = existingOwnerForGarage.mobileNumber;
+        finalLogo = existingOwnerForGarage.logo;
+      } else {
+        garageIdToUse = garageId;
+      }
+      createSettings = false;
+    } else {
+      // Generate a new garageId — this only runs for legacy leads
+      let isUnique = false;
+      while (!isUnique) {
+        garageIdToUse = Math.floor(
+          1000000000 + Math.random() * 9000000000,
+        ).toString();
+        const existing = await Owner.findOne({ garageId: garageIdToUse });
+        if (!existing) isUnique = true;
+      }
+      createSettings = true;
     }
 
-    // Create the Owner
-    const owner = await Owner.create({
-      name: lead.ownerName,
-      email: lead.email,
-      password,
-      role: "owner",
-      garageId: newGarageId,
-      garageName: lead.garageName,
-      mobileNumber: lead.mobileNumber,
-      address: lead.city, // Map city as initial address
-      verificationStatus: "Verified", // Automatically verify onboarding leads
-    });
+    let owner;
+    if (lead.garageId) {
+      const existingOwner = await Owner.findOne({ garageId: garageIdToUse });
+      if (existingOwner) {
+        existingOwner.coOwners = existingOwner.coOwners || [];
+        existingOwner.coOwners.push({
+          name: lead.ownerName,
+          email: lead.email,
+          mobileNumber: lead.mobileNumber,
+        });
+        await existingOwner.save();
+        owner = existingOwner;
+      } else {
+        owner = await Owner.create({
+          name: lead.ownerName,
+          email: lead.email,
+          password,
+          role: "owner",
+          garageId: garageIdToUse,
+          garageName: finalGarageName,
+          mobileNumber: finalMobileNumber,
+          address: finalAddress,
+          logo: finalLogo,
+          isCoOwner: false,
+          verificationStatus: "Verified",
+        });
+      }
+    } else {
+      owner = await Owner.create({
+        name: lead.ownerName,
+        email: lead.email,
+        password,
+        role: "owner",
+        garageId: garageIdToUse,
+        garageName: finalGarageName,
+        mobileNumber: finalMobileNumber,
+        address: finalAddress,
+        logo: finalLogo,
+        isCoOwner: false,
+        verificationStatus: "Verified",
+      });
+    }
 
-    // Create Default Settings
-    await GarageSettings.create({
-      ownerId: owner._id,
-      garageName: owner.garageName,
-      contactNumber: owner.mobileNumber,
-      businessAddress: owner.address,
-      notifications: {
-        emailReports: true,
-        serviceReminders: true,
-        lowStock: true,
-        reminderSchedule: [-7, -3, 0, 3],
-      },
-    });
+    if (createSettings) {
+      // Create Default Settings ONLY for new garage
+      await GarageSettings.create({
+        ownerId: owner._id,
+        garageName: owner.garageName,
+        contactNumber: owner.mobileNumber,
+        businessAddress: owner.address,
+        notifications: {
+          emailReports: true,
+          serviceReminders: true,
+          lowStock: true,
+          reminderSchedule: [-7, -3, 0, 3],
+        },
+      });
+    }
 
     // Invalidate onboarding token
     lead.signupToken = undefined;

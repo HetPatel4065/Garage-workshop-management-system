@@ -1,5 +1,6 @@
 import Mechanic from "../models/Mechanic.js";
 import Service from "../models/Service.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📋 GET MECHANIC PROFILE
 export const getMechanicProfile = async (req, res) => {
@@ -21,7 +22,9 @@ export const getMechanicProfile = async (req, res) => {
 export const getAllMechanics = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;
-    const mechanics = await Mechanic.find({ ownerId }).select("-password").lean();
+    const mechanics = await Mechanic.find({ ownerId })
+      .select("-password")
+      .lean();
     res.status(200).json(mechanics);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch mechanics" });
@@ -34,10 +37,18 @@ export const updateMechanic = async (req, res) => {
     const mechanic = await Mechanic.findOneAndUpdate(
       { _id: req.params.id || req.user.id, ownerId: req.user.effectiveOwnerId },
       { $set: req.body },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).select("-password");
 
     if (!mechanic) return res.status(404).json({ error: "Mechanic not found" });
+    
+    await logActivity(
+      req,
+      "update",
+      "Mechanic",
+      `Updated mechanic "${mechanic.name}"`,
+      mechanic._id,
+    );
     res.status(200).json(mechanic);
   } catch (err) {
     res.status(500).json({ error: "Update failed" });
@@ -52,6 +63,13 @@ export const deleteMechanic = async (req, res) => {
       ownerId: req.user.effectiveOwnerId,
     });
     if (!deleted) return res.status(404).json({ error: "Mechanic not found" });
+    await logActivity(
+      req,
+      "delete",
+      "Mechanic",
+      `Deleted mechanic with ID ${req.params.id}`,
+      req.params.id,
+    );
     res.status(200).json({ message: "Mechanic deleted" });
   } catch (err) {
     res.status(500).json({ error: "Delete failed" });
@@ -61,16 +79,17 @@ export const deleteMechanic = async (req, res) => {
 export const getMechanicServices = async (req, res) => {
   try {
     // 1. Get the mechanic ID from the auth middleware
-    const mechanicId = req.user.id; 
+    const mechanicId = req.user.id;
 
-    // 2. Find services assigned to this mechanic 
-    // .populate() pulls the actual Customer details instead of just an ID
+    // 2. Find services assigned to this mechanic
     const services = await Service.find({ assignedMechanic: mechanicId })
       .populate("customerId", "name phone address vehicleDetails")
       .lean();
 
     if (!services || services.length === 0) {
-      return res.status(200).json({ message: "No services assigned yet", data: [] });
+      return res
+        .status(200)
+        .json({ message: "No services assigned yet", data: [] });
     }
 
     res.status(200).json(services);

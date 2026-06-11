@@ -315,8 +315,7 @@ export default function Notifications() {
   );
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 max-w-screen h-screen mx-auto">
-      {/* ── PAGE HEADER — mirrors Customers ── */}
+    <div className="p-4 sm:p-6 max-w-400 min-h-screen mx-auto bg-slate-950 text-slate-100 antialiased">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -349,7 +348,6 @@ export default function Notifications() {
           </div>
         </div>
       </div>
-
       {/* ── SEARCH + FILTER — mirrors Customers ── */}
       <div className="mb-6 flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1">
@@ -403,7 +401,6 @@ export default function Notifications() {
           </select>
         </div>
       </div>
-
       {/* ── TYPE CHIPS — mirrors Customers' status chips ── */}
       <div className="flex flex-wrap gap-2 mb-6">
         {[
@@ -419,7 +416,6 @@ export default function Notifications() {
           </span>
         ))}
       </div>
-
       {/* ── TOTAL COUNT — mirrors Customers ── */}
       <div className="mt-4 border-t border-gray-100 p-4">
         <p className="text-sm font-medium text-gray-600">
@@ -427,7 +423,6 @@ export default function Notifications() {
           <span className="text-gray-900">{filteredNotifications.length}</span>
         </p>
       </div>
-
       {/* ── NOTIFICATION LIST ── */}
       {filteredNotifications.length > 0 ? (
         <div className="space-y-3">

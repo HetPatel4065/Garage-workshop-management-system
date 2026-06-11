@@ -1,4 +1,5 @@
 import Advisor from "../models/Advisor.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📋 GET ADVISOR PROFILE
 export const getAdvisorProfile = async (req, res) => {
@@ -37,6 +38,14 @@ export const updateAdvisor = async (req, res) => {
     ).select("-password");
 
     if (!advisor) return res.status(404).json({ error: "Advisor not found" });
+
+    await logActivity(
+      req,
+      "update",
+      "Advisor",
+      `Updated advisor "${advisor.name}"`,
+      advisor._id,
+    );
     res.status(200).json(advisor);
   } catch (err) {
     res.status(500).json({ error: "Update failed" });
@@ -51,6 +60,15 @@ export const deleteAdvisor = async (req, res) => {
       ownerId: req.user.effectiveOwnerId,
     });
     if (!deleted) return res.status(404).json({ error: "Advisor not found" });
+
+    await logActivity(
+      req,
+      "delete",
+      "Advisor",
+      `Deleted advisor with ID ${req.params.id}`,
+      req.params.id,
+    );
+
     res.status(200).json({ message: "Advisor deleted" });
   } catch (err) {
     res.status(500).json({ error: "Delete failed" });

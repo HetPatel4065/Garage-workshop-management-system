@@ -12,6 +12,7 @@ import bcrypt from "bcryptjs";
 import { sendEmail, buildDailyReportEmail } from "../utils/notifications.js";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📊 EXPORT DATA
 export const exportData = async (req, res) => {

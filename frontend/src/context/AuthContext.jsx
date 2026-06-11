@@ -91,8 +91,11 @@ export const useAuth = () => useContext(AuthContext);
 
 // ─── Token storage helpers (sessionStorage for cross-session persistence) ───────
 const TOKEN_KEY = "garage_token";
+
 const getStoredToken = () => sessionStorage.getItem(TOKEN_KEY);
-const setStoredToken = (t) => sessionStorage.setItem(TOKEN_KEY, t);
+
+const setStoredToken = (token) => sessionStorage.setItem(TOKEN_KEY, token);
+
 const clearStoredToken = () => sessionStorage.removeItem(TOKEN_KEY);
 
 export const AuthProvider = ({ children }) => {

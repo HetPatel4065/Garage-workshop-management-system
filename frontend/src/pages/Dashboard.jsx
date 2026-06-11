@@ -246,7 +246,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full min-h-screen bg-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-y-auto">
-      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:gap-6 xl:flex-row xl:items-center xl:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:mb-8">
         {/* Left Side: Identity & Greetings */}
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex items-center">
@@ -255,7 +255,7 @@ export default function Dashboard() {
             </span>
           </div>
 
-          <h1 className="text-2xl font-extrabold tracking-tight text-white leading-tight sm:text-2xl lg:text-3xl sm:whitespace-nowrap">
+          <h1 className="text-2xl font-extrabold leading-tight tracking-normal text-white sm:text-2xl lg:text-3xl">
             {roleLabel} Dashboard
           </h1>
 
@@ -264,9 +264,9 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Right Side: Quick Action Buttons wrapper */}
-        <div className="w-full shrink-0 xl:w-auto pt-5">
-          <div className="flex flex-wrap gap-2.5 lg:flex-nowrap">
+        {/* Right Side: Quick Action Buttons */}
+        <div className="shrink-0 pt-2 sm:pt-0">
+          <div className="flex flex-nowrap gap-2.5">
             <QuickActionButtons
               role={role}
               onAddCustomer={() => navigate("/customers")}

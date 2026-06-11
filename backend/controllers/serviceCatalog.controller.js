@@ -1,5 +1,6 @@
 import ServiceCatalog from "../models/ServiceCatalog.js";
 import Owner from "../models/Owner.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📝 GET ALL SERVICES IN CATALOG
 export const getServiceCatalog = async (req, res) => {
@@ -25,6 +26,13 @@ export const addToCatalog = async (req, res) => {
       description,
       ownerId
     });
+
+await logActivity(
+      req,
+      "create",
+      "ServiceCatalog",
+      `Added "${name}" to service catalog`,
+    );  
 
     await newItem.save();
     res.status(201).json(newItem);
@@ -58,6 +66,13 @@ export const updateCatalogItem = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to update catalog item" });
   }
+  await logActivity(
+    req,
+    "update",
+    "ServiceCatalog",
+    `Updated service catalog item with ID ${req.params.id}`,
+    req.params.id
+  );
 };
 
 // ❌ DELETE FROM CATALOG
@@ -70,4 +85,11 @@ export const deleteFromCatalog = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to delete from catalog" });
   }
+  await logActivity(
+    req,
+    "delete",
+    "ServiceCatalog",
+    `Deleted service catalog item with ID ${req.params.id}`,
+    req.params.id
+  );
 };

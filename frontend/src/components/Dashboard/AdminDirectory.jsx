@@ -3,7 +3,12 @@ import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useLoading } from "../../context/LoadingContext";
 import { useToast } from "../../context/ToastContext";
-import { FormInput, FormSelect, FormTextarea, FormButton } from "../layout/Form/forms";
+import {
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormButton,
+} from "../layout/Form/forms";
 import {
   Search,
   Filter,
@@ -365,9 +370,7 @@ export default function AdminDirectory() {
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>
-                      {garage.city || "Ahmedabad"}, {garage.state || "Gujarat"}
-                    </span>
+                    <span>{garage.address || "Address not set"}</span>
                   </div>
                 </div>
 

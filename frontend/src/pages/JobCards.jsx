@@ -88,6 +88,7 @@ const getDateRange = (type) => {
 
 import JobCard from "../components/Services/JobCard";
 import ExportButton from "../components/common/ExportButton";
+import EmptyState from "../components/UI/EmptyState";
 
 export default function JobCards() {
   const { user, token: authToken } = useAuth();

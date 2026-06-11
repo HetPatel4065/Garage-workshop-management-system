@@ -1,6 +1,9 @@
+import React from "react";
 import ServiceCard from "./ServiceCard";
 import { Wrench } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+// Adjust the import path below based on where your EmptyState component lives
+import EmptyState from "../UI/EmptyState";
 
 export default function ServiceList({
   services = [],
@@ -14,10 +17,11 @@ export default function ServiceList({
 
   if (!services.length) {
     return (
-      <div className="text-gray-500 text-center mt-2 flex flex-col items-center gap-2 py-25 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-        <Wrench className="w-8 h-8 text-gray-300" />
-        <p className="font-medium">No Service found</p>
-      </div>
+      <EmptyState
+        icon={Wrench}
+        title="No services found"
+        description="Define your garage's labor offerings, standard fix packages, and hourly diagnostic pricing tiers."
+      />
     );
   }
 

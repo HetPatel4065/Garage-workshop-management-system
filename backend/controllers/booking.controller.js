@@ -4,6 +4,7 @@ import {
   resolvePortalCustomerId,
   requirePortalCustomerId,
 } from "../utils/portalCustomerContext.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const VEHICLE_STATUS_VALUES = ["Available", "Booked", "Sold", "Hidden"];
 

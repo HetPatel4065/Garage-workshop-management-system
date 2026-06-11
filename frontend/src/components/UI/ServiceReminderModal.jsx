@@ -59,7 +59,7 @@ export default function ServiceReminderModal({ isOpen, onClose, reminders = [] }
                 {reminders.map((r, idx) => (
                   <div 
                     key={r._id || idx}
-                    className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 hover:border-blue-200 transition-all group"
+                    className="p-6 rounded-4xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-all group"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
                       <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export default function ServiceReminderModal({ isOpen, onClose, reminders = [] }
                     onClose();
                     window.location.href = "/reminders";
                   }}
-                  className="flex items-center gap-3 px-10 py-4 rounded-[24px] bg-slate-900 text-white font-black text-[13px] uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200 active:scale-95 group"
+                  className="flex items-center gap-3 px-10 py-4 rounded-3xl bg-slate-900 text-white font-black text-[13px] uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200 active:scale-95 group"
                 >
                   Manage Reminders
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />

@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const garageLeadSchema = new mongoose.Schema(
   {
+    garageId: {
+      type: String,
+      sparse: true,
+    },
     garageName: {
       type: String,
       required: [true, "Garage name is required"],
@@ -53,7 +57,7 @@ const garageLeadSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const GarageLead = mongoose.model("GarageLead", garageLeadSchema);

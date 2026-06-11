@@ -469,7 +469,7 @@ export default function Vehicles() {
         <div className="flex flex-col gap-4">
           {filteredFleet.length === 0 && (
             <EmptyState
-              icon={Car}
+              icon={FaCar}
               title="No vehicles found"
               description="Try a different search term or reset filters to locate available vehicles."
               className="mt-10"

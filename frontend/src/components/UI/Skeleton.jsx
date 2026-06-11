@@ -15,9 +15,9 @@ const Skeleton = ({ className, width, height, borderRadius = "0.75rem" }) => {
 
 export const CardSkeleton = () => (
   <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-    <Skeleton width="40%" height="1.5rem" />
-    <Skeleton width="90%" height="1rem" />
-    <Skeleton width="70%" height="1rem" />
+    <Skeleton width="45%" height="1.5rem" />
+    <Skeleton width="95%" height="1.5rem" />
+    <Skeleton width="75%" height="1.5rem" />
     <div className="flex gap-2 pt-2">
       <Skeleton width="4rem" height="2rem" borderRadius="0.5rem" />
       <Skeleton width="4rem" height="2rem" borderRadius="0.5rem" />

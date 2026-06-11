@@ -1,5 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { logActivity } from "../utils/activityLogger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -326,6 +327,14 @@ export const createListing = async (req, res) => {
       testDriveAvailable:
         testDriveAvailable === "true" || testDriveAvailable === true,
     });
+
+    await logActivity(
+      req,
+      "create",
+      "VehicleSale",
+      `Created new vehicle listing "${title}" with ID ${newListing._id}`,
+      newListing._id,
+    );
 
     res.status(201).json({
       success: true,
@@ -704,6 +713,14 @@ export const updateListing = async (req, res) => {
       { new: true, runValidators: true },
     );
 
+    await logActivity(
+      req,
+      "update",
+      "VehicleSale",
+      `Updated vehicle listing "${updatedListing.title}" with ID ${updatedListing._id}`,
+      updatedListing._id,
+    );
+
     res.status(200).json({
       success: true,
       message: "Listing updated successfully!",
@@ -741,6 +758,14 @@ export const deleteListing = async (req, res) => {
     }
 
     await VehicleSale.findByIdAndDelete(id);
+    
+    await logActivity(
+      req,
+      "delete",
+      "VehicleSale",
+      `Deleted vehicle listing "${listing.title}" with ID ${listing._id}`,
+      listing._id,
+    );
 
     res.status(200).json({
       success: true,

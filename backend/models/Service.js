@@ -11,6 +11,11 @@ const serviceSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Advisor",
     },
+    performedBy: {
+      userId: { type: mongoose.Schema.Types.ObjectId },
+      name: { type: String },
+      role: { type: String }, 
+    },
     mechanicId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Mechanic",
@@ -32,12 +37,7 @@ const serviceSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "Pending",
-        "In-progress",
-        "Completed",
-        "Cancelled"
-      ],
+      enum: ["Pending", "In-progress", "Completed", "Cancelled"],
       default: "Pending",
     },
     priority: {
@@ -107,11 +107,13 @@ const serviceSchema = new mongoose.Schema(
     billingStatus: { type: String, default: "Unbilled" },
 
     // Auditing
-    workLogs: [{
-      mechanic: { type: mongoose.Schema.Types.ObjectId, ref: "Mechanic" },
-      log: String,
-      timestamp: { type: Date, default: Date.now }
-    }],
+    workLogs: [
+      {
+        mechanic: { type: mongoose.Schema.Types.ObjectId, ref: "Mechanic" },
+        log: String,
+        timestamp: { type: Date, default: Date.now },
+      },
+    ],
 
     startTime: Date,
     endTime: Date,
@@ -127,7 +129,7 @@ const serviceSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Helper to pre-calculate labor sum for backward compatibility
@@ -138,7 +140,7 @@ serviceSchema.pre("save", async function (next) {
       const lastService = await this.constructor
         .findOne({
           ownerId: this.ownerId,
-          serviceId: { $regex: /^SRV-/ }
+          serviceId: { $regex: /^SRV-/ },
         })
         .sort({ serviceId: -1 })
         .lean();
@@ -167,24 +169,30 @@ serviceSchema.pre("save", async function (next) {
   }
 
   if (this.labourCharges && this.labourCharges.length > 0) {
-    this.labourAtTime = this.labourCharges.reduce((sum, item) => sum + (Number(item.labourCost) || 0), 0);
+    this.labourAtTime = this.labourCharges.reduce(
+      (sum, item) => sum + (Number(item.labourCost) || 0),
+      0,
+    );
     this.labourCost = this.labourAtTime;
   }
 
   if (this.selectedServices) {
-    this.selectedServices.forEach(item => {
-      if (item.priceAtTime && !item.priceAtTimeOfService) item.priceAtTimeOfService = item.priceAtTime;
-      if (item.priceAtTimeOfService && !item.priceAtTime) item.priceAtTime = item.priceAtTimeOfService;
+    this.selectedServices.forEach((item) => {
+      if (item.priceAtTime && !item.priceAtTimeOfService)
+        item.priceAtTimeOfService = item.priceAtTime;
+      if (item.priceAtTimeOfService && !item.priceAtTime)
+        item.priceAtTime = item.priceAtTimeOfService;
     });
   }
 
   if (this.partsUsed) {
-    this.partsUsed.forEach(item => {
-      if (item.priceAtTime && !item.priceAtTimeOfService) item.priceAtTimeOfService = item.priceAtTime;
-      if (item.priceAtTimeOfService && !item.priceAtTime) item.priceAtTime = item.priceAtTimeOfService;
+    this.partsUsed.forEach((item) => {
+      if (item.priceAtTime && !item.priceAtTimeOfService)
+        item.priceAtTimeOfService = item.priceAtTime;
+      if (item.priceAtTimeOfService && !item.priceAtTime)
+        item.priceAtTime = item.priceAtTimeOfService;
     });
   }
-
 });
 
 const Service = mongoose.model("Service", serviceSchema);

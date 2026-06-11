@@ -1,6 +1,7 @@
 import Service from "../models/Service.js";
 import Inventory from "../models/Inventory.js";
 import { notifyLowStock } from "../utils/inventoryUtils.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📋 GET SERVICES
 export const getAllServices = async (req, res) => {
@@ -21,7 +22,10 @@ export const getAllServices = async (req, res) => {
 
     const services = await Service.find(query)
       .populate("customerId", "name")
-      .populate("vehicleId", "make model licensePlate serviceDate nextServiceDate")
+      .populate(
+        "vehicleId",
+        "make model licensePlate serviceDate nextServiceDate",
+      )
       .populate("advisorId", "name")
       .populate("mechanicId", "name")
       .populate("partsUsed.partId", "name price")
@@ -101,6 +105,11 @@ export const createService = async (req, res) => {
     const { role, _id: userId, effectiveOwnerId: ownerId } = req.user;
 
     const serviceData = { ...req.body, ownerId };
+    serviceData.performedBy = {
+      userId: req.user._id,
+      name: req.user.name,
+      role: req.user.isCoOwner ? "co-owner" : req.user.role,
+    };
 
     // Inherit fields from parent Job Card
     if (serviceData.jobId) {
@@ -173,7 +182,9 @@ export const createService = async (req, res) => {
     if (newService.vehicleId && newService.serviceDate) {
       const { default: Vehicle } = await import("../models/Vehicle.js");
       if (newService.status === "Completed") {
-        const nextNorm = newService.nextServiceDate ? new Date(newService.nextServiceDate) : null;
+        const nextNorm = newService.nextServiceDate
+          ? new Date(newService.nextServiceDate)
+          : null;
         if (nextNorm) nextNorm.setHours(0, 0, 0, 0);
         const todayNorm = new Date();
         todayNorm.setHours(0, 0, 0, 0);
@@ -188,6 +199,13 @@ export const createService = async (req, res) => {
         });
       }
     }
+    await logActivity(
+      req,
+      "create",
+      "Service",
+      `Created service "${newService.serviceName}" with status "${newService.status}"`,
+      newService._id,
+    );
 
     res.status(201).json(newService);
   } catch (error) {
@@ -203,24 +221,25 @@ export const updateService = async (req, res) => {
     const updateData = req.body;
 
     const service = await Service.findOne({ _id: serviceId, ownerId });
+    updateData.performedBy = {
+      userId: req.user._id,
+      name: req.user.name,
+      role: req.user.isCoOwner ? "co-owner" : req.user.role,
+    };
     if (!service) return res.status(404).json({ error: "Service not found" });
 
     // --- PERMISSION CHECKS ---
     if (role === "mechanic") {
       if (service.mechanicId?.toString() !== userId.toString()) {
-        return res
-          .status(403)
-          .json({
-            error: "Unauthorized: You can only edit services assigned to you.",
-          });
+        return res.status(403).json({
+          error: "Unauthorized: You can only edit services assigned to you.",
+        });
       }
     } else if (role === "advisor") {
       if (service.advisorId?.toString() !== userId.toString()) {
-        return res
-          .status(403)
-          .json({
-            error: "Unauthorized: You can only edit services assigned to you.",
-          });
+        return res.status(403).json({
+          error: "Unauthorized: You can only edit services assigned to you.",
+        });
       }
     }
 
@@ -302,7 +321,9 @@ export const updateService = async (req, res) => {
     if (service.vehicleId && service.serviceDate) {
       const { default: Vehicle } = await import("../models/Vehicle.js");
 
-      const nextNorm = service.nextServiceDate ? new Date(service.nextServiceDate) : null;
+      const nextNorm = service.nextServiceDate
+        ? new Date(service.nextServiceDate)
+        : null;
       if (nextNorm) nextNorm.setHours(0, 0, 0, 0);
       const todayNorm = new Date();
       todayNorm.setHours(0, 0, 0, 0);
@@ -312,6 +333,14 @@ export const updateService = async (req, res) => {
           nextNorm && nextNorm > todayNorm ? "Pending" : "Completed",
       });
     }
+
+    await logActivity(
+      req,
+      "update",
+      "Service",
+      `Updated service "${service.serviceName}" — ${service.status}`,
+      service._id,
+    );
 
     res.status(200).json(service);
   } catch (error) {
@@ -348,6 +377,13 @@ export const deleteService = async (req, res) => {
         }
       }
     }
+    await logActivity(
+      req,
+      "delete",
+      "Service",
+      `Deleted service "${service.serviceName}" with status "${service.status}"`,
+      service._id,
+    );
 
     await Service.findByIdAndDelete(id);
     res.status(200).json({ message: "Service deleted successfully" });

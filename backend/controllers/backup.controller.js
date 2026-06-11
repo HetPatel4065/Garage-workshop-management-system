@@ -16,6 +16,7 @@ import csv from "csv-parser";
 import { fileURLToPath } from "url";
 import AdmZip from "adm-zip";
 import { Readable } from "stream";
+import { logActivity } from "../utils/activityLogger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

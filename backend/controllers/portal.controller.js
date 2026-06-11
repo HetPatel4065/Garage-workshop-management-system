@@ -22,6 +22,9 @@ import {
 import fs from "fs/promises";
 import { createReadStream } from "fs";
 import path from "path";
+import { logActivity } from "../utils/activityLogger.js";
+
+
 
 const STAFF_PORTAL_ROLES = ["admin"];
 

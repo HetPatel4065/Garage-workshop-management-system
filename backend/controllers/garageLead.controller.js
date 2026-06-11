@@ -1,6 +1,8 @@
 import GarageLead from "../models/GarageLead.js";
+import Owner from "../models/Owner.js"; 
 import crypto from "crypto";
 import { sendGarageOnboardingEmail } from "../utils/email.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📝 SUBMIT PARTNERSHIP LEAD (Public)
 export const createLead = async (req, res) => {
@@ -89,17 +91,45 @@ export const updateLeadStatus = async (req, res) => {
 
     let signupToken = undefined;
     let signupTokenExpires = undefined;
+    let reservedGarageId = undefined;
 
     if (status === "approved") {
       signupToken = crypto.randomBytes(32).toString("hex");
-      signupTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+      signupTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      const currentLead = await GarageLead.findById(id);
+      if (currentLead && currentLead.garageId) {
+        reservedGarageId = currentLead.garageId;
+      } else {
+        const existingOwner = await Owner.findOne({
+          garageName: {
+            $regex: new RegExp("^" + (currentLead?.garageName || "").trim() + "$", "i"),
+          },
+        });
+        if (existingOwner && existingOwner.garageId) {
+          reservedGarageId = existingOwner.garageId;
+        } else {
+          // ✅ Generate and reserve a garageId at approval time
+          // so onboarding never creates a duplicate garage
+          let isUnique = false;
+          while (!isUnique) {
+            reservedGarageId = Math.floor(
+              1000000000 + Math.random() * 9000000000,
+            ).toString();
+            const existing = await Owner.findOne({ garageId: reservedGarageId });
+            if (!existing) isUnique = true;
+          }
+        }
+      }
     }
 
     const lead = await GarageLead.findByIdAndUpdate(
       id,
       {
         status,
-        ...(status === "approved" ? { signupToken, signupTokenExpires } : {}),
+        ...(status === "approved"
+          ? { signupToken, signupTokenExpires, garageId: reservedGarageId }
+          : {}),
       },
       { new: true, runValidators: true },
     );

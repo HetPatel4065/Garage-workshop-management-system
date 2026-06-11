@@ -13,7 +13,7 @@ import {
   getLeadDetailsByToken,
   completeOwnerOnboarding
 } from "../controllers/auth.controller.js";
-import { auth, authorize } from "../middleware/auth.middleware.js";
+import { auth, authorize, optionalAuth } from "../middleware/auth.middleware.js";
 import multer from 'multer';
 import fs from 'fs';
 
@@ -23,7 +23,7 @@ if (!fs.existsSync('uploads')) {
 
 const upload = multer({ dest: 'uploads/' });
 
-router.post("/register", upload.single("logo"), register);
+router.post("/register", upload.single("logo"), optionalAuth, register);
 
 router.post("/login", login);
 router.post("/refresh", refreshToken);

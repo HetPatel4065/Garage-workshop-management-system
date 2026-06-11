@@ -4,6 +4,7 @@ import {
   requirePortalCustomerId,
   resolvePortalCustomerId,
 } from "../utils/portalCustomerContext.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const toggleWishlist = async (req, res) => {
   try {

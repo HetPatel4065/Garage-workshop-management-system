@@ -383,18 +383,22 @@ export default function InventoryForm({
                 />
               </div>
 
-              <div>
-                <NumberInput
-                  id="inventory-costPrice"
-                  label="Cost Price (₹)"
-                  required
-                  min={0}
-                  value={formData.costPrice}
-                  onChange={(e) => set("costPrice", e.target.value)}
-                  error={errors.costPrice}
-                  readOnly={readOnly}
-                />
-              </div>
+              {/* Conditionally render the entire wrapper div to prevent empty grid gaps */}
+              {role !== "mechanic" && (
+                <div>
+                  <NumberInput
+                    id="inventory-costPrice"
+                    label="Cost Price (₹)"
+                    required
+                    min={0}
+                    value={formData.costPrice}
+                    onChange={(e) => set("costPrice", e.target.value)}
+                    error={errors.costPrice}
+                    readOnly={readOnly}
+                  />
+                </div>
+              )}
+
               <div>
                 <NumberInput
                   id="inventory-retailPrice"
@@ -408,9 +412,14 @@ export default function InventoryForm({
                 />
               </div>
             </div>
+
             {role !== "mechanic" && role !== "advisor" && (
               <div
-                className={`text-sm font-bold p-3 rounded-lg border flex justify-between ${profitPerUnit < 0 ? "text-red-600 bg-red-50 border-red-100" : "text-blue-600 bg-blue-50 border-blue-100"}`}
+                className={`mt-3 text-sm font-bold p-3 rounded-lg border flex justify-between ${
+                  profitPerUnit < 0
+                    ? "text-red-600 bg-red-50 border-red-100"
+                    : "text-blue-600 bg-blue-50 border-blue-100"
+                }`}
               >
                 <span>Potential Profit per Unit:</span>
                 <span>₹{profitPerUnit}</span>

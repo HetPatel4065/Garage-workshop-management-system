@@ -7,6 +7,7 @@ import { sendWelcomeEmail, sendRejectionEmail } from "../utils/email.js";
 import mongoose from "mongoose";
 import { createNotification } from "../utils/notificationHelper.js";
 import { emitToCustomer } from "../utils/socket.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // ➕ CREATE REQUEST (Portal/Registration)
 export const createRequestedCustomer = async (req, res) => {
@@ -51,6 +52,14 @@ export const createRequestedCustomer = async (req, res) => {
       type: "new_customer",
       link: `/requested-customers`
     });
+
+    await logActivity(
+      req,
+      "create",
+      "RequestedCustomer",
+      `New customer request from ${data.customerName} for vehicle ${data.vehicleNumber}`,
+      requestedCustomer._id
+    );
 
     res.status(201).json(requestedCustomer);
   } catch (err) {
@@ -169,6 +178,14 @@ export const approveRequestedCustomer = async (req, res) => {
       console.error("Non-blocking Emit Error:", emitErr);
     }
 
+    await logActivity(
+      req,
+      "update",
+      "RequestedCustomer",
+      `Approved customer request from ${request.customerName} for vehicle ${request.vehicleNumber}`,
+      request._id
+    );
+
     res.status(200).json({ message: "Request approved with appointment scheduled", request: updatedRequest });
   } catch (err) {
     console.error("APPROVE REQUEST ERROR:", err);
@@ -229,6 +246,14 @@ export const rejectRequestedCustomer = async (req, res) => {
       return res.status(404).json({ error: "Request not found" });
     }
 
+    await logActivity(
+      req,
+      "update",
+      "RequestedCustomer",
+      `Rejected customer request from ${request.customerName} for vehicle ${request.vehicleNumber}`,
+      request._id
+    );
+
     // Send Rejection Email (Async)
     try {
       const owner = await Owner.findById(ownerId);
@@ -264,6 +289,13 @@ export const deleteRequestedCustomer = async (req, res) => {
     if (!request) {
       return res.status(404).json({ error: "Request not found" });
     }
+      await logActivity(
+      req,  
+      "delete",
+      "RequestedCustomer",
+      `Deleted customer request from ${request.customerName} for vehicle ${request.vehicleNumber}`,
+      request._id
+    );
 
     res.status(200).json({ message: "Request deleted successfully" });
   } catch (err) {

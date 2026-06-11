@@ -34,7 +34,7 @@ export default function InventoryItemCard({
   const isMechanic = role === "mechanic";
 
   return (
-    <div className="bg-white rounded-3xl p-4 sm:p-5 mb-3 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group cursor-auto">
+    <div className="bg-white rounded-3xl p-4 sm:p-5 mb-4 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group cursor-auto">
       {/* ── TOP ROW: Name + SKU + Stock status ── */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex flex-wrap items-center gap-2">

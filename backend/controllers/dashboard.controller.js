@@ -6,6 +6,7 @@ import Advisor from "../models/Advisor.js";
 import Mechanic from "../models/Mechanic.js";
 import Vehicle from "../models/Vehicle.js";
 import mongoose from "mongoose";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const getDashboardStats = async (req, res, next) => {
   try {

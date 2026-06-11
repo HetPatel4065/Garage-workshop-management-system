@@ -11,29 +11,23 @@ import {
   User,
   X,
   Menu,
-  Bell,
   ExternalLink,
   Loader2,
   Wrench,
   ClipboardList,
   Users,
   Box,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "../../theme/ThemeToggle";
-import { useNotifications } from "../../../context/NotificationContext";
 
-// ---------------------------------------------------------------------------
-// Highlight – bolds the matching substring inside a text string
-// ---------------------------------------------------------------------------
 const Highlight = ({ text = "", query = "" }) => {
   if (!query || !text) return <span>{text || ""}</span>;
-
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const parts = String(text).split(new RegExp(`(${escaped})`, "gi"));
-
   return (
     <span>
       {parts.map((part, i) =>
@@ -52,15 +46,10 @@ const Highlight = ({ text = "", query = "" }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// ResultSection – renders a labelled group of search results
-// ---------------------------------------------------------------------------
 const ResultSection = ({ title, items, onSelect, renderItem }) => {
   if (!items?.length) return null;
-
   return (
     <section className="mb-3 last:mb-0">
-      {/* Section header */}
       <div className="flex items-center justify-between px-3 py-1.5 sticky top-0 bg-white dark:bg-gray-900 z-10 border-b border-slate-200 dark:border-white/5 mb-1">
         <p className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em]">
           {title}
@@ -69,8 +58,6 @@ const ResultSection = ({ title, items, onSelect, renderItem }) => {
           {items.length}
         </span>
       </div>
-
-      {/* Result rows */}
       <div className="space-y-0.5 mt-1 px-1">
         {items.map((item, i) => (
           <button
@@ -86,9 +73,6 @@ const ResultSection = ({ title, items, onSelect, renderItem }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Small coloured icon box used inside every result row
-// ---------------------------------------------------------------------------
 const IconBox = ({ color, children }) => (
   <div
     className={`w-8 h-8 rounded-lg ${color} flex items-center justify-center shrink-0 shadow-sm border border-slate-200 dark:border-white/5`}
@@ -97,9 +81,6 @@ const IconBox = ({ color, children }) => (
   </div>
 );
 
-// ---------------------------------------------------------------------------
-// ResultsDropdown – the floating panel that appears below the search input
-// ---------------------------------------------------------------------------
 const ResultsDropdown = ({
   searchResults,
   isSearching,
@@ -119,7 +100,6 @@ const ResultsDropdown = ({
     setMobileSearchOpen?.(false);
   };
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -140,7 +120,6 @@ const ResultsDropdown = ({
       className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-lg dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden ring-1 ring-slate-100 dark:ring-white/5"
     >
       <div className="max-h-[65vh] overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-white/10 scroll-smooth">
-        {/* Loading state */}
         {isSearching ? (
           <div className="py-16 text-center text-slate-500 dark:text-gray-500 text-sm flex flex-col items-center gap-4">
             <div className="relative">
@@ -153,7 +132,6 @@ const ResultsDropdown = ({
           </div>
         ) : (
           <>
-            {/* Empty state */}
             {!hasAnyResults ? (
               <div className="py-12 text-center text-slate-500 dark:text-gray-500 flex flex-col items-center gap-3">
                 <Search size={24} className="opacity-10" />
@@ -166,7 +144,6 @@ const ResultsDropdown = ({
               </div>
             ) : (
               <div className="divide-y divide-slate-200 dark:divide-white/5">
-                {/* ── Customers ── */}
                 <ResultSection
                   title="Customers"
                   items={searchResults.customers}
@@ -197,8 +174,6 @@ const ResultsDropdown = ({
                     </>
                   )}
                 />
-
-                {/* ── Vehicles ── */}
                 <ResultSection
                   title="Vehicles"
                   items={searchResults.vehicles}
@@ -230,8 +205,6 @@ const ResultsDropdown = ({
                     </>
                   )}
                 />
-
-                {/* ── Inventory / Parts ── */}
                 <ResultSection
                   title="Inventory / Parts"
                   items={searchResults.inventory}
@@ -267,8 +240,6 @@ const ResultsDropdown = ({
                     </>
                   )}
                 />
-
-                {/* ── Services ── */}
                 <ResultSection
                   title="Services"
                   items={searchResults.services}
@@ -295,8 +266,6 @@ const ResultsDropdown = ({
                     </>
                   )}
                 />
-
-                {/* ── Job Cards ── */}
                 <ResultSection
                   title="Job Cards"
                   items={searchResults.jobCards}
@@ -323,8 +292,6 @@ const ResultsDropdown = ({
                     </>
                   )}
                 />
-
-                {/* ── Staff Members ── */}
                 <ResultSection
                   title="Staff Members"
                   items={searchResults.staff}
@@ -360,22 +327,16 @@ const ResultsDropdown = ({
   );
 };
 
-// ---------------------------------------------------------------------------
-// TopNavbar – main export
-// ---------------------------------------------------------------------------
 export default function TopNavbar({ userName = "User", onToggleSidebar }) {
   const { logout, user, token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { unreadCount } = useNotifications();
 
-  // Sync search input with ?q= param on first render
   const queryFromUrl = useMemo(
     () => new URLSearchParams(location.search).get("q") || "",
     [location.search],
   );
 
-  // ── UI state ──────────────────────────────────────────────────────────────
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState({
@@ -391,25 +352,23 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // ── Refs ──────────────────────────────────────────────────────────────────
   const dropdownRef = useRef();
   const searchRef = useRef();
   const mobileSearchRef = useRef();
 
-  // ── Derived display values ────────────────────────────────────────────────
   const firstName = (user?.name || userName).split(" ")[0];
   const roleLabel = user?.role
     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
     : "User";
 
-  // ── Scroll shadow ─────────────────────────────────────────────────────────
+  const isOwnerOrAdmin = ["owner", "admin"].includes(user?.role?.toLowerCase());
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ── Global search fetch ───────────────────────────────────────────────────
   const performSearch = useCallback(
     async (query) => {
       if (!query.trim() || query.length < 2) {
@@ -424,16 +383,13 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
         setShowResults(false);
         return;
       }
-
       setIsSearching(true);
       setShowResults(true);
-
       try {
         const headers = { Authorization: `Bearer ${token}` };
         const api = import.meta.env.VITE_API_URL;
         const role = user?.role?.toLowerCase();
         const isListCarAllowed = ["admin", "owner"].includes(role);
-
         const endpoints = [
           `${api}/customers`,
           isListCarAllowed ? `${api}/vehicles` : null,
@@ -442,7 +398,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
           `${api}/job-cards`,
           `${api}/auth/staff`,
         ];
-
         const responses = await Promise.all(
           endpoints.map((url) => {
             if (!url) return Promise.resolve([]);
@@ -451,9 +406,7 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
             );
           }),
         );
-
         const [cust, veh, serv, inv, jc, staff] = responses;
-
         const filter = (arr, fields) => {
           if (!Array.isArray(arr)) return [];
           return arr
@@ -466,7 +419,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
             )
             .slice(0, 5);
         };
-
         setSearchResults({
           customers: filter(cust, ["name", "phone", "email"]),
           vehicles: filter(veh, ["make", "model", "licensePlate"]),
@@ -484,7 +436,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
     [token, user?.role],
   );
 
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery !== queryFromUrl || showResults) {
@@ -494,25 +445,20 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
     return () => clearTimeout(timer);
   }, [searchQuery, performSearch, queryFromUrl, showResults]);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
         setMenuOpen(false);
-      }
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
+      if (searchRef.current && !searchRef.current.contains(e.target))
         setShowResults(false);
-      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Search submit (Enter key or button click) ─────────────────────────────
   const handleSearchSubmit = (e) => {
     if (e?.key && e.key !== "Enter") return;
     if (!searchQuery.trim()) return;
-
     e?.preventDefault?.();
     const term = searchQuery.trim();
     setShowResults(false);
@@ -521,7 +467,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
     navigate(`/search?q=${encodeURIComponent(term)}`);
   };
 
-  // ── Shared search input props ─────────────────────────────────────────────
   const searchInputProps = {
     type: "text",
     value: searchQuery,
@@ -529,7 +474,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
     onKeyDown: handleSearchSubmit,
   };
 
-  // ── Shared "Search" action button ─────────────────────────────────────────
   const SearchButton = () => (
     <button
       onClick={handleSearchSubmit}
@@ -539,10 +483,8 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
     </button>
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
   return (
     <>
-      {/*  Desktop / tablet header  */}
       <header
         className={`
           h-16 sm:h-20 flex items-center px-4 sm:px-8 sticky top-0 transition-all duration-300 z-40
@@ -559,7 +501,7 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
             <Menu size={22} />
           </button>
 
-          {/* ── Desktop search bar ── */}
+          {/* Desktop search bar */}
           <div
             className="flex-1 max-w-2xl hidden md:block relative"
             ref={searchRef}
@@ -585,8 +527,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                   focus:ring-8 focus:ring-blue-500/5 transition-all duration-300 shadow-inner
                 "
               />
-
-              {/* Clear + Search button row */}
               <AnimatePresence>
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                   {searchQuery && (
@@ -609,8 +549,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                 </div>
               </AnimatePresence>
             </div>
-
-            {/* Results dropdown */}
             <AnimatePresence>
               {showResults && (
                 <motion.div
@@ -631,10 +569,10 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
             </AnimatePresence>
           </div>
 
-          {/* Spacer – pushes action icons to the right on mobile */}
+          {/* Spacer on mobile */}
           <div className="flex-1 md:hidden" />
 
-          {/* ── Action icons + user menu ── */}
+          {/* Action icons + user menu */}
           <div
             className="flex items-center gap-1 sm:gap-2 shrink-0"
             ref={dropdownRef}
@@ -653,18 +591,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
 
             <ThemeToggle />
 
-            {/* Notifications */}
-            <button
-              onClick={() => navigate("/notifications")}
-              className="relative p-2.5 rounded-xl text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300 group"
-              title="Notifications"
-            >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900 shadow-sm animate-pulse" />
-              )}
-            </button>
-
             {/* Divider */}
             <div className="w-0.5 h-20 bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
 
@@ -674,7 +600,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-3 p-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-300 group"
               >
-                {/* Name + role (hidden on mobile) */}
                 <div className="hidden sm:block text-right">
                   <p className="text-[11px] font-black uppercase text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-none">
                     {firstName}
@@ -683,8 +608,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                     {roleLabel}
                   </p>
                 </div>
-
-                {/* Avatar */}
                 <div className="w-10 h-10 rounded-xl bg-linear-to-br bg-indigo-600 p-px shadow-lg group-hover:shadow-blue-500/20 transition-all">
                   <div className="w-full h-full rounded-[11px] capitalize bg-slate-100 dark:bg-gray-950 flex items-center justify-center text-blue-600 dark:text-blue-400 font-black text-lg">
                     {firstName[0]}
@@ -692,7 +615,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                 </div>
               </button>
 
-              {/* Dropdown menu */}
               <AnimatePresence>
                 {menuOpen && (
                   <motion.div
@@ -702,7 +624,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                     transition={{ duration: 0.15, ease: "easeOut" }}
                     className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-md border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-900 p-1.5 shadow-2xl ring-1 ring-slate-100 dark:ring-black/50 z-50"
                   >
-                    {/* Mobile-only user profile header */}
                     <div className="px-3 py-2.5 mb-1 sm:hidden">
                       <p className="text-sm font-semibold uppercase text-slate-900 dark:text-zinc-100 truncate">
                         {user?.name}
@@ -713,7 +634,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                     </div>
                     <div className="h-px bg-slate-200 dark:bg-white/5 my-1 mx-1 sm:hidden" />
 
-                    {/* Menu items */}
                     <div className="space-y-1">
                       {user?.role?.toLowerCase() === "admin" && (
                         <button
@@ -748,13 +668,10 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
         </div>
       </header>
 
-      {/* ================================================================== */}
-      {/* Mobile search overlay                                               */}
-      {/* ================================================================== */}
+      {/* Mobile search overlay */}
       <AnimatePresence>
         {mobileSearchOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -762,8 +679,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
               onClick={() => setMobileSearchOpen(false)}
               className="fixed inset-0 bg-black/80 backdrop-blur-md z-45 md:hidden"
             />
-
-            {/* Search panel */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -786,8 +701,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                     <SearchButton />
                   </div>
                 </div>
-
-                {/* Close button */}
                 <button
                   onClick={() => setMobileSearchOpen(false)}
                   className="p-3 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400"
@@ -795,8 +708,6 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
                   <X size={20} />
                 </button>
               </div>
-
-              {/* Results inside mobile overlay */}
               {showResults && (
                 <div className="mt-4 max-h-[70vh] overflow-y-auto rounded-2xl">
                   <ResultsDropdown

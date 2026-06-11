@@ -41,7 +41,7 @@ export default function VehicleCard({
     "bg-slate-50 text-slate-600 border-slate-100";
 
   return (
-    <div className="bg-white rounded-3xl p-4 sm:p-5 mb-4 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group h-full flex flex-col">
+    <div className="bg-white rounded-3xl p-4 sm:p-5 mb-4 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group cursor-auto">
       {/* ── TOP ROW ── */}
       <div className="flex flex-wrap items-center gap-3 mb-6 relative z-10">
         <h3 className="text-xl font-bold capitalize text-slate-900 tracking-tight">

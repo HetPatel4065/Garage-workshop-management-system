@@ -1,6 +1,7 @@
 import Owner from "../models/Owner.js";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📋 GET OWNER PROFILE / SETTINGS
 export const getOwnerSettings = async (req, res) => {

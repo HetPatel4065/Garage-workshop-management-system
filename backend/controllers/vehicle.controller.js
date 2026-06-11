@@ -1,13 +1,16 @@
 import Vehicle from "../models/Vehicle.js";
 import Customer from "../models/Customer.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const enrichVehiclesWithServiceDates = async (vehicles, ownerId) => {
   if (!vehicles || vehicles.length === 0) return [];
-  
+
   try {
     const { default: Service } = await import("../models/Service.js");
     const mongoose = await import("mongoose");
-    const { Types: { ObjectId } } = mongoose.default || mongoose;
+    const {
+      Types: { ObjectId },
+    } = mongoose.default || mongoose;
 
     const ownerObjectId = new ObjectId(String(ownerId));
     const vehicleObjectIds = vehicles.map((v) => v._id);
@@ -74,18 +77,30 @@ const enrichVehiclesWithServiceDates = async (vehicles, ownerId) => {
 
 export const addVehicle = async (req, res) => {
   try {
-    const { make, model, year, chassisnumber, licensePlate, customerId, ...rest } = req.body;
+    const {
+      make,
+      model,
+      year,
+      chassisnumber,
+      licensePlate,
+      customerId,
+      ...rest
+    } = req.body;
     const ownerId = req.user.effectiveOwnerId;
     if (!ownerId) return res.status(403).json({ error: "Unauthorized" });
 
     // 1. Check if customer exists and belongs to the same garage
     const customer = await Customer.findOne({ _id: customerId, ownerId });
     if (!customer) {
-      return res.status(404).json({ error: "Customer not found in this garage" });
+      return res
+        .status(404)
+        .json({ error: "Customer not found in this garage" });
     }
 
     if (customer.status === "Blocked") {
-      return res.status(403).json({ error: "Cannot add vehicle: Customer is blocked" });
+      return res
+        .status(403)
+        .json({ error: "Cannot add vehicle: Customer is blocked" });
     }
 
     const cleanChassis = chassisnumber?.trim() || undefined;
@@ -104,10 +119,21 @@ export const addVehicle = async (req, res) => {
     });
 
     const savedVehicle = await newVehicle.save();
+
+    await logActivity(
+      req,
+      "create",
+      "Vehicle",
+      `Added vehicle ${savedVehicle.licensePlate} for customer ${customer.name}`,
+      savedVehicle._id,
+    );
+
     res.status(201).json(savedVehicle);
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ error: "License plate or chassis number already exists" });
+      return res
+        .status(400)
+        .json({ error: "License plate or chassis number already exists" });
     }
     res.status(500).json({ error: error.message });
   }
@@ -116,8 +142,10 @@ export const addVehicle = async (req, res) => {
 export const getCustomerVehicles = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;
-    const vehicles = await Vehicle.find({ customerId: req.params.customerId, garageId: ownerId })
-      .populate("customerId", "name phone email");
+    const vehicles = await Vehicle.find({
+      customerId: req.params.customerId,
+      garageId: ownerId,
+    }).populate("customerId", "name phone email");
     const enriched = await enrichVehiclesWithServiceDates(vehicles, ownerId);
     res.json(enriched);
   } catch (error) {
@@ -142,7 +170,10 @@ export const getAllVehicles = async (req, res) => {
 export const getVehicleById = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;
-    const vehicle = await Vehicle.findOne({ _id: req.params.id, garageId: ownerId })
+    const vehicle = await Vehicle.findOne({
+      _id: req.params.id,
+      garageId: ownerId,
+    })
       .populate("customerId", "name phone email")
       .populate("jobCards");
     if (!vehicle) {
@@ -167,35 +198,55 @@ export const updateVehicle = async (req, res) => {
     if (updateData.chassisnumber === "") delete updateData.chassisnumber;
 
     // Find current vehicle to check existing customer status if customerId not provided in update
-    const existingVehicle = await Vehicle.findOne({ _id: req.params.id, garageId: ownerId }).populate("customerId");
-    if (!existingVehicle) return res.status(404).json({ error: "Vehicle not found" });
+    const existingVehicle = await Vehicle.findOne({
+      _id: req.params.id,
+      garageId: ownerId,
+    }).populate("customerId");
+    if (!existingVehicle)
+      return res.status(404).json({ error: "Vehicle not found" });
 
     // Check if new customer is blocked (if provided) or if existing customer is blocked
     if (updateData.customerId) {
-      const customer = await Customer.findOne({ _id: updateData.customerId, ownerId });
+      const customer = await Customer.findOne({
+        _id: updateData.customerId,
+        ownerId,
+      });
       if (customer) {
         if (customer.status === "Blocked") {
-          return res.status(403).json({ error: "Cannot update vehicle: Target customer is blocked" });
+          return res.status(403).json({
+            error: "Cannot update vehicle: Target customer is blocked",
+          });
         }
         updateData.customerName = customer.name;
       }
     } else if (existingVehicle.customerId?.status === "Blocked") {
-      return res.status(403).json({ error: "Cannot update vehicle: Current customer is blocked" });
+      return res
+        .status(403)
+        .json({ error: "Cannot update vehicle: Current customer is blocked" });
     }
-
-
 
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, garageId: ownerId },
       updateData,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).populate("customerId", "name phone email");
 
     if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
+
+    await logActivity(
+      req,
+      "update",
+      "Vehicle",
+      `Updated vehicle ${vehicle.licensePlate} for customer ${vehicle.customerId.name}`,
+      vehicle._id,
+    );
+
     res.json(vehicle);
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ error: "License plate or chassis number already exists" });
+      return res
+        .status(400)
+        .json({ error: "License plate or chassis number already exists" });
     }
     res.status(500).json({ error: error.message });
   }
@@ -204,8 +255,19 @@ export const updateVehicle = async (req, res) => {
 export const deleteVehicle = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;
-    const vehicle = await Vehicle.findOneAndDelete({ _id: req.params.id, garageId: ownerId });
+    const vehicle = await Vehicle.findOneAndDelete({
+      _id: req.params.id,
+      garageId: ownerId,
+    });
     if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
+
+    await logActivity(
+      req,
+      "delete",
+      "Vehicle",
+      `Deleted vehicle ${vehicle.licensePlate} for customer ${vehicle.customerName}`,
+      vehicle._id,
+    );
 
     res.json({ message: "Vehicle deleted successfully" });
   } catch (error) {

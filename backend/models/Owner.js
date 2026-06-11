@@ -29,13 +29,24 @@ const ownerSchema = new mongoose.Schema(
     // Garage details
     garageId: {
       type: String,
-      unique: true,
-      sparse: true,
+      required: false,
+      index: true,
     },
     garageName: {
       type: String,
       trim: true,
     },
+    isCoOwner: {
+      type: Boolean,
+      default: false,
+    },
+    coOwners: [
+      {
+        name: { type: String, trim: true },
+        email: { type: String, trim: true },
+        mobileNumber: { type: String, trim: true },
+      },
+    ],
     address: {
       type: String,
       trim: true,
@@ -86,11 +97,12 @@ const ownerSchema = new mongoose.Schema(
       default: "Pending",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 ownerSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
+  if (this.password?.startsWith("$2a$") || this.password?.startsWith("$2b$")) return;
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);

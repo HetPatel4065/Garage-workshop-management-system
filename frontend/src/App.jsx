@@ -76,6 +76,7 @@ const AboutUs = lazy(() => import("./pages/AboutUs"));
 const PortalSupport = lazy(() => import("./pages/portal/PortalSupport"));
 const PartnershipLeads = lazy(() => import("./pages/PartnershipLeads"));
 const MarketplaceListings = lazy(() => import("./pages/MarketplaceListings"));
+const ActivityLog = lazy(() => import("./pages/ActivityLog"));
 const PortalVehicleDetails = lazy(
   () => import("./pages/portal/PortalVehicleDetails"),
 );
@@ -404,6 +405,7 @@ function App() {
                   </PageTransition>
                 }
               />
+              
               <Route
                 path="pre-owned-cars"
                 element={
@@ -553,6 +555,16 @@ function App() {
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <PageTransition>
                       <PartnershipLeads />
+                    </PageTransition>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/activity-log"
+                element={
+                  <ProtectedRoute allowedRoles={["owner", "admin"]}>
+                    <PageTransition>
+                      <ActivityLog />
                     </PageTransition>
                   </ProtectedRoute>
                 }

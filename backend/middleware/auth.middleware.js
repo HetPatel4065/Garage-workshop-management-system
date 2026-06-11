@@ -72,12 +72,10 @@ const auth = async (req, res, next) => {
         "view_services",
         "view_customers",
         "view_inventory",
-        "view_staff",         // Needed for fetching mechanic/advisor dropdowns
+        "view_staff", // Needed for fetching mechanic/advisor dropdowns
         "update_service_status", // Mechanic restricted via controller to only their own items
       ],
-      customer: [
-        "view_own_data",
-      ],
+      customer: ["view_own_data"],
     };
 
     const userObj = user.toObject();
@@ -86,37 +84,59 @@ const auth = async (req, res, next) => {
     // 🛡️ ROLE RECOVERY (Ensure role and permissions exist)
     const role = detectedRole || userObj.role || "owner";
     userObj.role = role.toLowerCase();
-    
+
     // Get default permissions for the role
     const defaultPermissions = ROLE_PERMISSIONS[userObj.role] || [];
-    
-    // Resolve final permissions: use DB permissions if present, 
+
+    // Resolve final permissions: use DB permissions if present,
     // but ensure base staff permissions like 'view_staff' are always included for staff roles.
-    let resolvedPermissions = Array.isArray(userObj.permissions) && userObj.permissions.length > 0
-      ? userObj.permissions
-      : defaultPermissions;
+    let resolvedPermissions =
+      Array.isArray(userObj.permissions) && userObj.permissions.length > 0
+        ? userObj.permissions
+        : defaultPermissions;
 
     // Special Case: Ensure staff members can always view other staff (needed for dropdowns)
-    if (["advisor", "mechanic"].includes(userObj.role) && !resolvedPermissions.includes("view_staff")) {
+    if (
+      ["advisor", "mechanic"].includes(userObj.role) &&
+      !resolvedPermissions.includes("view_staff")
+    ) {
       resolvedPermissions = [...resolvedPermissions, "view_staff"];
     }
 
     userObj.permissions = resolvedPermissions;
 
-    let effectiveOwnerId =
-      userObj.role === "owner" ? userId : user.ownerId || userObj.ownerId;
+    let effectiveOwnerId = userId;
+    if (userObj.role === "owner") {
+      const primaryOwner = await Owner.findOne({
+        garageId: user.garageId,
+      }).sort({ createdAt: 1 });
+      if (primaryOwner) {
+        effectiveOwnerId = primaryOwner._id;
+        userObj.isCoOwner = primaryOwner._id.toString() !== userId.toString();
+      }
+    } else {
+      effectiveOwnerId = user.ownerId || userObj.ownerId;
+    }
 
     // Admin can carry an explicit garage context in the token or via request header
     if (userObj.role === "admin") {
       const headerOwnerId = req.header("x-effective-owner-id");
-      if (headerOwnerId && headerOwnerId !== "null" && headerOwnerId !== "undefined") {
+      if (
+        headerOwnerId &&
+        headerOwnerId !== "null" &&
+        headerOwnerId !== "undefined"
+      ) {
         effectiveOwnerId = headerOwnerId;
       } else if (decoded.effectiveOwnerId) {
         effectiveOwnerId = decoded.effectiveOwnerId;
       }
     }
 
-    if (!effectiveOwnerId && userObj.role !== "owner" && userObj.role !== "admin") {
+    if (
+      !effectiveOwnerId &&
+      userObj.role !== "owner" &&
+      userObj.role !== "admin"
+    ) {
       return res
         .status(403)
         .json({ error: "Staff account is not correctly linked to a garage" });
@@ -126,9 +146,13 @@ const auth = async (req, res, next) => {
 
     // 🏎️ ATTACH GARAGE METADATA (For staff members who don't have it on their own profile)
     if (userObj.role !== "owner" && userObj.effectiveOwnerId) {
-      let ownerDetails = await User.findById(userObj.effectiveOwnerId).select("garageName address logo mobileNumber");
+      let ownerDetails = await User.findById(userObj.effectiveOwnerId).select(
+        "garageName address logo mobileNumber",
+      );
       if (!ownerDetails) {
-        ownerDetails = await Owner.findById(userObj.effectiveOwnerId).select("garageName address logo mobileNumber");
+        ownerDetails = await Owner.findById(userObj.effectiveOwnerId).select(
+          "garageName address logo mobileNumber",
+        );
       }
 
       if (ownerDetails) {
@@ -186,12 +210,12 @@ const requireRole = (...roles) => {
         return res.status(401).json({ message: "Not authenticated" });
       }
       const userRole = user.role?.toLowerCase();
-      const allowed  = roles.map((r) => r.toLowerCase());
+      const allowed = roles.map((r) => r.toLowerCase());
       if (!allowed.includes(userRole)) {
         return res.status(403).json({
-          error:    "Access denied: insufficient role",
+          error: "Access denied: insufficient role",
           required: allowed,
-          current:  userRole,
+          current: userRole,
         });
       }
       next();
@@ -241,12 +265,26 @@ const optionalAuth = async (req, res, next) => {
     const role = detectedRole || userObj.role || "owner";
     userObj.role = role.toLowerCase();
 
-    let effectiveOwnerId =
-      userObj.role === "owner" ? userId : user.ownerId || userObj.ownerId;
+    let effectiveOwnerId = userId;
+    if (userObj.role === "owner") {
+      const primaryOwner = await Owner.findOne({
+        garageId: userObj.garageId,
+      }).sort({ createdAt: 1 });
+      if (primaryOwner) {
+        effectiveOwnerId = primaryOwner._id;
+        userObj.isCoOwner = primaryOwner._id.toString() !== userId.toString();
+      }
+    } else {
+      effectiveOwnerId = user.ownerId || userObj.ownerId;
+    }
 
     if (userObj.role === "admin") {
       const headerOwnerId = req.header("x-effective-owner-id");
-      if (headerOwnerId && headerOwnerId !== "null" && headerOwnerId !== "undefined") {
+      if (
+        headerOwnerId &&
+        headerOwnerId !== "null" &&
+        headerOwnerId !== "undefined"
+      ) {
         effectiveOwnerId = headerOwnerId;
       } else if (decoded.effectiveOwnerId) {
         effectiveOwnerId = decoded.effectiveOwnerId;

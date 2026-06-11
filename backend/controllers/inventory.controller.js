@@ -2,7 +2,11 @@ import Inventory from "../models/Inventory.js";
 import mongoose from "mongoose";
 import GarageSettings from "../models/GarageSettings.js";
 import Owner from "../models/Owner.js";
-import { notifyLowStock, createLowStockNotification } from "../utils/inventoryUtils.js";
+import {
+  notifyLowStock,
+  createLowStockNotification,
+} from "../utils/inventoryUtils.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📋 GET INVENTORY (with search + low stock filter)
 export const getInventory = async (req, res) => {
@@ -20,8 +24,8 @@ export const getInventory = async (req, res) => {
             { sku: { $regex: search, $options: "i" } },
             { carModel: { $regex: search, $options: "i" } },
             { carYear: { $regex: search, $options: "i" } },
-          ]
-        }
+          ],
+        },
       ];
     }
 
@@ -29,8 +33,8 @@ export const getInventory = async (req, res) => {
       query.$expr = {
         $and: [
           { $eq: ["$ownerId", { $toObjectId: ownerId }] },
-          { $lte: ["$stock", "$minLimit"] }
-        ]
+          { $lte: ["$stock", "$minLimit"] },
+        ],
       };
     }
 
@@ -60,6 +64,13 @@ export const addPart = async (req, res) => {
   try {
     const data = { ...req.body, ownerId: req.user.effectiveOwnerId };
     const part = await Inventory.create(data);
+    await logActivity(
+      req,
+      "create",
+      "Inventory",
+      `Added part "${part.name}" (SKU: ${part.sku || "N/A"})`,
+      part._id,
+    );
     res.status(201).json(part);
 
     // 📱 Fire low-stock notification
@@ -71,7 +82,9 @@ export const addPart = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         error: "Duplicate Part",
-        details: ["A part with this SKU / Part Number already exists in your garage."]
+        details: [
+          "A part with this SKU / Part Number already exists in your garage.",
+        ],
       });
     }
     if (error.name === "ValidationError") {
@@ -80,7 +93,9 @@ export const addPart = async (req, res) => {
         details: Object.values(error.errors).map((e) => e.message),
       });
     }
-    res.status(500).json({ error: "Failed to add part", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to add part", message: error.message });
   }
 };
 
@@ -92,7 +107,8 @@ export const updateStock = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;
     const item = await Inventory.findOne({ _id: id, ownerId });
-    if (!item) return res.status(404).json({ error: "Item not found or unauthorized" });
+    if (!item)
+      return res.status(404).json({ error: "Item not found or unauthorized" });
 
     const changeAmount = Number(quantity);
     const finalChange = adjustmentType === "add" ? changeAmount : -changeAmount;
@@ -114,12 +130,19 @@ export const updateStock = async (req, res) => {
           },
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
-    res.status(200).json(updatedItem);
+    await logActivity(
+      req,
+      "update",
+      "Inventory",
+      `Updated part "${updatedPart.name}"`,
+      updatedPart._id,
+    );
+    res.status(200).json(updatedPart);
 
-    // 📱 Fire low-stock notification (non-blocking)
+    // Check if the update
     notifyLowStock(ownerId, updatedItem);
     createLowStockNotification(ownerId, updatedItem);
   } catch (error) {
@@ -135,7 +158,7 @@ export const updatePart = async (req, res) => {
     const updatedPart = await Inventory.findOneAndUpdate(
       { _id: req.params.id, ownerId },
       { $set: req.body },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedPart) {
@@ -143,7 +166,7 @@ export const updatePart = async (req, res) => {
     }
 
     res.status(200).json(updatedPart);
-    
+
     // Check if the update (e.g., minLimit change) triggered a low stock state
     notifyLowStock(ownerId, updatedPart);
     createLowStockNotification(ownerId, updatedPart);
@@ -183,7 +206,15 @@ export const deletePart = async (req, res) => {
   const ownerId = req.user.effectiveOwnerId;
   try {
     const part = await Inventory.findOneAndDelete({ _id: id, ownerId });
-    if (!part) return res.status(404).json({ error: "Part not found or unauthorized" });
+    if (!part)
+      return res.status(404).json({ error: "Part not found or unauthorized" });
+    await logActivity(
+      req,
+      "delete",
+      "Inventory",
+      `Deleted part "${part.name}"`,
+      id,
+    );
     res.status(200).json({ message: "Part deleted successfully" });
   } catch (error) {
     console.error("DELETE ERROR:", error);
@@ -197,6 +228,13 @@ export const addInventory = async (req, res) => {
     const ownerId = req.user.effectiveOwnerId;
     const data = { ...req.body, ownerId };
     const newItem = await Inventory.create(data);
+    await logActivity(
+      req,
+      "create",
+      "Inventory",
+      `Added inventory item "${newItem.name}"`,
+      newItem._id,
+    );
     res.status(201).json(newItem);
 
     // 📱 Fire low-stock notification
@@ -207,7 +245,7 @@ export const addInventory = async (req, res) => {
     if (err.name === "ValidationError") {
       return res.status(400).json({
         error: "Validation failed",
-        details: Object.values(err.errors).map(e => e.message),
+        details: Object.values(err.errors).map((e) => e.message),
       });
     }
     if (err.code === 11000) {

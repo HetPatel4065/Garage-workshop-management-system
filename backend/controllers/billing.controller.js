@@ -12,6 +12,7 @@ import { uploadInvoicePDF, deleteInvoicePDF, getSignedDownloadUrl } from "../ser
 import fs from "fs/promises";
 import { createReadStream } from "fs";
 import path from "path";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 🧾 CREATE INVOICE DRAFT
 export const createInvoiceDraft = async (req, res) => {
@@ -136,6 +137,16 @@ export const createInvoiceDraft = async (req, res) => {
     // Update service billing status
     service.billingStatus = "Invoiced";
     await service.save();
+
+    await logActivity(
+      req,
+      existingInvoice ? "update" : "create",  
+      "Invoice",
+      existingInvoice
+        ? `Updated invoice draft ${invoiceToReturn.invoiceNumber} for service ${service._id}`
+        : `Created invoice draft ${invoiceToReturn.invoiceNumber} for service ${service._id}`,
+      invoiceToReturn._id,
+    );
 
     res.status(existingInvoice ? 200 : 201).json({
       message: existingInvoice
@@ -303,6 +314,14 @@ export const updateInvoiceStatus = async (req, res) => {
 
     await invoice.save();
 
+    await logActivity(
+      req,
+      "update",
+      "Invoice",
+      `Updated invoice ${invoice.invoiceNumber} — ${invoice.status}`,
+      invoice._id
+    );
+
     res.status(200).json({
       message: "Invoice payment updated successfully",
       invoice,
@@ -331,6 +350,14 @@ export const deleteInvoice = async (req, res) => {
     }
 
     await Invoice.findByIdAndDelete(id);
+
+    await logActivity(
+      req,
+      "delete", 
+      "Invoice",
+      `Deleted invoice ${invoice.invoiceNumber} with status ${invoice.status}`,
+      invoice._id,
+    );
 
     res.status(200).json({ message: "Invoice deleted successfully" });
   } catch (error) {

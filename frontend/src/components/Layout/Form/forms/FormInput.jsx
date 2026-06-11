@@ -4,9 +4,7 @@ import FormError from "./FormError";
 
 const renderIcon = (iconInput) => {
   if (!iconInput) return null;
-  if (React.isValidElement(iconInput)) {
-    return iconInput;
-  }
+  if (React.isValidElement(iconInput)) return iconInput;
   const Comp = iconInput;
   return <Comp className="w-4 h-4" />;
 };
@@ -34,7 +32,7 @@ export default function FormInput({
 }) {
   const reactId = useId();
   const inputId = id || `input-${reactId}`;
-  
+
   const ActiveIcon = leftIcon || icon;
 
   return (
@@ -52,7 +50,7 @@ export default function FormInput({
       )}
       <div className="relative">
         {ActiveIcon && (
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none flex items-center justify-center">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none flex items-center justify-center">
             {renderIcon(ActiveIcon)}
           </div>
         )}
@@ -63,26 +61,34 @@ export default function FormInput({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          disabled={disabled || readOnly}
-          className={`w-full transition-all outline-none rounded-xl border
-            ${ActiveIcon ? "pl-10" : "px-3.5"} 
-            ${rightIcon || rightAction ? "pr-10" : "pr-3.5"}
-            ${type === "number" ? "h-11 py-2" : "h-11"}
+          disabled={disabled}
+          readOnly={readOnly}
+          className={`
+            w-full text-sm transition-all outline-none rounded-xl border
+            ${ActiveIcon ? "pl-9" : "px-3"}
+            ${rightIcon || rightAction ? "pr-9" : "pr-3"}
+            ${type === "number" ? "h-9 py-1.5" : "h-9"}
             ${
               error
-                ? "border-red-300 focus:ring-2 focus:ring-red-200 focus:border-red-400 bg-red-50/50 text-red-900"
-                : "border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                ? "border-red-300 focus:ring-2 focus:ring-red-200 focus:border-red-400 bg-red-50/50 text-red-900 placeholder:text-red-300"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-[#121826] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             }
             ${
-              disabled || readOnly
-                ? "bg-slate-50 text-slate-500 cursor-not-allowed border-slate-100"
+              disabled
+                ? "bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 cursor-not-allowed border-slate-100 dark:border-slate-700/50"
                 : ""
             }
-            ${inputClassName}`}
+            ${
+              readOnly
+                ? "bg-slate-50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 cursor-default border-slate-100 dark:border-slate-700/50"
+                : ""
+            }
+            ${inputClassName}
+          `}
           {...props}
         />
         {(rightIcon || rightAction) && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center">
             {rightAction || renderIcon(rightIcon)}
           </div>
         )}

@@ -2,6 +2,7 @@ import Customer from "../models/Customer.js";
 import Service from "../models/Service.js";
 import Owner from "../models/Owner.js";
 import { sendWelcomeEmail } from "../utils/email.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const SIX_MONTHS_IN_MS = 1000 * 60 * 60 * 24 * 30 * 6;
 
@@ -80,6 +81,13 @@ export const createCustomer = async (req, res) => {
       vehicleModel: data.vehicleModel || "N/A",
       ownerId,
     });
+    await logActivity(
+      req,
+      "create",
+      "Customer",
+      `Added customer "${customer.name}"`,
+      customer._id,
+    );
 
     res.status(201).json({
       ...customer.toObject(),
@@ -142,7 +150,13 @@ export const updateCustomer = async (req, res) => {
       return res
         .status(404)
         .json({ error: "Customer not found or unauthorized" });
-
+      await logActivity(
+        req,
+        "update",
+        "Customer",
+        `Updated customer "${customer.name}"`,
+        customer._id,
+      );
     res.status(200).json(customer);
   } catch (err) {
     console.error("Update Customer Error:", err);
@@ -159,6 +173,13 @@ export const deleteCustomer = async (req, res) => {
       return res
         .status(404)
         .json({ error: "Customer not found or unauthorized" });
+      await logActivity(
+        req,  
+        "delete",
+        "Customer",
+        `Deleted customer "${result.name}"`,
+        id,
+      );
     res.status(200).json({ message: "Customer deleted successfully" });
   } catch (err) {
     console.error("Delete Customer Error:", err);
@@ -200,13 +221,20 @@ export const approveCustomer = async (req, res) => {
       console.error("Failed to send welcome email:", emailErr);
       // We don't block the approval if email fails
     }
-
+      await logActivity(
+        req,
+        "approve",
+        "Customer",
+        `Approved customer "${customer.name}"`,
+        customer._id,
+      );
     res
       .status(200)
       .json({ message: "Customer approved successfully", customer });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+  
 };
 
 export const rejectCustomer = async (req, res) => {
@@ -219,6 +247,14 @@ export const rejectCustomer = async (req, res) => {
 
     if (!customer) return res.status(404).json({ error: "Customer not found" });
 
+    // After Customer.findOneAndDelete(...) in deleteCustomer
+    await logActivity(
+      req,
+      "reject",
+      "Customer",
+      `Rejected customer "${customer.name}"`,
+      customer._id,
+    );
     res
       .status(200)
       .json({ message: "Customer rejected successfully", customer });

@@ -13,6 +13,7 @@ import ServiceCatalog from "../models/ServiceCatalog.js";
 import GarageSettings from "../models/GarageSettings.js";
 import RequestedCustomer from "../models/RequestedCustomer.js";
 import mongoose from "mongoose";
+import { logActivity } from "../utils/activityLogger.js";
 
 // 📋 GET ALL GARAGES WITH STATS (PAGINATED, SEARCHABLE, FILTERABLE)
 export const getGarages = async (req, res) => {
@@ -23,7 +24,7 @@ export const getGarages = async (req, res) => {
     const status = req.query.status; // "active" or "suspended"
     const verification = req.query.verification; // "Pending", "Verified", "Rejected"
 
-    const query = {};
+    const query = { isCoOwner: { $ne: true } };
 
     if (search) {
       query.$or = [
@@ -64,9 +65,14 @@ export const getGarages = async (req, res) => {
             Service.countDocuments({ ownerId }),
           ]);
 
+        // Count all owners: 1 primary + co-owners stored in array
+        const ownerCount = 1 + (owner.coOwners?.length || 0);
+
+        // Look up garage by name to get the garageId string
+        const ownerObj = owner.toObject();
         return {
           ...owner.toObject(),
-          totalStaff: advisorCount + mechanicCount,
+          totalStaff: advisorCount + mechanicCount + ownerCount, // exclude primary owner from staff count
           totalCustomers: customerCount,
           totalAppointments: serviceCount,
         };
@@ -165,7 +171,9 @@ export const deleteGarage = async (req, res) => {
 
     // Perform cascade delete across all linked collections in parallel without native transaction sessions
     await Promise.all([
-      Owner.findByIdAndDelete(id),
+      Owner.deleteMany({
+        $or: [{ garageId: owner.garageId }, { _id: owner._id }],
+      }),
       GarageSettings.deleteMany({ ownerId: id }),
       User.deleteMany({ ownerId: id }),
       Advisor.deleteMany({ ownerId: id }),
@@ -181,11 +189,9 @@ export const deleteGarage = async (req, res) => {
       RequestedCustomer.deleteMany({ ownerId: id }),
     ]);
 
-    res
-      .status(200)
-      .json({
-        message: "Garage and all associated records permanently deleted",
-      });
+    res.status(200).json({
+      message: "Garage and all associated records permanently deleted",
+    });
   } catch (err) {
     console.error("Failed to delete garage:", err);
     res

@@ -117,6 +117,12 @@ const NAV_SECTIONS = [
         icon: Bell,
         roles: ["admin", "owner"],
       },
+      {
+        name:"Activity Log",
+        path: "/activity-log",
+        icon: FileText,
+        roles: ["admin", "owner"],  
+      },
     ],
   },
   {
