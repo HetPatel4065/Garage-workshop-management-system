@@ -137,6 +137,7 @@ export const createInvoiceDraft = async (req, res) => {
     // Update service billing status
     service.billingStatus = "Invoiced";
     await service.save();
+    emitToOwner(ownerId, "service:updated", service);
 
     await logActivity(
       req,
@@ -147,6 +148,15 @@ export const createInvoiceDraft = async (req, res) => {
         : `Created invoice draft ${invoiceToReturn.invoiceNumber} for service ${service._id}`,
       invoiceToReturn._id,
     );
+
+    // Populate invoice to match structure expected by frontend
+    await invoiceToReturn.populate("customerId");
+    await invoiceToReturn.populate({
+      path: "serviceId",
+      populate: [{ path: "partsUsed.partId" }, { path: "vehicleId" }],
+    });
+
+    emitToOwner(ownerId, existingInvoice ? "invoice:updated" : "invoice:created", invoiceToReturn);
 
     res.status(existingInvoice ? 200 : 201).json({
       message: existingInvoice
@@ -271,6 +281,14 @@ export const finalizeInvoice = async (req, res) => {
       link: `/billing`,
     });
 
+    await invoice.populate("customerId");
+    await invoice.populate({
+      path: "serviceId",
+      populate: [{ path: "partsUsed.partId" }, { path: "vehicleId" }],
+    });
+
+    emitToOwner(ownerId, "invoice:updated", invoice);
+
     res.status(200).json({
       message: "Invoice finalized and sent to customer",
       invoice,
@@ -322,6 +340,14 @@ export const updateInvoiceStatus = async (req, res) => {
       invoice._id
     );
 
+    await invoice.populate("customerId");
+    await invoice.populate({
+      path: "serviceId",
+      populate: [{ path: "partsUsed.partId" }, { path: "vehicleId" }],
+    });
+
+    emitToOwner(ownerId, "invoice:updated", invoice);
+
     res.status(200).json({
       message: "Invoice payment updated successfully",
       invoice,
@@ -358,6 +384,8 @@ export const deleteInvoice = async (req, res) => {
       `Deleted invoice ${invoice.invoiceNumber} with status ${invoice.status}`,
       invoice._id,
     );
+
+    emitToOwner(ownerId, "invoice:deleted", { _id: id });
 
     res.status(200).json({ message: "Invoice deleted successfully" });
   } catch (error) {

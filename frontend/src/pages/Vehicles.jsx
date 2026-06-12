@@ -16,6 +16,7 @@ import { FaCar, FaUser } from "react-icons/fa";
 import VehicleCard from "../components/Vehicles/VehicleCard";
 import ExportButton from "../components/common/ExportButton";
 import EmptyState from "../components/UI/EmptyState";
+import { useSocket } from "../context/SocketContext";
 
 export default function Vehicles() {
   const { user, token: authToken } = useAuth();
@@ -95,6 +96,62 @@ export default function Vehicles() {
   useEffect(() => {
     if (token) fetchData();
   }, [token]);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleVehicleCreated = (newVehicle) => {
+      setVehicles((prev) => {
+        if (prev.some((v) => v._id === newVehicle._id)) return prev;
+        return [...prev, newVehicle];
+      });
+    };
+
+    const handleVehicleUpdated = (updatedVehicle) => {
+      setVehicles((prev) =>
+        prev.map((v) => (v._id === updatedVehicle._id ? updatedVehicle : v))
+      );
+    };
+
+    const handleVehicleDeleted = ({ _id }) => {
+      setVehicles((prev) => prev.filter((v) => v._id !== _id));
+    };
+
+    const handleCustomerCreated = (newCustomer) => {
+      setCustomers((prev) => {
+        if (prev.some((c) => c._id === newCustomer._id)) return prev;
+        return [...prev, newCustomer];
+      });
+    };
+
+    const handleCustomerUpdated = (updatedCustomer) => {
+      setCustomers((prev) =>
+        prev.map((c) => (c._id === updatedCustomer._id ? updatedCustomer : c))
+      );
+    };
+
+    const handleCustomerDeleted = ({ _id }) => {
+      setCustomers((prev) => prev.filter((c) => c._id !== _id));
+    };
+
+    socket.on("vehicle:created", handleVehicleCreated);
+    socket.on("vehicle:updated", handleVehicleUpdated);
+    socket.on("vehicle:deleted", handleVehicleDeleted);
+    socket.on("customer:created", handleCustomerCreated);
+    socket.on("customer:updated", handleCustomerUpdated);
+    socket.on("customer:deleted", handleCustomerDeleted);
+
+    return () => {
+      socket.off("vehicle:created", handleVehicleCreated);
+      socket.off("vehicle:updated", handleVehicleUpdated);
+      socket.off("vehicle:deleted", handleVehicleDeleted);
+      socket.off("customer:created", handleCustomerCreated);
+      socket.off("customer:updated", handleCustomerUpdated);
+      socket.off("customer:deleted", handleCustomerDeleted);
+    };
+  }, [socket]);
 
   // Count per status for pill badges
   const statusCounts = useMemo(() => {

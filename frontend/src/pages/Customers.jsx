@@ -11,6 +11,7 @@ import ConfirmModal from "../components/UI/ConfirmModal";
 import VehicleHistoryModal from "../components/Customers/VehicleHistoryModal";
 import { Plus, X } from "lucide-react";
 import ExportButton from "../components/common/ExportButton";
+import { useSocket } from "../context/SocketContext";
 
 const CUSTOMER_STATUS_FILTERS = [
   {
@@ -104,6 +105,39 @@ export default function Customers() {
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCreated = (newCustomer) => {
+      setCustomers((prev) => {
+        if (prev.some((c) => c._id === newCustomer._id)) return prev;
+        return [...prev, newCustomer];
+      });
+    };
+
+    const handleUpdated = (updatedCustomer) => {
+      setCustomers((prev) =>
+        prev.map((c) => (c._id === updatedCustomer._id ? updatedCustomer : c))
+      );
+    };
+
+    const handleDeleted = ({ _id }) => {
+      setCustomers((prev) => prev.filter((c) => c._id !== _id));
+    };
+
+    socket.on("customer:created", handleCreated);
+    socket.on("customer:updated", handleUpdated);
+    socket.on("customer:deleted", handleDeleted);
+
+    return () => {
+      socket.off("customer:created", handleCreated);
+      socket.off("customer:updated", handleUpdated);
+      socket.off("customer:deleted", handleDeleted);
+    };
+  }, [socket]);
 
   const filteredCustomers = customers.filter((c) => {
     // Use searchQuery (user typing) if active, otherwise fallback to activeSearch (locked search)

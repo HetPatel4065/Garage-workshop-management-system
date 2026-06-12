@@ -6,6 +6,7 @@ import GarageNavbar from "./Navbar/GarageNavbar";
 import GarageSidebar from "./Sidebar/GarageSidebar";
 import ServiceReminderModal from "../UI/ServiceReminderModal";
 import { useAuth } from "../../context/AuthContext";
+import { Menu } from "lucide-react";
 
 // ─── Constants ───
 
@@ -206,6 +207,17 @@ export default function GarageLayout({ children }) {
         collapsed={collapsed}
         setCollapsed={setCollapsed}
       />
+
+      {/* Floating hamburger for mobile when navbar is hidden */}
+      {hideNavbar && (
+        <button
+          onClick={() => setSidebarOpen((prev) => !prev)}
+          className="fixed top-5 right-5 z-50 lg:hidden w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 active:scale-95 transition-all"
+          aria-label="Toggle menu"
+        >
+          <Menu size={22} />
+        </button>
+      )}
 
       {/* ── Main content column ── */}
       <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden relative">

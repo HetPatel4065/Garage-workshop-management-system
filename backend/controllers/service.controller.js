@@ -2,6 +2,7 @@ import Service from "../models/Service.js";
 import Inventory from "../models/Inventory.js";
 import { notifyLowStock } from "../utils/inventoryUtils.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { emitToOwner } from "../utils/socket.js";
 
 // 📋 GET SERVICES
 export const getAllServices = async (req, res) => {
@@ -207,6 +208,7 @@ export const createService = async (req, res) => {
       newService._id,
     );
 
+    emitToOwner(ownerId, "service:created", newService);
     res.status(201).json(newService);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -342,6 +344,7 @@ export const updateService = async (req, res) => {
       service._id,
     );
 
+    emitToOwner(ownerId, "service:updated", service);
     res.status(200).json(service);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -386,6 +389,7 @@ export const deleteService = async (req, res) => {
     );
 
     await Service.findByIdAndDelete(id);
+    emitToOwner(ownerId, "service:deleted", { _id: id });
     res.status(200).json({ message: "Service deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete service" });

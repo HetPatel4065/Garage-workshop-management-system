@@ -3,6 +3,7 @@ import Service from "../models/Service.js";
 import Owner from "../models/Owner.js";
 import { sendWelcomeEmail } from "../utils/email.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { emitToOwner } from "../utils/socket.js";
 
 const SIX_MONTHS_IN_MS = 1000 * 60 * 60 * 24 * 30 * 6;
 
@@ -89,8 +90,11 @@ export const createCustomer = async (req, res) => {
       customer._id,
     );
 
+    const payload = customer.toObject();
+    emitToOwner(ownerId, "customer:created", payload);
+
     res.status(201).json({
-      ...customer.toObject(),
+      ...payload,
       message: "Customer created successfully",
     });
   } catch (err) {
@@ -157,6 +161,7 @@ export const updateCustomer = async (req, res) => {
         `Updated customer "${customer.name}"`,
         customer._id,
       );
+    emitToOwner(req.user.effectiveOwnerId, "customer:updated", customer);
     res.status(200).json(customer);
   } catch (err) {
     console.error("Update Customer Error:", err);
@@ -180,6 +185,7 @@ export const deleteCustomer = async (req, res) => {
         `Deleted customer "${result.name}"`,
         id,
       );
+    emitToOwner(ownerId, "customer:deleted", { _id: id });
     res.status(200).json({ message: "Customer deleted successfully" });
   } catch (err) {
     console.error("Delete Customer Error:", err);
@@ -228,6 +234,7 @@ export const approveCustomer = async (req, res) => {
         `Approved customer "${customer.name}"`,
         customer._id,
       );
+    emitToOwner(req.user.effectiveOwnerId, "customer:updated", customer);
     res
       .status(200)
       .json({ message: "Customer approved successfully", customer });
@@ -255,6 +262,7 @@ export const rejectCustomer = async (req, res) => {
       `Rejected customer "${customer.name}"`,
       customer._id,
     );
+    emitToOwner(req.user.effectiveOwnerId, "customer:deleted", { _id: req.params.id });
     res
       .status(200)
       .json({ message: "Customer rejected successfully", customer });

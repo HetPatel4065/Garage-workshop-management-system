@@ -10,6 +10,7 @@ import StockUpdateModal from "../components/Inventory/StockUpdateModal";
 import ConfirmModal from "../components/UI/ConfirmModal";
 import { Plus } from "lucide-react";
 import ExportButton from "../components/common/ExportButton";
+import { useSocket } from "../context/SocketContext";
 
 export default function Inventory() {
   const [items, setItems] = useState([]);
@@ -64,6 +65,39 @@ export default function Inventory() {
   useEffect(() => {
     fetchInventory();
   }, []);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCreated = (newItem) => {
+      setItems((prev) => {
+        if (prev.some((i) => i._id === newItem._id)) return prev;
+        return [...prev, newItem];
+      });
+    };
+
+    const handleUpdated = (updatedItem) => {
+      setItems((prev) =>
+        prev.map((i) => (i._id === updatedItem._id ? updatedItem : i))
+      );
+    };
+
+    const handleDeleted = ({ _id }) => {
+      setItems((prev) => prev.filter((i) => i._id !== _id));
+    };
+
+    socket.on("inventory:created", handleCreated);
+    socket.on("inventory:updated", handleUpdated);
+    socket.on("inventory:deleted", handleDeleted);
+
+    return () => {
+      socket.off("inventory:created", handleCreated);
+      socket.off("inventory:updated", handleUpdated);
+      socket.off("inventory:deleted", handleDeleted);
+    };
+  }, [socket]);
 
   // 🔍 Filter & Sort
   let filteredItems = items.filter((i) => {

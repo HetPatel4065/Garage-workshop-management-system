@@ -18,16 +18,17 @@ import {
   X,
   MoreHorizontal,
   Wrench,
+  Car,
 } from "lucide-react";
-import { FaCar } from "react-icons/fa";
 import { useToast } from "../context/ToastContext";
 import SearchBar from "../components/UI/SearchBar";
 import EmptyState from "../components/UI/EmptyState";
 import Modal from "../components/UI/Modal";
 import ConfirmModal from "../components/UI/ConfirmModal";
-import { Meta } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ExportButton from "../components/common/ExportButton";
+import { useSocket } from "../context/SocketContext";
+import { FaCar } from "react-icons/fa";
 
 // ─── MetaField (mirrors CustomerCard) ────────────────────────────
 function MetaField({
@@ -149,10 +150,12 @@ const StatCard = ({
 // ─── Request Card (mirrors CustomerCard layout) ───────────────────
 function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
   const dateObj = new Date(req.createdAt);
+  const apponintmwntTime = req.appointmentTime
+    ? new Date(`1999-01-01T${req.appointmentTime}:00`)
+    : null;
 
   return (
     <div className="bg-white rounded-3xl p-4 sm:p-5 mb-4 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300 border border-slate-100 shadow-sm relative overflow-hidden group cursor-auto">
-      {/* Background Accent */}
       {/* ── TOP ROW: Name + ID + Status ── */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -209,7 +212,7 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
                   })
                 : "Date Not Set"
           }
-          secondary={`Time: ${req.appointmentTime || "—"}`}
+          secondary={`Time: ${apponintmwntTime ? apponintmwntTime.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }) : "—"}`}
         />
       </div>
 
@@ -225,7 +228,7 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
         >
           <Eye size={14} />
           View Details
-        </button> 
+        </button>
 
         {/* Right-side actions */}
         <div className="flex items-center gap-2">
@@ -252,7 +255,7 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
             (!req.appointmentDate ||
               new Date(req.appointmentDate).getFullYear() < 2000) && (
               <button
-                onClick={() => onApprove(req)} // Re-using approve modal for setting date
+                onClick={() => onApprove(req)}
                 className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition active:scale-95"
               >
                 <CalendarCheck size={14} />
@@ -273,22 +276,48 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
   );
 }
 
+// ─── Section Heading (for modal) ─────────────────────────────────
+function SectionHeading({ title }) {
+  return (
+    <div className="flex items-center gap-2 pt-4.5 pb-2">
+      <span className="w-1 h-4 rounded-full bg-black dark:bg-white shrink-0" />
+      <h3 className="text-[10.5px] font-bold text-slate-400 uppercase tracking-[0.14em]">
+        {title}
+      </h3>
+    </div>
+  );
+}
+
 // ─── Detail Row (for modal) ───────────────────────────────────────
-const DetailRow = ({ icon, label, value }) => (
-  <div className="flex items-center gap-4 group">
-    <div className="w-10 h-10 rounded-xl ml-1.5 bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 group-hover:scale-110 transition-all duration-200 shrink-0">
-      {icon}
+function DetailRow({ icon, label, value }) {
+  return (
+    <div className="flex items-start gap-3 py-2.5 px-4">
+      <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11.5px] text-slate-400 font-medium mb-0.5">{label}</p>
+        <p className="text-[13.5px] font-semibold text-slate-800 leading-snug wrap-break-words">
+          {value || "Not specified"}
+        </p>
+      </div>
     </div>
-    <div className="flex-1 border-b border-slate-50 pb-2 min-w-0">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1.5">
-        {label}
+  );
+}
+
+// ─── Meta Card (for modal) ────────────────────────────────────────
+function MetaCard({ title, children, wide = false }) {
+  return (
+    <div
+      className={`px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-100 ${wide ? "col-span-2" : ""}`}
+    >
+      <p className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+        {title}
       </p>
-      <p className="text-sm font-semibold text-slate-800 truncate">
-        {value || "Not specified"}
-      </p>
+      {children}
     </div>
-  </div>
-);
+  );
+}
 
 // ─── Main Component ───────────────────────────────────────────────
 export default function RequestedCustomers() {
@@ -390,9 +419,7 @@ export default function RequestedCustomers() {
     }
     try {
       setIsSubmitting(true);
-
       if (selectedRequest.status === "approved") {
-        // Just update the appointment
         await axios.patch(
           `${import.meta.env.VITE_API_URL}/requested-customers/${selectedRequest._id}/appointment`,
           { appointmentDate: inspectionDate, appointmentTime: inspectionTime },
@@ -400,7 +427,6 @@ export default function RequestedCustomers() {
         );
         addToast("Appointment scheduled successfully!", "success");
       } else {
-        // Standard approval
         await axios.patch(
           `${import.meta.env.VITE_API_URL}/requested-customers/${selectedRequest._id}/approve`,
           { inspectionDate, inspectionTime },
@@ -408,7 +434,6 @@ export default function RequestedCustomers() {
         );
         addToast("Customer approved and welcome email sent!", "success");
       }
-
       setApproveModalOpen(false);
       setDetailsModalOpen(false);
       fetchRequests();
@@ -549,6 +574,23 @@ export default function RequestedCustomers() {
     },
   ];
 
+  // Derived values for modal
+  const requestId = `#${selectedRequest?._id?.slice(-6).toUpperCase() ?? "———"}`;
+  const formattedSubmittedDate = selectedRequest
+    ? new Date(selectedRequest.createdAt).toLocaleDateString("en-IN", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+  const appointmentLabel =
+    selectedRequest?.status === "approved"
+      ? selectedRequest.appointmentDate
+        ? `${new Date(selectedRequest.appointmentDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} at ${selectedRequest.appointmentTime || "TBD"}`
+        : "Date Not Set"
+      : null;
+
   return (
     <div className="p-4 sm:p-6 bg-gray-100 max-w-screen min-h-screen mx-auto dark:bg-slate-950">
       {/* ── Header ── */}
@@ -596,10 +638,9 @@ export default function RequestedCustomers() {
         </div>
       </div>
 
-
-      {/* ── Stat Cards ── */}
-      <div className=" mb-6">
-         <SearchBar
+      {/* ── Search ── */}
+      <div className="mb-6">
+        <SearchBar
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onSearch={(term) => {
@@ -613,7 +654,8 @@ export default function RequestedCustomers() {
           className="w-full"
         />
       </div>
-      {/* ── Search ── */}
+
+      {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {statCards.map((card) => (
           <StatCard
@@ -652,7 +694,7 @@ export default function RequestedCustomers() {
 
       {/* ── Count ── */}
       {!loading && filteredRequests.length > 0 && (
-      <div className="mt-4 border-t border-gray-100 p-4">
+        <div className="mt-4 border-t border-gray-100 p-4">
           <p className="text-sm font-medium text-gray-500">
             Total Requests:{" "}
             <span className="text-gray-900 font-bold">
@@ -662,7 +704,7 @@ export default function RequestedCustomers() {
         </div>
       )}
 
-{/* ── Cards ── */}
+      {/* ── Cards ── */}
       <div>
         {loading ? (
           [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
@@ -740,157 +782,126 @@ export default function RequestedCustomers() {
       >
         {selectedRequest && (
           <div className="flex flex-col max-h-[80vh] overflow-hidden">
-            <div className="mb-6 flex items-center gap-4 shrink-0">
-              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-xl shadow-blue-100 shrink-0">
-                <FaCar className="text-2xl" />
+            {/* ── Modal Header: tag + close + vehicle identity ── */}
+            <div className="pb-0 shrink-0">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-[0.14em]">
+                  Registration request
+                </span>
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-black text-slate-900 leading-tight truncate">
-                  {selectedRequest.vehicleNumber}
-                </h2>
-                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    {selectedRequest.vehicleModel}
-                  </span>
-                  <StatusBadge status={selectedRequest.status} />
+
+              <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100">
+                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                  <FaCar size={25} className="dark:text-white text-black" />
                 </div>
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto pr-1 space-y-6">
-              <div className="pb-4 border-b border-slate-50">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-1 h-4 rounded-full bg-blue-500" />
-                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
-                    Customer Details
-                  </h3>
-                </div>
-                <div className="space-y-4">
-                  <DetailRow
-                    icon={
-                      <Mail size={16} className="text-black dark:text-white" />
-                    }
-                    label="Customer Email"
-                    value={selectedRequest.email}
-                  />
-                  <DetailRow
-                    icon={
-                      <Phone size={16} className="text-black dark:text-white" />
-                    }
-                    label="Contact Number"
-                    value={selectedRequest.phone}
-                  />
-                  <DetailRow
-                    icon={
-                      <MapPin
-                        size={16}
-                        className="text-black dark:text-white"
-                      />
-                    }
-                    label="Service Location"
-                    value={selectedRequest.location}
-                  />
-                  <DetailRow
-                    icon={
-                      <Wrench
-                        size={16}
-                        className="text-black dark:text-white"
-                      />
-                    }
-                    label="Complaint / Service Request"
-                    value={selectedRequest.requestedService || "—"}
-                  />
-                  {selectedRequest.status === "approved" && (
-                    <DetailRow
-                      icon={
-                        <CalendarCheck
-                          size={16}
-                          className="text-black dark:text-white"
-                        />
-                      }
-                      label="Scheduled Appointment"
-                      value={
-                        selectedRequest.appointmentDate
-                          ? `${new Date(selectedRequest.appointmentDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} at ${selectedRequest.appointmentTime || "TBD"}`
-                          : "Date Not Set"
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-1 h-4 rounded-full bg-blue-500" />
-                  <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
-                    Request Metadata
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10.5px] font-black text-slate-400 uppercase mb-1.5">
-                      Status
-                    </p>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-[16px] font-black text-slate-900 leading-tight truncate">
+                    {selectedRequest.vehicleNumber}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    <span className="text-[13px] capitalize font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                      {selectedRequest.vehicleModel}
+                    </span>
                     <StatusBadge status={selectedRequest.status} />
                   </div>
-                  <div className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10.5px] font-black text-slate-400 uppercase mb-1.5">
-                      Request ID
-                    </p>
-                    <p className="text-sm font-bold text-slate-700 font-mono">
-                      #{selectedRequest._id?.slice(-6).toUpperCase()}
-                    </p>
-                  </div>
-                  <div className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 col-span-2">
-                    <p className="text-[10.5px] font-black text-slate-400 uppercase mb-1.5">
-                      Submitted On
-                    </p>
-                    <p className="text-xs font-bold text-slate-700">
-                      {new Date(selectedRequest.createdAt).toLocaleDateString(
-                        "en-IN",
-                        {
-                          weekday: "long",
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        },
-                      )}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
-            <div className="mt-6 flex flex-col md:flex-row items-stretch md:items-center gap-3 shrink-0 pt-4 border-t border-slate-50">
-              <button
-                onClick={() => setDetailsModalOpen(false)}
-                className="order-2 md:order-1 flex px-6 py-4 rounded-2xl font-bold text-[13.5px] text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-all active:scale-[0.90]"
-              >
-                Dismiss
-              </button>
-              {selectedRequest.status === "pending" && (
-                <div className="flex flex-wrap items-center gap-2 flex-1 order-1 md:order-2">
-                  <button
-                    onClick={() => setDeleteModalOpen(true)}
-                    className="flex md:flex-none px-6 py-4 rounded-2xl font-bold text-[11.5px] text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-all active:scale-[0.98] items-center justify-center gap-2"
-                  >
-                    <Trash2 size={14} /> Delete
-                  </button>
-                  <button
-                    onClick={() => setRejectModalOpen(true)}
-                    className="flex md:flex-none px-6 py-4 rounded-2xl font-bold text-[11.5px] text-amber-600 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-all active:scale-[0.98] items-center justify-center gap-2"
-                  >
-                    <UserX size={14} /> Reject
-                  </button>
-                  <button
-                    onClick={() => {
-                      setInspectionDate(new Date().toISOString().split("T")[0]);
-                      setInspectionTime("10:00");
-                      setApproveModalOpen(true);
-                    }}
-                    className="flex flex-1 px-6 py-4 rounded-2xl font-bold text-[11.5px] bg-slate-900 text-white hover:bg-black transition-all shadow-xl shadow-slate-200 active:scale-[0.98] items-center justify-center gap-2"
-                  >
-                    <CheckCircle size={14} /> Approve Request
-                  </button>
-                </div>
+
+            {/* ── Scrollable body ── */}
+            <div className="flex-1 overflow-y-auto pr-1">
+              <SectionHeading title="Customer details" />
+
+              <DetailRow
+                icon={<Mail size={15} className="text-slate-500" />}
+                label="Email"
+                value={selectedRequest.email}
+              />
+              <DetailRow
+                icon={<Phone size={15} className="text-slate-500" />}
+                label="Contact number"
+                value={selectedRequest.phone}
+              />
+              <DetailRow
+                icon={<MapPin size={15} className="text-slate-500" />}
+                label="Service location"
+                value={selectedRequest.location}
+              />
+              <DetailRow
+                icon={<Wrench size={15} className="text-slate-500" />}
+                label="Complaint / service request"
+                value={selectedRequest.requestedService || "—"}
+              />
+              {selectedRequest.status === "approved" && (
+                <DetailRow
+                  icon={<CalendarCheck size={15} className="text-slate-500" />}
+                  label="Scheduled appointment"
+                  value={appointmentLabel}
+                />
               )}
+
+              <SectionHeading title="Request metadata" />
+
+              <div className="grid grid-cols-2 gap-2 pb-4">
+                <MetaCard title="Status">
+                  <StatusBadge status={selectedRequest.status} />
+                </MetaCard>
+                <MetaCard title="Request ID">
+                  <p className="text-[12px] font-bold text-slate-700 font-mono">
+                    {requestId}
+                  </p>
+                </MetaCard>
+                <MetaCard title="Submitted on" wide>
+                  <p className="text-[12px] font-semibold text-slate-700">
+                    {formattedSubmittedDate}
+                  </p>
+                </MetaCard>
+              </div>
+            </div>
+
+            {/* ── Footer actions ── */}
+            <div className="pt-4 border-t border-slate-100 shrink-0">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setDetailsModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-colors active:scale-95"
+                >
+                  Dismiss
+                </button>
+
+                {selectedRequest.status === "pending" && (
+                  <>
+                    <div className="w-px h-6 bg-slate-200 mx-0.5" />
+                    <button
+                      onClick={() => setDeleteModalOpen(true)}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 transition-colors active:scale-95"
+                    >
+                      <Trash2 size={13} />
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => setRejectModalOpen(true)}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors active:scale-95"
+                    >
+                      <UserX size={13} />
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => {
+                        setInspectionDate(
+                          new Date().toISOString().split("T")[0],
+                        );
+                        setInspectionTime("10:00");
+                        setApproveModalOpen(true);
+                      }}
+                      className="flex flex-1 items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-semibold bg-slate-900 text-white hover:bg-black transition-colors active:scale-95"
+                    >
+                      <CheckCircle size={13} />
+                      Approve
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -921,7 +932,7 @@ export default function RequestedCustomers() {
       >
         <div className="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl space-y-4">
           <div className="flex items-center gap-2 mb-1">
-            <CalendarCheck size={14} className="text-emerald-600" />
+            <CalendarCheck size={15} className="text-emerald-600" />
             <p className="text-[11px] font-black text-emerald-700 uppercase tracking-widest">
               Schedule Visit
             </p>
@@ -941,7 +952,7 @@ export default function RequestedCustomers() {
                   new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
                     .toISOString()
                     .split("T")[0]
-                } // 1 year from now
+                }
               />
             </div>
             <div className="space-y-1.5">

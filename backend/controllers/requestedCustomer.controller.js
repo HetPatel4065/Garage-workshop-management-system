@@ -6,7 +6,7 @@ import Owner from "../models/Owner.js";
 import { sendWelcomeEmail, sendRejectionEmail } from "../utils/email.js";
 import mongoose from "mongoose";
 import { createNotification } from "../utils/notificationHelper.js";
-import { emitToCustomer } from "../utils/socket.js";
+import { emitToCustomer, emitToOwner } from "../utils/socket.js";
 import { logActivity } from "../utils/activityLogger.js";
 
 // ➕ CREATE REQUEST (Portal/Registration)

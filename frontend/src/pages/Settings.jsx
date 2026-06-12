@@ -1078,9 +1078,10 @@ export default function Settings() {
 
           <div className="flex-1 bg-white rounded-2xl md:rounded-4xl border border-slate-100 overflow-hidden">
             <div className="p-6 md:p-10">
+              {/* ── BUSINESS TAB ── */}
               {activeTab === "business" && isAdmin && (
                 <div className="space-y-12 animate-in fade-in slide-in-from-right-4">
-                  {/* OWNER INFORMATION */}
+                  {/* Owner Information */}
                   <section className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1088,6 +1089,7 @@ export default function Settings() {
                         Owner Profile Details
                       </h3>
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <InputField
                         label="Owner Full Name"
@@ -1116,7 +1118,7 @@ export default function Settings() {
                     </div>
                   </section>
 
-                  {/* BUSINESS INFORMATION */}
+                  {/* Business Information */}
                   <section className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1124,6 +1126,7 @@ export default function Settings() {
                         Business Details
                       </h3>
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <InputField
                         label="Garage Name"
@@ -1160,92 +1163,95 @@ export default function Settings() {
                     </div>
                   </section>
 
-                  {/* Single Brand Logo */}
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
-                    <h3 className="text-lg font-bold text-slate-800">
-                      Business Logo
-                    </h3>
-                  </div>
-                  <div className="flex flex-col items-center gap-6 p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem] relative group transition-all hover:bg-white hover:border-blue-200 shadow-sm">
-                    {/* Unified Logo Preview Area */}
-                    {logoFile || formData.logo ? (
-                      <div className="w-60 h-60 rounded-3xl bg-white shadow-2xl shadow-slate-200/50 overflow-hidden flex items-center justify-center p-4 border border-slate-100">
-                        <img
-                          src={
-                            logoFile
-                              ? URL.createObjectURL(logoFile)
-                              : formData.logo.startsWith("http")
-                                ? formData.logo
-                                : `${import.meta.env.VITE_BASE_URL}/${formData.logo}`
-                          }
-                          alt="Business Logo"
-                          className="w-full h-full object-contain transition-transform group-hover:scale-105"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-48 h-48 rounded-3xl bg-white border-2 border-slate-100 flex items-center justify-center text-slate-200 shadow-inner">
-                        <ImageIcon size={80} strokeWidth={1.5} />
-                      </div>
-                    )}
+                  {/* Business Logo */}
+                  <section className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
+                      <h3 className="text-lg font-bold text-slate-800">
+                        Business Logo
+                      </h3>
+                    </div>
 
-                    {/* Action Section */}
-                    <div className="flex flex-col items-center gap-3">
-                      {canEdit && (
-                        <div className="flex flex-wrap justify-center gap-3">
-                          <label className="cursor-auto bg-blue-600 text-white px-10 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
-                            Upload New Logo
-                            <input
-                              ref={logoInputRef}
-                              type="file"
-                              className="hidden"
-                              accept="image/*"
-                              onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                  handleChange();
-                                  setLogoFile(e.target.files[0]);
-                                  setLogoRemoved(false);
-                                }
-                              }}
-                            />
-                          </label>
-                          {(logoFile || formData.logo) && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setLogoFile(null);
-                                setLogoRemoved(true);
-                                if (logoInputRef.current) {
-                                  logoInputRef.current.value = "";
-                                }
-                                if (formData.logo) {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    logo: "",
-                                  }));
-                                }
-                                handleChange();
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-all"
-                            >
-                              <X size={14} />
-                              Remove Logo
-                            </button>
-                          )}
+                    <div className="flex flex-col items-center gap-6 p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem] relative group transition-all hover:bg-white hover:border-blue-200 shadow-sm">
+                      {/* Logo Preview */}
+                      {logoFile || formData.logo ? (
+                        <div className="w-60 h-60 rounded-3xl bg-white shadow-2xl shadow-slate-200/50 overflow-hidden flex items-center justify-center p-4 border border-slate-100">
+                          <img
+                            src={
+                              logoFile
+                                ? URL.createObjectURL(logoFile)
+                                : formData.logo.startsWith("http")
+                                  ? formData.logo
+                                  : `${import.meta.env.VITE_BASE_URL}/${formData.logo}`
+                            }
+                            alt="Business Logo"
+                            className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-48 h-48 rounded-3xl bg-white border-2 border-slate-100 flex items-center justify-center text-slate-200 shadow-inner">
+                          <ImageIcon size={80} strokeWidth={1.5} />
                         </div>
                       )}
 
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                        Recommended: Square PNG or JPG (Max 3MB)
-                      </p>
+                      {/* Actions */}
+                      <div className="flex flex-col items-center gap-3">
+                        {canEdit && (
+                          <div className="flex flex-wrap justify-center gap-3">
+                            <label className="cursor-auto bg-blue-600 text-white px-10 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
+                              Upload New Logo
+                              <input
+                                ref={logoInputRef}
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  if (e.target.files?.[0]) {
+                                    handleChange();
+                                    setLogoFile(e.target.files[0]);
+                                    setLogoRemoved(false);
+                                  }
+                                }}
+                              />
+                            </label>
+
+                            {(logoFile || formData.logo) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setLogoFile(null);
+                                  setLogoRemoved(true);
+                                  if (logoInputRef.current)
+                                    logoInputRef.current.value = "";
+                                  if (formData.logo)
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      logo: "",
+                                    }));
+                                  handleChange();
+                                }}
+                                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-all"
+                              >
+                                <X size={14} />
+                                Remove Logo
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                          Recommended: Square PNG or JPG (Max 3MB)
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  </section>
                 </div>
               )}
 
+              {/* ── CATALOG TAB ──────────────────────────────────────────── */}
               {activeTab === "catalog" && (
                 <div className="space-y-6">
-                  {/* --- NATIVE REPLACEMENT HEADER ASSEMBLY --- */}
+                  {/* Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                     <div className="flex items-start gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1293,9 +1299,8 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  {/* --- CATALOG CONTENT --- */}
+                  {/* Catalog Content */}
                   <div className="space-y-4">
-                    {/* Desktop Header */}
                     {catalog.length > 0 && (
                       <div className="hidden md:flex gap-4 px-5 mb-2">
                         <div className="flex-1 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">
@@ -1304,7 +1309,7 @@ export default function Settings() {
                         <div className="w-48 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">
                           Default Base Price
                         </div>
-                        <div className="w-12"></div>
+                        <div className="w-12" />
                       </div>
                     )}
 
@@ -1323,6 +1328,7 @@ export default function Settings() {
                         className="relative overflow-hidden group cursor-auto bg-slate-50 dark:bg-slate-950/20 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300"
                       >
                         <div className="relative z-10 w-full flex flex-col md:flex-row items-start md:items-center gap-4">
+                          {/* Service Name */}
                           <div className="flex-1 w-full">
                             <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 mb-1 block md:hidden">
                               Service Name
@@ -1341,6 +1347,8 @@ export default function Settings() {
                               className="w-full border border-slate-200 dark:border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 disabled:bg-slate-100 dark:disabled:bg-slate-950 disabled:text-slate-500"
                             />
                           </div>
+
+                          {/* Default Price */}
                           <div className="w-full md:w-48">
                             <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 mb-1 block md:hidden">
                               Default Price
@@ -1362,6 +1370,8 @@ export default function Settings() {
                               />
                             </div>
                           </div>
+
+                          {/* Delete */}
                           <button
                             type="button"
                             onClick={() => {
@@ -1386,9 +1396,10 @@ export default function Settings() {
                 </div>
               )}
 
+              {/* ── NOTIFICATIONS TAB ────────────────────────────────────── */}
               {activeTab === "notifications" && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                  {/* Header Section */}
+                  {/* Header */}
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1402,14 +1413,7 @@ export default function Settings() {
                         type="button"
                         onClick={() => handleSendTest("email")}
                         disabled={isTestingNotif.email}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl 
-                        bg-gray-100 hover:bg-blue-100 
-                        dark:bg-slate-800 dark:hover:bg-slate-700
-                        border border-slate-700 dark:border-slate-600 
-                        text-slate-700 dark:text-slate-200 
-                        text-[13px] font-bold transition-all duration-300 
-                        disabled:opacity-50 disabled:hover:bg-gray-100 
-                        disabled:hover:border-slate-700"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-[13px] font-bold transition-all duration-300 disabled:opacity-50 disabled:hover:bg-gray-100 disabled:hover:border-slate-700"
                       >
                         {isTestingNotif.email ? (
                           <Loader2
@@ -1427,7 +1431,7 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  {/* Toggles Grid */}
+                  {/* Toggles */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <ToggleItem
                       title="Low Stock Alerts"
@@ -1447,10 +1451,11 @@ export default function Settings() {
                 </div>
               )}
 
+              {/* ── ADVANCED TAB ─────────────────────────────────────────── */}
               {activeTab === "advanced" && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
-                  {/* BACKUP & RESTORE MODULE */}
-                  <div className="space-y-8">
+                  {/* Backup & Restore */}
+                  <section className="space-y-8">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
                       <h3 className="text-lg font-bold text-slate-800">
@@ -1458,8 +1463,8 @@ export default function Settings() {
                       </h3>
                     </div>
 
-                    <div className="flex flex-col gap-6 max-w-2xl mx-auto">
-                      {/* BACKUP BOX */}
+                    <div className="flex flex-col gap-6">
+                      {/* Backup Box */}
                       <div className="p-6 bg-linear-to-br from-blue-50 to-indigo-50 dark:from-zinc-900 dark:to-zinc-800/80 border border-blue-100 dark:border-zinc-800 rounded-4xl space-y-5 shadow-sm hover:shadow-md transition-all">
                         <div className="flex items-center gap-4">
                           <div className="p-3 bg-blue-600 dark:bg-blue-950/90 text-white rounded-2xl">
@@ -1481,6 +1486,7 @@ export default function Settings() {
                           safekeeping.
                         </p>
 
+                        {/* Time Range Selector */}
                         <div className="space-y-3">
                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider px-1 block">
                             Time Range
@@ -1510,6 +1516,7 @@ export default function Settings() {
                           </div>
                         </div>
 
+                        {/* Export Buttons */}
                         <div className="space-y-3">
                           <button
                             type="button"
@@ -1559,7 +1566,7 @@ export default function Settings() {
                         </div>
                       </div>
 
-                      {/* RESTORE BOX */}
+                      {/* Restore Box */}
                       <div className="p-6 bg-linear-to-br from-slate-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800/80 border border-slate-200 dark:border-zinc-800 rounded-4xl space-y-5 shadow-sm hover:shadow-md transition-all">
                         <div className="flex items-center gap-4">
                           <div className="p-3 bg-slate-900 dark:bg-zinc-800 text-white rounded-2xl">
@@ -1577,7 +1584,7 @@ export default function Settings() {
 
                         <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed px-1">
                           Upload a previously generated backup ZIP file to
-                          restore or merge records.
+                          restore or merge records.{" "}
                           <span className="font-bold text-red-500">
                             Note: This action is irreversible.
                           </span>
@@ -1618,7 +1625,7 @@ export default function Settings() {
                             <input
                               type="file"
                               accept=".zip"
-                              className="hidden "
+                              className="hidden"
                               onChange={(e) =>
                                 setRestoreFile(e.target.files[0])
                               }
@@ -1643,7 +1650,7 @@ export default function Settings() {
                       </div>
                     </div>
 
-                    {/* RESTORE RESULTS DISPLAY */}
+                    {/* Restore Results */}
                     {restoreResult && (
                       <div className="animate-in fade-in zoom-in-95 duration-300 bg-emerald-50 border border-emerald-100 rounded-4xl p-6 space-y-4">
                         <div className="flex items-center gap-2 text-emerald-700">
@@ -1652,6 +1659,7 @@ export default function Settings() {
                             Restore Completed Successfully
                           </h5>
                         </div>
+
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           {Object.entries(restoreResult.restored).map(
                             ([key, count]) => (
@@ -1669,6 +1677,7 @@ export default function Settings() {
                             ),
                           )}
                         </div>
+
                         {restoreResult.errors.length > 0 && (
                           <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100 space-y-1">
                             <p className="text-[10px] font-black text-red-500 uppercase">
@@ -1690,16 +1699,17 @@ export default function Settings() {
                         )}
                       </div>
                     )}
-                  </div>
+                  </section>
 
-                  {/* SECURITY TOGGLES */}
-                  <div className="space-y-6">
+                  {/* Security Settings */}
+                  <section className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
                       <h3 className="text-lg font-bold text-slate-800">
                         Security Settings
                       </h3>
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <ToggleItem
                         title="Two-Factor Authentication"
@@ -1714,20 +1724,22 @@ export default function Settings() {
                         onChange={() => handleSecurityToggle("loginAlerts")}
                       />
                     </div>
+
                     <p className="text-xs font-semibold text-slate-400">
                       Security toggle changes are saved with the main{" "}
                       <strong>Save Changes</strong> button.
                     </p>
-                  </div>
+                  </section>
 
-                  {/* CHANGE PASSWORD */}
-                  <div className="space-y-6">
+                  {/* Change Password */}
+                  <section className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
                       <h3 className="text-lg font-bold text-slate-800">
                         Change Password
                       </h3>
                     </div>
+
                     <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
                       {["current", "next", "confirm"].map((field) => (
                         <div key={field} className="space-y-2">
@@ -1765,10 +1777,7 @@ export default function Settings() {
                             <button
                               type="button"
                               onClick={() =>
-                                setShowPw((p) => ({
-                                  ...p,
-                                  [field]: !p[field],
-                                }))
+                                setShowPw((p) => ({ ...p, [field]: !p[field] }))
                               }
                               className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                             >
@@ -1781,18 +1790,21 @@ export default function Settings() {
                           </div>
                         </div>
                       ))}
+
                       {pwError && (
                         <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
                           <ShieldAlert size={14} />
                           <p className="text-xs font-semibold">{pwError}</p>
                         </div>
                       )}
+
                       {pwSuccess && (
                         <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2">
                           <CheckCircle2 size={14} />
                           <p className="text-xs font-semibold">{pwSuccess}</p>
                         </div>
                       )}
+
                       <button
                         onClick={handleChangePassword}
                         disabled={pwLoading}
@@ -1806,7 +1818,7 @@ export default function Settings() {
                         {pwLoading ? "Updating..." : "Update Password"}
                       </button>
                     </div>
-                  </div>
+                  </section>
                 </div>
               )}
             </div>

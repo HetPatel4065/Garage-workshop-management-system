@@ -17,8 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ExportButton from "../components/common/ExportButton";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import ConfirmModal from "../components/UI/ConfirmModal";
 
 const MODULE_OPTIONS = [
   "All",
@@ -268,6 +267,8 @@ export default function ActivityLog() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [moduleFilter, setModuleFilter] = useState("All");
@@ -289,7 +290,7 @@ export default function ActivityLog() {
       if (dateFrom) params.append("startDate", dateFrom);
       if (dateTo) params.append("endDate", dateTo);
 
-      const endpoint = `${API_BASE}/activity-log/mine`;
+      const endpoint = `${import.meta.env.VITE_API_URL}/activity-log/mine`;
       const res = await axios.get(`${endpoint}?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -327,6 +328,14 @@ export default function ActivityLog() {
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+
+  // keep current page within valid bounds whenever the filtered list changes
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [totalPages, page]);
+
   const paginated = filtered.slice(
     (page - 1) * ITEMS_PER_PAGE,
     page * ITEMS_PER_PAGE,
@@ -345,6 +354,31 @@ export default function ActivityLog() {
     setDateFrom("");
     setDateTo("");
     setPage(1);
+  };
+
+  const goToPrevPage = () => {
+    setPage((p) => Math.max(1, p - 1));
+  };
+
+  const goToNextPage = () => {
+    setPage((p) => Math.min(totalPages, p + 1));
+  };
+
+  const handleDeleteOldLogs = async () => {
+    if (!token) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/activity-log/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDeleteModalOpen(false);
+      await fetchLogs();
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to delete activity logs");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // Export columns
@@ -560,13 +594,24 @@ export default function ActivityLog() {
       )}
 
       {/* ── COUNT BAR ── */}
-      <div className="border-t border-gray-100 dark:border-slate-700 py-3 mb-4">
+      <div className="border-t border-gray-100 dark:border-slate-700 py-3 mb-4 flex items-center justify-between">
         <p className="text-sm font-medium text-gray-600 dark:text-slate-400">
           Total Logs:{" "}
           <span className="text-gray-900 dark:text-slate-100">
             {filtered.length}
           </span>
         </p>
+
+        <div>
+          <button
+            onClick={() => setDeleteModalOpen(true)}
+            disabled={deleting || logs.length === 0}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/60 border border-red-200 dark:border-red-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Trash2 size={15} className={deleting ? "animate-pulse" : ""} />
+            {deleting ? "Deleting..." : "Delete Previous Logs"}
+          </button>
+        </div>
       </div>
 
       {/* ── TABLE / CARDS ── */}
@@ -693,7 +738,7 @@ export default function ActivityLog() {
 
                         {/* Description */}
                         <td className="px-5 py-4 max-w-xs">
-                          <p className="text-slate-700 dark:text-slate-300 text-xs font-medium truncate">
+                          <p className="text-slate-700 dark:text-slate-300 text-xs font-medium">
                             {log.description}
                           </p>
                           <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
@@ -759,59 +804,29 @@ export default function ActivityLog() {
           </>
         )}
 
-        {/* Pagination */}
-        {!loading && !error && filtered.length > ITEMS_PER_PAGE && (
+        {/* Bottom Pagination */}
+        {!loading && !error && filtered.length > 0 && (
           <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Showing {(page - 1) * ITEMS_PER_PAGE + 1}–
               {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of{" "}
               {filtered.length}
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={goToPrevPage}
                 disabled={page === 1}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={15} />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(
-                  (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
-                )
-                .reduce((acc, p, idx, arr) => {
-                  if (idx > 0 && p - arr[idx - 1] > 1) {
-                    acc.push("...");
-                  }
-                  acc.push(p);
-                  return acc;
-                }, [])
-                .map((p, i) =>
-                  p === "..." ? (
-                    <span
-                      key={`ellipsis-${i}`}
-                      className="px-1 text-slate-400 text-xs font-bold"
-                    >
-                      ...
-                    </span>
-                  ) : (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`w-8 h-8 rounded-lg text-xs font-black transition-colors ${
-                        page === p
-                          ? "bg-blue-600 text-white"
-                          : "border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ),
-                )}
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Page {page} of {totalPages}
+              </span>
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={goToNextPage}
                 disabled={page === totalPages}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={15} />
               </button>
@@ -819,6 +834,17 @@ export default function ActivityLog() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteOldLogs}
+        title="Delete All Logs"
+        message={`This will permanently delete all ${logs.length} activity log${logs.length !== 1 ? "s" : ""} for your garage. This action cannot be undone.`}
+        confirmText="Yes, Delete All"
+        type="delete"
+        isLoading={deleting}
+      />
     </div>
   );
 }

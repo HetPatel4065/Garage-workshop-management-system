@@ -321,7 +321,7 @@ export default function Profile({ isAdvisor }) {
           <div className="p-6 md:p-10">
             {activeTab === "personal" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                <div className="max-w-3xl mx-auto p-0.5 space-y-12">
+                <div className="space-y-12 animate-in fade-in slide-in-from-right-4">
                   <section className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />

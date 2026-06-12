@@ -9,6 +9,7 @@ import { LoadingProvider } from "./context/LoadingContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { WishlistProvider } from "./context/WishlistContext.jsx";
+import { SocketProvider } from "./context/SocketContext.jsx";
 
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
@@ -45,11 +46,13 @@ createRoot(document.getElementById("root")).render(
         <ToastProvider>
           <LoadingProvider>
             <AuthProvider>
-              <WishlistProvider>
-                <NotificationProvider>
-                  <App />
-                </NotificationProvider>
-              </WishlistProvider>
+              <SocketProvider>
+                <WishlistProvider>
+                  <NotificationProvider>
+                    <App />
+                  </NotificationProvider>
+                </WishlistProvider>
+              </SocketProvider>
             </AuthProvider>
           </LoadingProvider>
         </ToastProvider>

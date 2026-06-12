@@ -89,6 +89,7 @@ const getDateRange = (type) => {
 import JobCard from "../components/Services/JobCard";
 import ExportButton from "../components/common/ExportButton";
 import EmptyState from "../components/UI/EmptyState";
+import { useSocket } from "../context/SocketContext";
 
 export default function JobCards() {
   const { user, token: authToken } = useAuth();
@@ -258,6 +259,30 @@ export default function JobCards() {
   useEffect(() => {
     if (token) fetchData();
   }, [token, filterDateType, filterStartDate, filterEndDate, filterStaff]);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const triggerFetch = () => {
+      fetchData();
+    };
+
+    socket.on("jobcard:created", triggerFetch);
+    socket.on("jobcard:updated", triggerFetch);
+    socket.on("jobcard:deleted", triggerFetch);
+    socket.on("customer:updated", triggerFetch);
+    socket.on("vehicle:updated", triggerFetch);
+
+    return () => {
+      socket.off("jobcard:created", triggerFetch);
+      socket.off("jobcard:updated", triggerFetch);
+      socket.off("jobcard:deleted", triggerFetch);
+      socket.off("customer:updated", triggerFetch);
+      socket.off("vehicle:updated", triggerFetch);
+    };
+  }, [socket]);
 
   // Count per status for pill badges (calculated dynamically from current staff & date filtered job cards)
   const statusCounts = jobCards.reduce((acc, jc) => {

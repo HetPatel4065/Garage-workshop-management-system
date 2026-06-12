@@ -34,11 +34,11 @@ export default memo(function InvoicePreview({
   const tax = Number(invoice?.gst || 0);
   const total = Number(invoice?.total || 0);
 
-  const [showPaymentOptions, setShowPaymentOptions] = React.useState(false);
-  const [selectedMethod, setSelectedMethod] = React.useState(
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState(
     invoice.paymentMethod || "Cash",
   );
-  const [amtToPay, setAmtToPay] = React.useState(
+  const [amtToPay, setAmtToPay] = useState(
     invoice.total - (invoice.amountPaid || 0),
   );
 

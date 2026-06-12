@@ -3,6 +3,7 @@ import Vehicle from "../models/Vehicle.js";
 import Customer from "../models/Customer.js";
 import { createNotification } from "../utils/notificationHelper.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { emitToOwner } from "../utils/socket.js";
 
 export const createJobCard = async (req, res) => {
   try {
@@ -62,7 +63,7 @@ export const createJobCard = async (req, res) => {
       type: "info",
       link: "/job-cards",
     });
-      await logActivity(
+    await logActivity(
 
       req,
       "create",
@@ -70,6 +71,8 @@ export const createJobCard = async (req, res) => {
       `Created Job Card ${savedJobCard.jobCardId} for vehicle ${vehicle.licensePlate}`,
       savedJobCard._id,
     );
+
+    emitToOwner(ownerId, "jobcard:created", savedJobCard);
 
     res.status(201).json(savedJobCard);
   } catch (error) {
@@ -206,6 +209,8 @@ export const updateJobCard = async (req, res) => {
       jobCard._id,
     );
 
+    emitToOwner(ownerId, "jobcard:updated", jobCard);
+
     res.json(jobCard);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -275,6 +280,8 @@ export const deleteJobCard = async (req, res) => {
       `Deleted Job Card ${jobCard.jobCardId} for vehicle ${jobCard.licensePlate}`,
       jobCard._id,
     );
+
+    emitToOwner(ownerId, "jobcard:deleted", { _id: jobCard._id });
 
     res.json({ message: "Job card deleted successfully" });
   } catch (error) {

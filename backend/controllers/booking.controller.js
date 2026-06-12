@@ -5,6 +5,7 @@ import {
   requirePortalCustomerId,
 } from "../utils/portalCustomerContext.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { emitToOwner } from "../utils/socket.js";
 
 const VEHICLE_STATUS_VALUES = ["Available", "Booked", "Sold", "Hidden"];
 
@@ -61,6 +62,14 @@ export const createBookingRequest = async (req, res) => {
       requestType,
       note: String(note || "").trim(),
     });
+
+    await booking.populate({
+      path: "vehicleSaleId",
+      select: "title brand model year price status",
+    });
+    await booking.populate({ path: "customerId", select: "name phone email" });
+
+    emitToOwner(vehicle.ownerId, "booking:created", booking);
 
     return res.status(201).json({ success: true, booking });
   } catch (error) {
@@ -154,6 +163,14 @@ export const updateBookingDecision = async (req, res) => {
       );
     }
 
+    await booking.populate({
+      path: "vehicleSaleId",
+      select: "title brand model year price status",
+    });
+    await booking.populate({ path: "customerId", select: "name phone email" });
+
+    emitToOwner(ownerId, "booking:updated", booking);
+
     res.status(200).json({ success: true, booking, updatedVehicle });
   } catch (error) {
     console.error("UPDATE BOOKING DECISION ERROR:", error);
@@ -205,6 +222,7 @@ export const deleteBooking = async (req, res) => {
     }
 
     await Booking.findByIdAndDelete(id);
+    emitToOwner(booking.ownerId, "booking:deleted", { _id: id });
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("DELETE BOOKING ERROR:", error);

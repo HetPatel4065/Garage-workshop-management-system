@@ -246,6 +246,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full min-h-screen bg-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-y-auto">
+      {/* ── Header ── */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:mb-8">
         {/* Left Side: Identity & Greetings */}
         <div className="min-w-0 flex-1">
@@ -276,56 +277,57 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <div
-        className={`grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8`}
-      >
-        {["owner", "admin"].includes(role) && (
-          <>
-            <StatsCard
-              title="Total Revenue"
-              value={`₹ ${Math.floor(data.stats.totalRevenue).toLocaleString("en-IN")}`}
-              icon={<IndianRupee />}
-              color="blue"
-            />
-            <StatsCard
-              title="Today"
-              value={`₹ ${Math.floor(data.stats.todayRevenue).toLocaleString("en-IN")}`}
-              icon={<IndianRupee />}
-              color="emerald"
-            />
-            <StatsCard
-              title="Previous Payment"
-              value={`₹ ${Number(data.stats.todayStats.previousPayments).toLocaleString("en-IN")}`}
-              icon={<History />}
-              color="purple"
-            />
 
-            <StatsCard
-              title="Due Today"
-              value={data.reminderStats?.dueToday || 0}
-              icon={<Bell />}
-              color="yellow"
-              navigateTo="/reminders?filter=Today"
-            />
-            <StatsCard
-              title="Due This Week"
-              value={data.reminderStats?.dueThisWeek || 0}
-              icon={<FiCalendar />}
-              color="blue"
-              navigateTo="/reminders?filter=Upcoming"
-            />
-            <StatsCard
-              title="Overdue"
-              value={data.reminderStats?.overdue || 0}
-              icon={<AlertTriangle />}
-              color="red"
-              navigateTo="/reminders?filter=Overdue"
-            />
-          </>
-        )}
-      </div>
+      {/* ── Stats Cards ── */}
       {["owner", "admin"].includes(role) && (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <StatsCard
+            title="Total Revenue"
+            value={`₹ ${Math.floor(data.stats.totalRevenue).toLocaleString("en-IN")}`}
+            icon={<IndianRupee />}
+            color="blue"
+          />
+          <StatsCard
+            title="Today"
+            value={`₹ ${Math.floor(data.stats.todayRevenue).toLocaleString("en-IN")}`}
+            icon={<IndianRupee />}
+            color="emerald"
+          />
+          <StatsCard
+            title="Previous Payment"
+            value={`₹ ${Number(data.stats.todayStats.previousPayments).toLocaleString("en-IN")}`}
+            icon={<History />}
+            color="purple"
+          />
+
+          <StatsCard
+            title="Due Today"
+            value={data.reminderStats?.dueToday || 0}
+            icon={<Bell />}
+            color="yellow"
+            navigateTo="/reminders?filter=Today"
+          />
+          <StatsCard
+            title="Due This Week"
+            value={data.reminderStats?.dueThisWeek || 0}
+            icon={<FiCalendar />}
+            color="blue"
+            navigateTo="/reminders?filter=Upcoming"
+          />
+          <StatsCard
+            title="Overdue"
+            value={data.reminderStats?.overdue || 0}
+            icon={<AlertTriangle />}
+            color="red"
+            navigateTo="/reminders?filter=Overdue"
+          />
+        </div>
+      )}
+
+      {/* ── Charts Row ── */}
+      {["owner", "admin"].includes(role) && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* Business Analytics — takes 2 of 3 cols on lg+ */}
           <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
             <div className="p-5 sm:p-6 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 mb-6 gap-4">
               <div className="flex items-center gap-3">
@@ -445,6 +447,8 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
+          {/* Job Distribution — takes 1 of 3 cols on lg+ */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
             <div className="p-5 sm:p-6 pb-4 flex items-center gap-3 border-b border-slate-50 mb-6">
               <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm shadow-emerald-100">
@@ -474,7 +478,6 @@ export default function Dashboard() {
                       {data.serviceBreakdown.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          // Look up color by status name, otherwise use default
                           fill={STATUS_COLORS[entry.name] || DEFAULT_COLOR}
                           cornerRadius={6}
                         />
@@ -517,8 +520,11 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 items-start">
-        <div className="col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+
+      {/* ── Bottom Row: Recent Activity + Sidebar ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+        {/* Recent Activity — 2 cols */}
+        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-5 flex items-center justify-between border-b border-slate-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-800/50 text-indigo-400 rounded-2xl flex items-center justify-center shadow-sm shadow-indigo-100">
@@ -543,7 +549,8 @@ export default function Dashboard() {
           <RecentServices services={data.recentServices} />
         </div>
 
-        <div className="space-y-6">
+        {/* Sidebar — 1 col */}
+        <div className="space-y-4 sm:space-y-6">
           <PendingApprovals inspections={inspections} />
 
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden h-fit">

@@ -238,7 +238,7 @@ export default function AdminDirectory() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen px-4 sm:px-6 lg:px-8 py-6 rounded-xl">
+    <div className="bg-gray-100 min-h-screen px-4 sm:px-6 lg:px-8 py-6">
       {/* Directory Header */}
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
         <div>

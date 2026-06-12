@@ -5,7 +5,7 @@ import Owner from "../models/Owner.js";
 export const getMyActivityLog = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;
-    const { module, action, performer, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const { module, action, performer, startDate, endDate, page = 1 } = req.query;
 
     const owner = await Owner.findById(ownerId).select("garageId").lean();
     if (!owner) return res.status(404).json({ error: "Garage not found" });
@@ -32,12 +32,12 @@ export const getMyActivityLog = async (req, res) => {
       }
     }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const skip = (parseInt(page) - 1) * parseInt();
     const total = await ActivityLog.countDocuments(query);
     const logs = await ActivityLog.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt());
 
     // Get unique performers for filter dropdown
     const performers = await ActivityLog.distinct("performedBy", { garageId: owner.garageId });
@@ -47,7 +47,7 @@ export const getMyActivityLog = async (req, res) => {
       logs,
       total,
       page: parseInt(page),
-      pages: Math.ceil(total / parseInt(limit)),
+      pages: Math.ceil(total / parseInt()),
       performers,
     });
   } catch (err) {
@@ -59,7 +59,7 @@ export const getMyActivityLog = async (req, res) => {
 export const getActivityLog = async (req, res) => {
   try {
     const { garageId } = req.params;
-    const { module, action, performer, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const { module, action, performer, startDate, endDate, page = 1 } = req.query;
 
     const query = { garageId };
 
@@ -83,22 +83,39 @@ export const getActivityLog = async (req, res) => {
       }
     }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const skip = (parseInt(page) - 1) * parseInt();
     const total = await ActivityLog.countDocuments(query);
     const logs = await ActivityLog.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt());
 
     res.status(200).json({
       success: true,
       logs,
       total,
       page: parseInt(page),
-      pages: Math.ceil(total / parseInt(limit)),
+      pages: Math.ceil(total / parseInt()),
     });
   } catch (err) {
     console.error("GET ACTIVITY LOG ERROR:", err);
     res.status(500).json({ error: "Failed to fetch activity log" });
+  }
+};
+
+export const deleteMyActivityLogs = async (req, res) => {
+  try {
+    const ownerId = req.user.effectiveOwnerId;
+    const owner = await Owner.findById(ownerId).select("garageId").lean();
+    if (!owner) return res.status(404).json({ error: "Garage not found" });
+
+    const result = await ActivityLog.deleteMany({ garageId: owner.garageId });
+    res.status(200).json({
+      success: true,
+      message: `Deleted ${result.deletedCount} activity log(s) successfully`,
+    });
+  } catch (err) {
+    console.error("DELETE ACTIVITY LOGS ERROR:", err);
+    res.status(500).json({ error: "Failed to delete activity logs" });
   }
 };

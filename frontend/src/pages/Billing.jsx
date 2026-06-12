@@ -14,6 +14,7 @@ import EmptyState from "../components/UI/EmptyState";
 import { ClipboardClock, FileText, ReceiptIndianRupee } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ExportButton from "../components/common/ExportButton";
+import { useSocket } from "../context/SocketContext";
 
 const LoadingIndicator = () => (
   <div className="flex flex-col items-center justify-center py-20 text-blue-600/50">
@@ -100,6 +101,33 @@ export default function Billing() {
     fetchUnbilledServices();
     fetchSettings();
   }, [fetchInvoices, fetchUnbilledServices, fetchSettings]);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const triggerFetch = () => {
+      fetchInvoices(true);
+      fetchUnbilledServices();
+    };
+
+    socket.on("invoice:created", triggerFetch);
+    socket.on("invoice:updated", triggerFetch);
+    socket.on("invoice:deleted", triggerFetch);
+    socket.on("service:created", triggerFetch);
+    socket.on("service:updated", triggerFetch);
+    socket.on("service:deleted", triggerFetch);
+
+    return () => {
+      socket.off("invoice:created", triggerFetch);
+      socket.off("invoice:updated", triggerFetch);
+      socket.off("invoice:deleted", triggerFetch);
+      socket.off("service:created", triggerFetch);
+      socket.off("service:updated", triggerFetch);
+      socket.off("service:deleted", triggerFetch);
+    };
+  }, [socket, fetchInvoices, fetchUnbilledServices]);
 
   // 💸 Handle generating a new invoice
   const handleGenerateInvoice = async (serviceId) => {

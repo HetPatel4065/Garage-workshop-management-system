@@ -10,6 +10,7 @@ import ConfirmModal from "../components/UI/ConfirmModal";
 import { useAuth } from "../context/AuthContext";
 import { Plus } from "lucide-react";
 import ExportButton from "../components/common/ExportButton";
+import { useSocket } from "../context/SocketContext";
 
 export default function Services() {
   const { user, token } = useAuth();
@@ -63,6 +64,26 @@ export default function Services() {
   useEffect(() => {
     fetchServices();
   }, [location.search]);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const triggerFetch = () => {
+      fetchServices();
+    };
+
+    socket.on("service:created", triggerFetch);
+    socket.on("service:updated", triggerFetch);
+    socket.on("service:deleted", triggerFetch);
+
+    return () => {
+      socket.off("service:created", triggerFetch);
+      socket.off("service:updated", triggerFetch);
+      socket.off("service:deleted", triggerFetch);
+    };
+  }, [socket]);
 
   // Filter
   const filteredServices = services

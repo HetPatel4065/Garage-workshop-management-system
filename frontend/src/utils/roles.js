@@ -17,9 +17,7 @@ export const GARAGE_ROLES = [
 /** Staff roles that require a Garage ID on login */
 export const STAFF_ROLES = [ROLES.ADVISOR, ROLES.MECHANIC];
 
-// ─────────────────────────────────────────────
 // DISPLAY META
-// ─────────────────────────────────────────────
 export const ROLE_LABELS = {
   admin: "Administrator",
   owner: "Garage Owner",
@@ -36,9 +34,7 @@ export const ROLE_DESCRIPTIONS = {
   customer: "Track your vehicle service history",
 };
 
-// ─────────────────────────────────────────────
 // ROUTING HELPERS
-// ─────────────────────────────────────────────
 
 /** Returns the dedicated login route for a given role */
 export const getLoginRoute = (role) => {
@@ -63,9 +59,7 @@ export const getDashboardRoute = (role) => {
   return "/dashboard";
 };
 
-// ─────────────────────────────────────────────
 // FRONTEND PERMISSION HELPERS
-// ─────────────────────────────────────────────
 export const ROLE_PERMISSIONS = {
   admin: ["all"],
   owner: ["all"],
@@ -112,9 +106,7 @@ export const isGarageRole = (role) =>
 /** True if the role is a staff member (advisor or mechanic) */
 export const isStaffRole = (role) => STAFF_ROLES.includes(role?.toLowerCase());
 
-// ─────────────────────────────────────────────
 // ROUTE ACCESS MAP (which routes each role may visit)
-// ─────────────────────────────────────────────
 export const ROLE_ALLOWED_ROUTES = {
   admin: [
     "/dashboard",

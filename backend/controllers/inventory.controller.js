@@ -7,6 +7,7 @@ import {
   createLowStockNotification,
 } from "../utils/inventoryUtils.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { emitToOwner } from "../utils/socket.js";
 
 // 📋 GET INVENTORY (with search + low stock filter)
 export const getInventory = async (req, res) => {
@@ -71,6 +72,7 @@ export const addPart = async (req, res) => {
       `Added part "${part.name}" (SKU: ${part.sku || "N/A"})`,
       part._id,
     );
+    emitToOwner(req.user.effectiveOwnerId, "inventory:created", part);
     res.status(201).json(part);
 
     // 📱 Fire low-stock notification
@@ -140,6 +142,7 @@ export const updateStock = async (req, res) => {
       `Updated part "${updatedItem.name}"`,
       updatedItem._id,
     );
+    emitToOwner(ownerId, "inventory:updated", updatedItem);
     res.status(200).json(updatedItem);
 
     // Check if the update
@@ -165,6 +168,7 @@ export const updatePart = async (req, res) => {
       return res.status(404).json({ error: "Part not found or unauthorized" });
     }
 
+    emitToOwner(req.user.effectiveOwnerId, "inventory:updated", updatedPart);
     res.status(200).json(updatedPart);
 
     // Check if the update (e.g., minLimit change) triggered a low stock state
@@ -215,6 +219,7 @@ export const deletePart = async (req, res) => {
       `Deleted part "${part.name}"`,
       id,
     );
+    emitToOwner(ownerId, "inventory:deleted", { _id: id });
     res.status(200).json({ message: "Part deleted successfully" });
   } catch (error) {
     console.error("DELETE ERROR:", error);
@@ -235,6 +240,7 @@ export const addInventory = async (req, res) => {
       `Added inventory item "${newItem.name}"`,
       newItem._id,
     );
+    emitToOwner(ownerId, "inventory:created", newItem);
     res.status(201).json(newItem);
 
     // 📱 Fire low-stock notification

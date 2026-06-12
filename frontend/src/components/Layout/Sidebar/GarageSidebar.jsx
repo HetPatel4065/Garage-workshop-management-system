@@ -28,7 +28,7 @@ import ThemeToggle from "../../theme/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import { ROLE_LABELS } from "../../../utils/roles";
 
-// ─── Navigation config ────────────────────────────────────────────────────────
+// ─── Navigation config ──
 
 const NAV_SECTIONS = [
   {
@@ -118,10 +118,10 @@ const NAV_SECTIONS = [
         roles: ["admin", "owner"],
       },
       {
-        name:"Activity Log",
+        name: "Activity Log",
         path: "/activity-log",
         icon: FileText,
-        roles: ["admin", "owner"],  
+        roles: ["admin", "owner"],
       },
     ],
   },
@@ -148,7 +148,7 @@ const NAV_SECTIONS = [
 
 const QUICK_LINK_PATHS = new Set(["/dashboard", "/partnership-leads"]);
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Sub-components ──
 
 const SidebarNavLink = React.memo(function SidebarNavLink({
   to,
@@ -254,7 +254,7 @@ const LogoEl = React.memo(function LogoEl({ size = "w-9 h-9", iconSize = 18 }) {
   );
 });
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main component ──
 
 export default function GarageSidebar({
   isOpen,
@@ -273,10 +273,11 @@ export default function GarageSidebar({
 
   const isAdminDashboard =
     role === "admin" &&
-    location.pathname.startsWith("/dashboard") &&
+    (location.pathname.startsWith("/dashboard") ||
+      location.pathname.startsWith("/partnership-leads")) &&
     !selectedGarage;
 
-  // ── Local state ──────────────────────────────────────────────────────────────
+  // ── Local state ──
 
   const [openSections, setOpenSections] = useState(() => {
     const saved = sessionStorage.getItem("sidebar_open_sections");
@@ -289,7 +290,7 @@ export default function GarageSidebar({
 
   const sidebarRef = useRef(null);
 
-  // ── Derived values ───────────────────────────────────────────────────────────
+  // ── Derived values ──
 
   const isCollapsedDesktop = collapsed && isDesktop;
   const isProfileActive =
@@ -311,7 +312,7 @@ export default function GarageSidebar({
     [rawAddress],
   );
 
-  // ── Side effects ─────────────────────────────────────────────────────────────
+  // ── Side effects ──
 
   // Responsive breakpoint listener
   useEffect(() => {
@@ -358,7 +359,7 @@ export default function GarageSidebar({
     if (!isDesktop && isOpen) onClose();
   }, [location.pathname, isDesktop]);
 
-  // ── Handlers ─────────────────────────────────────────────────────────────────
+  // ── Handlers ──
 
   const toggleSection = (idx) =>
     setOpenSections((prev) => prev.map((v, i) => (i === idx ? !v : v)));
@@ -367,7 +368,7 @@ export default function GarageSidebar({
     if (isDesktop) setCollapsed((c) => !c);
   };
 
-  // ── Animation variants ───────────────────────────────────────────────────────
+  // ── Animation variants ──
 
   const sidebarVariants = {
     open: {
@@ -380,7 +381,7 @@ export default function GarageSidebar({
     },
   };
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Render ──
 
   return (
     <>
@@ -409,7 +410,7 @@ export default function GarageSidebar({
           isDesktop ? (collapsed ? "w-20" : "w-68") : "w-[85vw] max-w-80",
         ].join(" ")}
       >
-        {/* ── Header ─────────────────────────────────────────────────────────── */}
+        {/* ── Header ── */}
         <div className="flex flex-col shrink-0 border-b border-slate-200 dark:border-white/5">
           {isCollapsedDesktop ? (
             // Collapsed: just the logo
@@ -463,7 +464,7 @@ export default function GarageSidebar({
           )}
         </div>
 
-        {/* ── Quick links ─────────────────────────────────────────────────────── */}
+        {/* ── Quick links ── */}
         <div className="px-3 py-1.5 border-b border-slate-200 dark:border-white/5 shrink-0">
           <div className="flex flex-col gap-1">
             <SidebarNavLink
@@ -486,7 +487,7 @@ export default function GarageSidebar({
           </div>
         </div>
 
-        {/* ── Main navigation ──────────────────────────────────────────────────── */}
+        {/* ── Main navigation ── */}
         <nav
           ref={sidebarRef}
           className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-2.5 scrollbar-thin"
@@ -545,27 +546,40 @@ export default function GarageSidebar({
           })}
         </nav>
 
-        {/* ── Footer ──────────────────────────────────────────────────────────── */}
+        {/* ── Footer ── */}
         <div
-          className={`border-t border-slate-200 dark:border-white/5 ${
-            isCollapsedDesktop ? "p-2" : "p-3"
-          }`}
+          className={`border-t border-slate-200 dark:border-white/5 ${isCollapsedDesktop ? "p-2" : "p-3"}`}
         >
           {/* Admin-only actions */}
           {isAdminDashboard && (
             <div
-              className={`mb-3 flex flex-col gap-2 ${
-                isCollapsedDesktop ? "items-center" : "items-start"
-              }`}
+              className={`mb-3 flex flex-col gap-2 ${isCollapsedDesktop ? "items-center" : "items-start"}`}
             >
+              {/* Theme Toggle Container */}
               <div
-                className={`flex w-full ${
-                  isCollapsedDesktop ? "justify-center" : "justify-start px-1"
-                }`}
+                className={[
+                  "flex w-full items-center rounded-xl text-[15px] font-medium transition-colors duration-200",
+                  // Spacing aur alignment baki buttons ke sath match kiya
+                  isCollapsedDesktop
+                    ? "justify-center p-2.5"
+                    : "justify-start gap-3 px-3 py-2.5",
+                  // Background aur text jo dark/light mode me bindas chalega
+                  "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5",
+                ].join(" ")}
               >
-                <ThemeToggle />
+                {/* Toggle ko center karne ke liye flex wrapper */}
+                <div className="flex items-center justify-center shrink-0">
+                  <ThemeToggle />
+                </div>
+
+                {!isCollapsedDesktop && (
+                  <span className="select-none text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Appearance
+                  </span>
+                )}
               </div>
 
+              {/* Customer Portal */}
               <button
                 type="button"
                 onClick={() => navigate("/portal/dashboard")}
@@ -575,14 +589,15 @@ export default function GarageSidebar({
                   "transition-colors duration-200",
                   isCollapsedDesktop
                     ? "justify-center p-3"
-                    : "justify-start gap-4 px-4 py-3.5",
-                  "bg-zinc-800 text-zinc-100 hover:bg-zinc-700/80",
+                    : "justify-start gap-4 px-4 py-3",
+                  "bg-slate-200 text-slate-800 hover:bg-slate-300/80 dark:bg-white/10 dark:text-zinc-100 dark:hover:bg-white/15",
                 ].join(" ")}
               >
                 <ExternalLink size={22} className="shrink-0 stroke-2" />
                 {!isCollapsedDesktop && <span>Customer Portal</span>}
               </button>
 
+              {/* Sign Out */}
               <button
                 type="button"
                 onClick={logout}
@@ -592,8 +607,8 @@ export default function GarageSidebar({
                   "transition-colors duration-200",
                   isCollapsedDesktop
                     ? "justify-center p-3"
-                    : "justify-start gap-4 px-4 py-3.5",
-                  "bg-red-950/20 text-red-400 hover:bg-red-950/40",
+                    : "justify-start gap-4 px-4 py-3",
+                  "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/40",
                 ].join(" ")}
               >
                 <LogOut size={22} className="shrink-0 stroke-2" />
@@ -610,7 +625,7 @@ export default function GarageSidebar({
             aria-disabled={!isOwner}
             className={[
               "w-full flex items-center rounded-xl text-sm font-semibold transition-colors duration-200",
-              isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2",
+              isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5",
               isProfileActive
                 ? "bg-indigo-600 text-white"
                 : "text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/10 active:bg-slate-200/70 dark:active:bg-white/5",
@@ -623,31 +638,23 @@ export default function GarageSidebar({
                 "w-8 h-8 rounded-lg flex items-center justify-center font-bold shrink-0 transition-colors",
                 isProfileActive
                   ? "bg-white/20 text-white"
-                  : "bg-blue-600/20 text-blue-500",
+                  : "bg-blue-600/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400",
               ].join(" ")}
             >
               {user?.name?.[0]?.toUpperCase() ?? "U"}
             </div>
 
-            {/* User details + role badge (expanded mode only) */}
+            {/* User details + role badge */}
             {!isCollapsedDesktop && (
               <>
                 <div className="flex-1 min-w-0 text-left">
                   <p
-                    className={`text-sm font-semibold truncate transition-colors ${
-                      isProfileActive
-                        ? "text-white"
-                        : "text-slate-900 dark:text-white"
-                    }`}
+                    className={`text-sm font-semibold truncate transition-colors ${isProfileActive ? "text-white" : "text-slate-900 dark:text-white"}`}
                   >
                     {user?.name ?? "User"}
                   </p>
                   <p
-                    className={`text-[11px] truncate transition-colors ${
-                      isProfileActive
-                        ? "text-blue-100"
-                        : "text-slate-500 dark:text-gray-500"
-                    }`}
+                    className={`text-[11px] truncate transition-colors ${isProfileActive ? "text-blue-100" : "text-slate-500 dark:text-gray-500"}`}
                   >
                     {user?.email}
                   </p>
@@ -657,7 +664,7 @@ export default function GarageSidebar({
                   className={`text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full shrink-0 transition-colors ${
                     isProfileActive
                       ? "bg-white/20 text-white"
-                      : "bg-emerald-500/20 text-emerald-400"
+                      : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
                   }`}
                 >
                   {ROLE_LABELS[role] ?? role}

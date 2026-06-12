@@ -1,6 +1,7 @@
 import Vehicle from "../models/Vehicle.js";
 import Customer from "../models/Customer.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { emitToOwner } from "../utils/socket.js";
 
 const enrichVehiclesWithServiceDates = async (vehicles, ownerId) => {
   if (!vehicles || vehicles.length === 0) return [];
@@ -128,6 +129,7 @@ export const addVehicle = async (req, res) => {
       savedVehicle._id,
     );
 
+    emitToOwner(ownerId, "vehicle:created", savedVehicle);
     res.status(201).json(savedVehicle);
   } catch (error) {
     if (error.code === 11000) {
@@ -241,6 +243,7 @@ export const updateVehicle = async (req, res) => {
       vehicle._id,
     );
 
+    emitToOwner(req.user.effectiveOwnerId, "vehicle:updated", vehicle);
     res.json(vehicle);
   } catch (error) {
     if (error.code === 11000) {
@@ -269,6 +272,7 @@ export const deleteVehicle = async (req, res) => {
       vehicle._id,
     );
 
+    emitToOwner(req.user.effectiveOwnerId, "vehicle:deleted", { _id: req.params.id });
     res.json({ message: "Vehicle deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
