@@ -137,10 +137,10 @@ export const updateStock = async (req, res) => {
       req,
       "update",
       "Inventory",
-      `Updated part "${updatedPart.name}"`,
-      updatedPart._id,
+      `Updated part "${updatedItem.name}"`,
+      updatedItem._id,
     );
-    res.status(200).json(updatedPart);
+    res.status(200).json(updatedItem);
 
     // Check if the update
     notifyLowStock(ownerId, updatedItem);

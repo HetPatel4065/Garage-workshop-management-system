@@ -12,7 +12,7 @@ const serviceSchema = new mongoose.Schema(
       ref: "Advisor",
     },
     performedBy: {
-      userId: { type: mongoose.Schema.Types.ObjectId },
+      userId: { type: mongoose.Schema.Types.Mixed },
       name: { type: String },
       role: { type: String }, 
     },

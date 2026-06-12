@@ -480,10 +480,11 @@ export default function InventoryForm({
               type="button"
               onClick={handleSubmit}
               disabled={isInvalid}
-              className={`flex-1 sm:flex-none group px-4 sm:px-6 py-2.5 text-sm font-bold rounded-xl text-white flex items-center justify-center gap-2 transition-all duration-200 ${
+              className={`flex-1 sm:flex-none group px-4 sm:px-6 py-2.5 text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-all duration-200
+              ${
                 isInvalid
-                  ? "bg-gray-200 cursor-not-allowed shadow-none"
-                  : "bg-gray-900 hover:bg-black hover:shadow-xl hover:shadow-gray-900/25 active:scale-[0.97]"
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed shadow-none"
+                  : "bg-gray-900 text-white hover:bg-black hover:shadow-xl hover:shadow-gray-900/25 active:scale-[0.97] dark:bg-blue-900 dark:hover:bg-blue-800 dark:text-slate-200"
               }`}
             >
               <svg

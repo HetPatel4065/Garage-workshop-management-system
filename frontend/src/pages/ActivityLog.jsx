@@ -367,8 +367,7 @@ export default function ActivityLog() {
     },
     {
       header: "Action",
-      accessor: (row) =>
-        ACTION_CONFIG[row.action]?.label || row.action || "—",
+      accessor: (row) => ACTION_CONFIG[row.action]?.label || row.action || "—",
     },
     {
       header: "Module",
@@ -406,7 +405,7 @@ export default function ActivityLog() {
             />
             <button
               onClick={fetchLogs}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors font-medium text-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-950/90 dark:hover:bg-blue-700 border border-slate-200 dark:border-slate-700 text-white dark:text-slate-200 rounded-lg transition-colors font-medium text-sm"
             >
               <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
               Refresh
@@ -592,7 +591,10 @@ export default function ActivityLog() {
           </div>
         ) : paginated.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <Activity size={40} className="text-slate-300 dark:text-slate-600" />
+            <Activity
+              size={40}
+              className="text-slate-300 dark:text-slate-600"
+            />
             <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
               {search || activeFilterCount > 0
                 ? "No results match your filters"
@@ -665,9 +667,7 @@ export default function ActivityLog() {
                               className={`w-8 h-8 rounded-xl bg-linear-to-br ${avatarGrad} flex items-center justify-center text-white font-black text-xs shrink-0`}
                             >
                               {log.performedBy?.name
-                                ? log.performedBy.name
-                                    .charAt(0)
-                                    .toUpperCase()
+                                ? log.performedBy.name.charAt(0).toUpperCase()
                                 : "?"}
                             </div>
                             <div>
@@ -777,8 +777,7 @@ export default function ActivityLog() {
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
                 .filter(
-                  (p) =>
-                    p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+                  (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
                 )
                 .reduce((acc, p, idx, arr) => {
                   if (idx > 0 && p - arr[idx - 1] > 1) {

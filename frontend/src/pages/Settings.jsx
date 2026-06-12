@@ -1403,14 +1403,24 @@ export default function Settings() {
                         onClick={() => handleSendTest("email")}
                         disabled={isTestingNotif.email}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl 
-                      bg-gray-100 border border-slate-700 text-slate-700 
-                        text-[13px] font-bold transition-all disabled:opacity-50 
-                      hover:border-blue-300 hover:bg-blue-100 disabled:hover:bg-gray-100 disabled:hover:border-slate-700"
+                        bg-gray-100 hover:bg-blue-100 
+                        dark:bg-slate-800 dark:hover:bg-slate-700
+                        border border-slate-700 dark:border-slate-600 
+                        text-slate-700 dark:text-slate-200 
+                        text-[13px] font-bold transition-all duration-300 
+                        disabled:opacity-50 disabled:hover:bg-gray-100 
+                        disabled:hover:border-slate-700"
                       >
                         {isTestingNotif.email ? (
-                          <Loader2 size={14} className="animate-spin" />
+                          <Loader2
+                            size={14}
+                            className="animate-spin text-slate-700 dark:text-slate-200"
+                          />
                         ) : (
-                          <Mail size={14} />
+                          <Mail
+                            size={14}
+                            className="text-slate-700 dark:text-slate-200"
+                          />
                         )}
                         <span>Get Your Daily Business Summary</span>
                       </button>

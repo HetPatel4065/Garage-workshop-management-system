@@ -42,7 +42,7 @@ export const logActivity = async (
       performedBy: {
         userId: req.user._id || req.user.id,
         name: req.user.name,
-        role: req.user.role,
+        role: req.user.isCoOwner ? "co-owner" : req.user.role,
       },
       action,
       module,

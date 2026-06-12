@@ -1306,7 +1306,7 @@ export default function JobCards() {
               <button
                 onClick={handleSaveRequest}
                 disabled={isSaving}
-                className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 dark:bg-blue-950/90 rounded-xl shadow-sm"
+                className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-500 hover:dark:bg-blue-900 rounded-xl shadow-sm"
               >
                 {isSaving ? "Saving..." : "Save Job Card"}
               </button>

@@ -14,7 +14,7 @@ const activityLogSchema = new mongoose.Schema(
       index: true,
     },
     performedBy: {
-      userId: { type: mongoose.Schema.Types.ObjectId },
+      userId: { type: mongoose.Schema.Types.Mixed },
       name: { type: String },
       role: { type: String },
     },

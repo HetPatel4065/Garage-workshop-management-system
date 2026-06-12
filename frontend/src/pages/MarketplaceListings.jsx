@@ -1306,7 +1306,14 @@ export default function MarketplaceListings({
               {isManager && ownerPanel === "listings" && (
                 <button
                   onClick={handleOpenAdd}
-                  className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-bold transition-all duration-300 shadow-md hover:shadow-xl h-10.5 self-start sm:self-auto"
+                  className="flex items-center gap-2 px-5 py-3 
+               bg-blue-600 hover:bg-blue-700 
+               dark:bg-blue-950/90 dark:hover:bg-blue-800
+               text-white dark:text-slate-200 
+               rounded-2xl text-sm font-bold 
+               transition-all duration-300 
+               shadow-md hover:shadow-xl 
+               h-10.5 self-start sm:self-auto"
                 >
                   <Plus size={17} />
                   List New Car

@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { getGarageEmails } from "./notifications.js";
 
 dotenv.config();
 
@@ -153,49 +154,59 @@ export const sendInspectionReminderToOwner = async (
     )
     .join("");
 
-  const mailOptions = {
-    from: `"Garage Portal" <${process.env.SMTP_USER}>`,
-    to: ownerEmail,
-    subject: `Today's Vehicle Inspections - ${dateStr}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
-        <h2 style="color: #007bff; text-align: center;">Today's Vehicle Inspections</h2>
-        <p>Hello <strong>${ownerName}</strong>,</p>
-        <p>You have scheduled inspections for today, <strong>${dateStr}</strong>, at <strong>${garageName}</strong>.</p>
-        
-        <table width="100%" style="border-collapse: collapse; margin: 20px 0;">
-          <thead>
-            <tr style="border-bottom: 2px solid #007bff; text-align: left; color: #007bff;">
-              <th style="padding: 10px 0;">Customer</th>
-              <th style="padding: 10px 0;">Vehicle</th>
-              <th style="padding: 10px 0; text-align: right;">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${inspectionListHtml}
-          </tbody>
-        </table>
-
-        <p>Please prepare accordingly and ensure the service bay is ready for these inspections.</p>
-        
-        <div style="text-align: center; margin-top: 30px;">
-          <a href="${process.env.CLIENT_URL}/requested-customers" style="background: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Requested Customers</a>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
-        <p style="font-size: 12px; color: #888; text-align: center;">&copy; ${new Date().getFullYear()} ${garageName}. All rights reserved.</p>
-      </div>
-    `,
-  };
-
+  let recipients = [ownerEmail];
   try {
-    if (!transporter) return false;
-    await transporter.sendMail(mailOptions);
-    return true;
-  } catch (error) {
-    console.error("Error sending inspection reminder email:", error);
-    return false;
+    recipients = await getGarageEmails(ownerEmail);
+  } catch (err) {
+    console.error("Error fetching garage emails for inspection reminder:", err.message);
   }
+
+  let success = false;
+  for (const recipient of recipients) {
+    const mailOptions = {
+      from: `"Garage Portal" <${process.env.SMTP_USER}>`,
+      to: recipient,
+      subject: `Today's Vehicle Inspections - ${dateStr}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
+          <h2 style="color: #007bff; text-align: center;">Today's Vehicle Inspections</h2>
+          <p>Hello <strong>${ownerName}</strong>,</p>
+          <p>You have scheduled inspections for today, <strong>${dateStr}</strong>, at <strong>${garageName}</strong>.</p>
+          
+          <table width="100%" style="border-collapse: collapse; margin: 20px 0;">
+            <thead>
+              <tr style="border-bottom: 2px solid #007bff; text-align: left; color: #007bff;">
+                <th style="padding: 10px 0;">Customer</th>
+                <th style="padding: 10px 0;">Vehicle</th>
+                <th style="padding: 10px 0; text-align: right;">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${inspectionListHtml}
+            </tbody>
+          </table>
+
+          <p>Please prepare accordingly and ensure the service bay is ready for these inspections.</p>
+          
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="${process.env.CLIENT_URL}/requested-customers" style="background: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Requested Customers</a>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+          <p style="font-size: 12px; color: #888; text-align: center;">&copy; ${new Date().getFullYear()} ${garageName}. All rights reserved.</p>
+        </div>
+      `,
+    };
+
+    try {
+      if (!transporter) continue;
+      await transporter.sendMail(mailOptions);
+      success = true;
+    } catch (error) {
+      console.error(`Error sending inspection reminder email to ${recipient}:`, error);
+    }
+  }
+  return success;
 };
 
 export const sendRejectionEmail = async (email, name, garageName, reason) => {

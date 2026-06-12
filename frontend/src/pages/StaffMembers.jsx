@@ -542,17 +542,9 @@ export default function StaffMembers() {
     const trimmedName = addForm.name.trim();
     const trimmedEmail = addForm.email.trim();
     const { role, password, targetGarageId } = addForm;
-    // Co-owners don't need email/password — they share primary owner's credentials
-    if (addForm.role === "owner") {
-      if (!trimmedName || !trimmedEmail) {
-        addToast("Please enter the co-owner's name and email", "error");
-        return;
-      }
-    } else {
-      if (!trimmedName || !trimmedEmail || !password) {
-        addToast("Please fill in all required fields", "error");
-        return;
-      }
+    if (!trimmedName || !trimmedEmail || !password) {
+      addToast("Please fill in all required fields", "error");
+      return;
     }
     // Admin must always select a garage for any staff role
     if (user?.role === "admin" && !targetGarageId) {
@@ -577,7 +569,7 @@ export default function StaffMembers() {
         body: JSON.stringify({
           name: trimmedName,
           email: trimmedEmail,
-          password: role === "owner" ? `placeholder_${Date.now()}` : password,
+          password,
           role,
           mobileNumber: addForm.mobileNumber.trim(),
           ownerId:
@@ -1115,9 +1107,7 @@ export default function StaffMembers() {
               className={inputCls}
             />
           </div>
-          <div
-            className={`grid gap-4 ${addForm.role === "owner" ? "grid-cols-1" : "grid-cols-2"}`}
-          >
+          <div className="grid gap-4 grid-cols-2">
             <div className="space-y-1.5">
               <Label required>System Role</Label>
               <select
@@ -1130,18 +1120,16 @@ export default function StaffMembers() {
                 {user?.role === "admin" && <option value="owner">Owner</option>}
               </select>
             </div>
-            {addForm.role !== "owner" && (
-              <div className="space-y-1.5">
-                <Label required>Password</Label>
-                <input
-                  value={addForm.password}
-                  onChange={handleInputChange(setAddForm, "password")}
-                  placeholder="••••••••"
-                  type="password"
-                  className={inputCls}
-                />
-              </div>
-            )}
+            <div className="space-y-1.5">
+              <Label required>Password</Label>
+              <input
+                value={addForm.password}
+                onChange={handleInputChange(setAddForm, "password")}
+                placeholder="••••••••"
+                type="password"
+                className={inputCls}
+              />
+            </div>
           </div>
           {/* Admin must always pick a garage; for owners this is only when role=owner */}
           {(user?.role === "admin" || addForm.role === "owner") && (
@@ -1173,16 +1161,15 @@ export default function StaffMembers() {
                 </select>
               )}
 
-              {/* ✅ Warning shown when admin picks a garage for a co-owner */}
+              {/* ✅ Info shown when admin picks a garage for a co-owner */}
               {addForm.role === "owner" && addForm.targetGarageId && (
-                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex gap-2 mt-2">
-                  <AlertTriangle
+                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-3 flex gap-2 mt-2">
+                  <AlertCircle
                     size={15}
-                    className="text-amber-500 shrink-0 mt-0.5"
+                    className="text-blue-500 shrink-0 mt-0.5"
                   />
-                  <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
-                    This co-owner will use their own email but the primary
-                    owner's password to login. No separate password needed.
+                  <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                    This co-owner will use their own email and password to log in.
                   </p>
                 </div>
               )}

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import ActivityLog from "../models/ActivityLog.js";
 import Owner from "../models/Owner.js";
 
@@ -13,7 +14,13 @@ export const getMyActivityLog = async (req, res) => {
 
     if (module && module !== "All") query.module = module;
     if (action && action !== "All") query.action = action;
-    if (performer && performer !== "All") query["performedBy.userId"] = performer;
+    if (performer && performer !== "All") {
+      if (mongoose.Types.ObjectId.isValid(performer)) {
+        query["performedBy.userId"] = new mongoose.Types.ObjectId(performer);
+      } else {
+        query["performedBy.userId"] = performer;
+      }
+    }
 
     if (startDate || endDate) {
       query.createdAt = {};
@@ -58,7 +65,13 @@ export const getActivityLog = async (req, res) => {
 
     if (module && module !== "All") query.module = module;
     if (action && action !== "All") query.action = action;
-    if (performer && performer !== "All") query["performedBy.userId"] = performer;
+    if (performer && performer !== "All") {
+      if (mongoose.Types.ObjectId.isValid(performer)) {
+        query["performedBy.userId"] = new mongoose.Types.ObjectId(performer);
+      } else {
+        query["performedBy.userId"] = performer;
+      }
+    }
 
     if (startDate || endDate) {
       query.createdAt = {};

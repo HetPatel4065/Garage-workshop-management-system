@@ -357,7 +357,6 @@ export const updateSettings = async (req, res) => {
 // 🔐 CHANGE PASSWORD
 export const changePassword = async (req, res) => {
   try {
-    const ownerId = req.user.effectiveOwnerId;
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
@@ -371,6 +370,29 @@ export const changePassword = async (req, res) => {
         .json({ error: "New password must be at least 6 characters." });
     }
 
+    if (req.user.isCoOwner) {
+      const [parentOwnerId, idxStr] = req.user._id.split("_co_");
+      const idx = parseInt(idxStr);
+      const parentOwner = await Owner.findById(parentOwnerId).select("+password");
+      if (!parentOwner || !parentOwner.coOwners?.[idx]) {
+        return res.status(404).json({ error: "Co-owner account not found." });
+      }
+
+      const co = parentOwner.coOwners[idx];
+      const currentHashed = co.password || parentOwner.password;
+      const isMatch = await bcrypt.compare(currentPassword, currentHashed);
+      if (!isMatch) {
+        return res.status(401).json({ error: "Current password is incorrect." });
+      }
+
+      const salt = await bcrypt.genSalt(12);
+      co.password = await bcrypt.hash(newPassword, salt);
+      await parentOwner.save({ validateBeforeSave: false });
+
+      return res.status(200).json({ message: "Password changed successfully." });
+    }
+
+    const ownerId = req.user.effectiveOwnerId;
     const owner = await Owner.findById(ownerId).select("+password");
     if (!owner) return res.status(404).json({ error: "Account not found." });
 

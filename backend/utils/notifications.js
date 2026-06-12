@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import Owner from "../models/Owner.js";
 
 const getTransporter = () => {
   const user = process.env.SMTP_USER;
@@ -13,14 +14,63 @@ const getTransporter = () => {
   });
 };
 
-export const sendEmail = async ({
-  to,
-  subject,
-  html,
-  attachments = [],
-  smtpConfig = null,
-  fromName = "Garage Admin",
-}) => {
+export const getGarageEmails = async (recipientEmail) => {
+  if (!recipientEmail) return [];
+  const normalizedEmail = recipientEmail.toLowerCase().trim();
+
+  try {
+    const owner = await Owner.findOne({
+      $or: [
+        { email: normalizedEmail },
+        { "coOwners.email": normalizedEmail },
+      ],
+    });
+
+    if (!owner) {
+      return [recipientEmail];
+    }
+
+    const emails = new Set();
+
+    if (owner.isActive !== false && owner.email) {
+      emails.add(owner.email.toLowerCase().trim());
+    }
+
+    if (Array.isArray(owner.coOwners)) {
+      for (const co of owner.coOwners) {
+        if (co.isActive !== false && co.email) {
+          emails.add(co.email.toLowerCase().trim());
+        }
+      }
+    }
+
+    if (emails.size === 0) {
+      return [recipientEmail];
+    }
+
+    return Array.from(emails);
+  } catch (err) {
+    console.error("[EMAIL ERROR] Failed to fetch garage emails from database:", err.message);
+    return [recipientEmail];
+  }
+};
+
+export const sendEmail = async (options, ...args) => {
+  let to, subject, html, attachments = [], smtpConfig = null, fromName = "Garage Admin";
+  if (typeof options === "object" && options !== null && !Array.isArray(options)) {
+    ({
+      to,
+      subject,
+      html,
+      attachments = [],
+      smtpConfig = null,
+      fromName = "Garage Admin",
+    } = options);
+  } else {
+    to = options;
+    [subject, html, attachments = [], smtpConfig = null, fromName = "Garage Admin"] = args;
+  }
+
   try {
     let transporter;
 
@@ -47,23 +97,36 @@ export const sendEmail = async ({
 
     const fromEmail = smtpConfig?.user || process.env.SMTP_USER;
 
-    const mailOptions = {
-      from: `"${fromName}" <${fromEmail}>`,
-      to,
-      subject,
-      html,
-    };
-
-    if (attachments && attachments.length > 0) {
-      mailOptions.attachments = attachments;
+    let recipients = [to];
+    try {
+      recipients = await getGarageEmails(to);
+    } catch (err) {
+      console.error("[EMAIL ERROR] Failed to fetch garage emails:", err.message);
     }
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log(
-      `[EMAIL SENT] ID: ${info.messageId} | Subject: "${subject}" → ${to}`,
-    );
+    for (const recipient of recipients) {
+      try {
+        const mailOptions = {
+          from: `"${fromName}" <${fromEmail}>`,
+          to: recipient,
+          subject,
+          html,
+        };
+
+        if (attachments && attachments.length > 0) {
+          mailOptions.attachments = attachments;
+        }
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(
+          `[EMAIL SENT] ID: ${info.messageId} | Subject: "${subject}" → ${recipient}`,
+        );
+      } catch (err) {
+        console.error(`[EMAIL ERROR] Failed to send email to ${recipient}:`, err.message);
+      }
+    }
   } catch (err) {
-    console.error("[EMAIL ERROR] Failed to send email:", err.message);
+    console.error("[EMAIL ERROR] Failed in sendEmail wrapper:", err.message);
   }
 };
 

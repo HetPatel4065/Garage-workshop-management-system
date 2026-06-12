@@ -23,7 +23,7 @@ const resolveUserByIdAcrossCollections = async (id) => {
         _id: id,
         name: co.name,
         email: co.email,
-        password: co.password,
+        password: co.password || parentOwner.password,
         role: "owner",
         isCoOwner: true,
         garageId: parentOwner.garageId,
@@ -414,8 +414,11 @@ export const login = async (req, res) => {
             mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
             isActive: parentOwner.isActive,
             comparePassword: async function(candidatePassword) {
-              if (!candidatePassword || !this.password) return false;
-              return await bcrypt.compare(candidatePassword, this.password);
+              if (!candidatePassword) return false;
+              if (this.password) {
+                return await bcrypt.compare(candidatePassword, this.password);
+              }
+              return await bcrypt.compare(candidatePassword, parentOwner.password);
             },
             toObject: function() {
               return { ...this };
