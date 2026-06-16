@@ -1,0 +1,518 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth theme transitions */
+.theme-transition,
+.theme-transition * {
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease,
+    fill 300ms ease,
+    stroke 300ms ease,
+    box-shadow 300ms ease !important;
+}
+/* Add this to your global CSS */
+.disable-transitions,
+.disable-transitions * {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
+
+/* ─── Base ──────────────────────────────────────── */
+:root {
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --sidebar-transition: 300px;
+}
+
+.resizing,
+.resizing * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.gpu-accelerated {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Force sidebar visible on desktop to prevent hydration flickering */
+@media (min-width: 1024px) {
+  .sidebar-persistent {
+    transform: translateX(0) !important;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    /* Remove scroll animations */
+    scroll-behavior: auto !important;
+    scroll-padding-top: 4rem;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+
+    scrollbar-gutter: stable;
+  }
+
+  html::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      scroll-padding-top: 5.5rem;
+    }
+  }
+
+  img,
+  video,
+  canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0f172a;
+    transition:
+      background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+      color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    font-family:
+      "Inter",
+      "Segoe UI",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll on body */
+  }
+
+  html.dark body {
+    background-color: #090d16;
+    color: #f8fafc;
+  }
+
+  body::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2;
+  }
+
+  /* Remove default anchor underlines site-wide */
+  a {
+    text-decoration: none;
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────── */
+@layer utilities {
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
+  /* Global scrollbar hiding for all elements */
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  *::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Gradient text helper */
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Landing page section separator */
+  .section-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(99, 102, 241, 0.15) 50%,
+      transparent 100%
+    );
+    margin: 0 auto;
+    max-width: 640px;
+  }
+
+  /* ─── Skeleton Shimmer ─── */
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.5) 60%,
+      rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* Make tables horizontally scrollable on small screens to improve admin responsiveness */
+@media (max-width: 768px) {
+  main table,
+  .flex-1 table,
+  .page-content table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  main table thead,
+  main table tbody,
+  main table tr {
+    display: table !important;
+    width: max-content !important;
+  }
+}
+
+/* ─── Global Dark Theme Injection ─── */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #030712 !important; /* gray-950 */
+  color: #f3f4f6 !important; /* gray-100 */
+}
+
+/* Card & panel backgrounds mapping to elegant deep dark zinc-900 */
+html.dark .bg-white,
+html.dark .bg-white\/80,
+html.dark .bg-white\/60,
+html.dark .bg-white\/90 {
+  background-color: #18181b !important; /* zinc-900 */
+}
+
+/* Page containers & dashboard background override to deep dark gray-950 */
+html.dark .bg-gray-100,
+html.dark .bg-slate-50,
+html.dark .bg-gray-50 {
+  background-color: #030712 !important; /* gray-950 */
+}
+
+/* Input, button, select backgrounds mapping to nice zinc-800 */
+html.dark .bg-slate-100,
+html.dark .bg-slate-50,
+html.dark .bg-gray-50,
+html.dark .bg-slate-200\/50,
+html.dark .bg-slate-50\/70,
+html.dark .bg-blue-50\/30 {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+html.dark .bg-slate-50 {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+/* Hover background states */
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+/* Text overrides - Headers and prominent text to high contrast zinc-100 */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-slate-950 {
+  color: #f4f4f5 !important; /* zinc-100 */
+}
+
+/* Text overrides - Secondary/body text to zinc-200/300 */
+html.dark .text-slate-700,
+html.dark .text-gray-750,
+html.dark .text-gray-700,
+html.dark .text-slate-600 {
+  color: #e4e4e7 !important; /* zinc-200 */
+}
+
+/* Text overrides - Muted/helper text to zinc-400 */
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+/* Border overrides - clean subtle dark borders */
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-slate-200\/50 {
+  border-color: #27272a !important; /* zinc-800 */
+}
+
+/* Table header/body border adjustments */
+html.dark .divide-slate-100 > * + *,
+html.dark .divide-gray-100 > * + * {
+  border-color: #27272a !important; /* zinc-800 */
+}
+
+/* Active sidebar/menu link states should remain white text */
+html.dark .text-white {
+  color: #ffffff !important;
+}
+
+/* Recharts / SVG / Chart adjustments in dark theme */
+html.dark .recharts-cartesian-grid-horizontal line,
+html.dark .recharts-cartesian-grid-vertical line {
+  stroke: #27272a !important; /* zinc-800 */
+}
+
+html.dark .recharts-tooltip-cursor {
+  fill: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ─── Portal Login & Signup Dark Mode Overrides ─── */
+/* Portal screen backgrounds */
+html.dark .bg-emerald-50,
+html.dark .bg-violet-50,
+html.dark .bg-orange-50,
+html.dark .bg-slate-50 {
+  background-color: #030712 !important; /* gray-950 */
+}
+
+/* Portal card input fields backgrounds */
+html.dark .bg-emerald-50\/60,
+html.dark .bg-violet-50\/60,
+html.dark .bg-orange-50\/60,
+html.dark .bg-slate-50\/60,
+html.dark .bg-emerald-50\/50,
+html.dark .bg-violet-50\/50,
+html.dark .bg-orange-50\/50,
+html.dark .bg-slate-50\/50 {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+/* Portal card and input borders */
+html.dark .border-emerald-200,
+html.dark .border-violet-200,
+html.dark .border-orange-200,
+html.dark .border-slate-200,
+html.dark .border-emerald-100,
+html.dark .border-violet-100,
+html.dark .border-orange-100,
+html.dark .border-slate-100 {
+  border-color: #27272a !important; /* zinc-800 */
+}
+
+/* Portal role badge backgrounds */
+html.dark .bg-emerald-100,
+html.dark .bg-violet-100,
+html.dark .bg-orange-100,
+html.dark .bg-slate-100 {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+/* ─── Landing Page Dark Mode Overrides ─── */
+:root {
+  --bg-primary: #f8faff;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: rgba(255, 255, 255, 0.7);
+  --text-heading: #1e1b4b;
+  --text-body: #64748b;
+  --text-muted: #475569;
+  --border-color: rgba(226, 232, 240, 0.8);
+  --border-active: rgba(99, 102, 241, 0.25);
+  --nav-bg: rgba(248, 250, 255, 0.92);
+  --nav-border: rgba(99, 102, 241, 0.1);
+  --dropdown-bg: rgba(255, 255, 255, 0.97);
+  --dropdown-border: rgba(99, 102, 241, 0.13);
+  --dropdown-text: #1e1b4b;
+  --dropdown-desc: #64748b;
+  --pricing-toggle-bg: rgba(226, 232, 240, 0.6);
+  --pricing-btn-bg: #ffffff;
+  --pricing-btn-text: #6366f1;
+}
+
+html.dark {
+  --bg-primary: #030712;
+  --bg-secondary: #18181b;
+  --bg-tertiary: rgba(24, 24, 27, 0.7);
+  --text-heading: #f4f4f5;
+  --text-body: #a1a1aa;
+  --text-muted: #d4d4d8;
+  --border-color: rgba(63, 63, 70, 0.8);
+  --border-active: rgba(99, 102, 241, 0.4);
+  --nav-bg: rgba(3, 7, 18, 0.92);
+  --nav-border: rgba(63, 63, 70, 0.4);
+  --dropdown-bg: rgba(24, 24, 27, 0.97);
+  --dropdown-border: rgba(63, 63, 70, 0.4);
+  --dropdown-text: #f4f4f5;
+  --dropdown-desc: #a1a1aa;
+  --pricing-toggle-bg: #27272a;
+  --pricing-btn-bg: rgba(255, 255, 255, 0.15);
+  --pricing-btn-text: #ffffff;
+}
+
+/* Main text colors conversion */
+html.dark [style*="color: #1e1b4b"],
+html.dark [style*="color:#1e1b4b"] {
+  color: #f4f4f5 !important; /* zinc-100 */
+}
+
+html.dark [style*="color: #64748b"],
+html.dark [style*="color:#64748b"] {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+html.dark [style*="color: #475569"],
+html.dark [style*="color:#475569"] {
+  color: #d4d4d8 !important; /* zinc-300 */
+}
+
+/* Section backgrounds conversion */
+html.dark [style*="background: #f8faff"],
+html.dark [style*="background:#f8faff"],
+html.dark [style*="background-color: #f8faff"],
+html.dark [style*="background-color:#f8faff"],
+html.dark #pricing[style*="background: #f8faff"],
+html.dark #faq[style*="background: #f8faff"] {
+  background-color: #030712 !important; /* gray-950 */
+  background: #030712 !important;
+}
+
+html.dark [style*="background: #fff"],
+html.dark [style*="background:#fff"],
+html.dark [style*="background-color: #fff"],
+html.dark [style*="background-color:#fff"] {
+  background-color: #18181b !important; /* zinc-900 */
+  background: #18181b !important;
+}
+
+html.dark [style*="background: rgba(255,255,255,0.7)"],
+html.dark [style*="background:rgba(255,255,255,0.7)"],
+html.dark [style*="background: rgba(255, 255, 255, 0.7)"] {
+  background-color: rgba(24, 24, 27, 0.7) !important; /* zinc-900/70 */
+  background: rgba(24, 24, 27, 0.7) !important;
+}
+
+/* FAQ item borders conversion */
+html.dark [style*="border: 1.5px solid rgba(226,232,240,0.8)"],
+html.dark [style*="1.5px solid rgba(226,232,240,0.8)"],
+html.dark [style*="rgba(226,232,240,0.8)"] {
+  border-color: rgba(63, 63, 70, 0.8) !important; /* zinc-700/80 */
+}
+
+/* Footer gradient background adaptation */
+html.dark footer,
+html.dark
+  [style*="background: linear-gradient(180deg, #f8faff 0%, #eef2ff 100%)"] {
+  background: linear-gradient(180deg, #030712 0%, #090d16 100%) !important;
+}
+
+/* Pricing toggle container background */
+html.dark [style*="background: rgba(226,232,240,0.6)"],
+html.dark [style*="background:rgba(226,232,240,0.6)"] {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+/* Ambient blobs opacity adjustment for dark theme */
+html.dark [style*="rgba(99,102,241,0.10)"],
+html.dark [style*="rgba(99,102,241,0.08)"] {
+  background: radial-gradient(
+    ellipse at top left,
+    rgba(99, 102, 241, 0.15) 0%,
+    transparent 65%
+  ) !important;
+}
+
+html.dark [style*="rgba(59,130,246,0.10)"] {
+  background: radial-gradient(
+    ellipse at bottom right,
+    rgba(59, 130, 246, 0.15) 0%,
+    transparent 65%
+  ) !important;
+}
+
+/* ─── Premium Segmented Theme Toggle Classes ─── */
+.theme-toggle-container {
+  background-color: rgba(241, 245, 249, 0.8) !important; /* slate-100/80 */
+  border-color: rgba(226, 232, 240, 0.8) !important; /* slate-200/80 */
+}
+
+html.dark .theme-toggle-container {
+  background-color: rgba(63, 63, 70, 0.4) !important; /* zinc-700/40 glass */
+  border-color: rgba(63, 63, 70, 0.5) !important; /* zinc-700/50 border */
+}
+
+.theme-indicator-active {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.dark .theme-indicator-active {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.15
+  ) !important; /* luminousFrostedWhite glass */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ─── Ultra-Smooth Snappy Theme Switch Transition (GPU Hardware-Accelerated) ─── */
+.theme-transition,
+.theme-transition *,
+.theme-transition *:before,
+.theme-transition *:after {
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease !important;
+  will-change: background-color, border-color, color;
+}
+
+/* ─── Global Shadow Removal ─── */
+*,
+::before,
+::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  drop-shadow: none !important;
+}
