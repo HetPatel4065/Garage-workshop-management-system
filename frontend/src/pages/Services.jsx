@@ -120,7 +120,7 @@ export default function Services() {
 
       return matchesSearch;
     })
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   const handleView = (service) => {
     setSelectedService(service);

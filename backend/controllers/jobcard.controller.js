@@ -64,7 +64,6 @@ export const createJobCard = async (req, res) => {
       link: "/job-cards",
     });
     await logActivity(
-
       req,
       "create",
       "JobCard",
@@ -81,7 +80,6 @@ export const createJobCard = async (req, res) => {
     }
     res.status(500).json({ error: error.message });
   }
- 
 };
 
 export const getJobCards = async (req, res) => {
@@ -136,7 +134,7 @@ export const getJobCards = async (req, res) => {
       .populate("vehicleId", "make model licensePlate displayName")
       .populate("advisorId", "name")
       .populate("mechanicId", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 });
     res.json(jobCards);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -201,7 +199,7 @@ export const updateJobCard = async (req, res) => {
         link: "/job-cards",
       });
     }
-    await logActivity(  
+    await logActivity(
       req,
       "update",
       "JobCard",
@@ -215,7 +213,6 @@ export const updateJobCard = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-  
 };
 
 export const deleteJobCard = async (req, res) => {

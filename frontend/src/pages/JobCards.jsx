@@ -365,7 +365,7 @@ export default function JobCards() {
 
       return matchesSearch && matchesStatus && matchesStaff && matchesDate;
     })
-    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
 
   const groupedJobCards = React.useMemo(() => {
     const groups = {};

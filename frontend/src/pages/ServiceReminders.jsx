@@ -204,11 +204,6 @@ function ReminderCard({ r, onSendEmail, onSendSMS, onCall, isSending }) {
         </span>
       );
     }
-    return (
-      <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-        In {days} {days === 1 ? "day" : "days"}
-      </span>
-    );
   };
 
   return (

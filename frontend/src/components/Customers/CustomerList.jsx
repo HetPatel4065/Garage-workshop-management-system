@@ -1,5 +1,6 @@
 import CustomerCard from "./CustomerCard";
 import { Users } from "lucide-react";
+import EmptyState from "../UI/EmptyState";
 
 export default function CustomerList({
   customers = [],
@@ -13,10 +14,11 @@ export default function CustomerList({
 }) {
   if (!customers.length) {
     return (
-      <div className="text-gray-500 text-center mt-2 flex flex-col items-center gap-2 py-25 bg-white rounded-2xl border-2 border-dashed border-gray-300">
-        <Users className="w-8 h-8 text-gray-300" />
-        <p className="font-medium">No customers found</p>
-      </div>
+      <EmptyState
+        icon={Users}
+        title="No Customers Found"
+        description="There are no customers available at the moment."
+        />
     );
   }
 

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "./Counter.js"; // Ensure Counter model is registered
 
 const jobCardSchema = new mongoose.Schema(
   {
@@ -23,6 +24,7 @@ const jobCardSchema = new mongoose.Schema(
     licensePlate: {
       type: String,
     },
+    // ✅ no unique: true here — compound index below handles it
     jobCardId: {
       type: String,
     },
@@ -36,13 +38,7 @@ const jobCardSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [
-        "pending",
-        "in-progress",
-        "completed",
-        "cancelled",
-        "closed"
-      ],
+      enum: ["pending", "in-progress", "completed", "cancelled", "closed"],
       default: "pending",
     },
     serviceInstructions: {
@@ -52,27 +48,29 @@ const jobCardSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-jobCardSchema.pre("save", async function (next) {
-  if (this.isNew && !this.jobCardId) {
-    try {
-      const lastJobCard = await this.constructor
-        .findOne({ garageId: this.garageId })
-        .sort({ _id: -1 });
+// ✅ unique per garage, not globally
+jobCardSchema.index({ jobCardId: 1, garageId: 1 }, { unique: true });
 
-      let maxNum = 1;
-      if (lastJobCard && lastJobCard.jobCardId && lastJobCard.jobCardId.startsWith("JC-")) {
-        const num = parseInt(lastJobCard.jobCardId.split("-")[1], 10);
-        if (!isNaN(num)) {
-          maxNum = num + 1;
-        }
-      }
-      this.jobCardId = `JC-${maxNum}`;
-    } catch (err) {
-      console.error("Error generating jobCardId:", err);
+jobCardSchema.pre("save", async function (next) {
+  try {
+    if (this.isNew && !this.jobCardId) {
+      const Counter = mongoose.model("Counter");
+
+      const counter = await Counter.findOneAndUpdate(
+        { _id: `jobCard_${this.garageId}` },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true },
+      );
+
+      this.jobCardId = `JC-${counter.seq + 999}`;
     }
+
+  } catch (err) {
+    console.error("Error generating jobCardId:", err);
+    next(err);
   }
 });
 
