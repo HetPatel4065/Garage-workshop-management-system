@@ -1655,7 +1655,7 @@ export default function JobCards() {
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={confirmDelete}
         title="Delete Job Card"
-        message="This action cannot be undone."
+        message="Are you sure you want to delete this job card? This action cannot be undone."
         confirmText="Yes, Delete"
         type="danger"
       />
