@@ -5,6 +5,10 @@ import SelectDropdown from "../../components/UI/SelectDropdown";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { FormTextarea } from "../layout/Form/forms";
+import {
+  CAR_MAKES_MODELS,
+  CAR_MAKE_OPTIONS,
+} from "../../constants/vehicleMarketplaceOptions";
 
 const CATEGORY_OPTIONS = [
   "Engine",
@@ -30,11 +34,28 @@ const Section = ({ title, children }) => (
 );
 
 function getInitialState(itemData) {
+  // Split saved "Maruti Suzuki Swift" → make: "Maruti Suzuki", model: "Swift"
+  let savedMake = "";
+  let savedModel = itemData?.carModel || "Universal";
+
+  if (itemData?.carModel && itemData.carModel !== "Universal") {
+    const found = Object.keys(CAR_MAKES_MODELS).find((make) =>
+      CAR_MAKES_MODELS[make].some(
+        (model) => itemData.carModel === `${make} ${model}`,
+      ),
+    );
+    if (found) {
+      savedMake = found;
+      savedModel = itemData.carModel.replace(`${found} `, "");
+    }
+  }
+
   return {
     name: itemData?.name || "",
     sku: itemData?.sku || "",
     category: itemData?.category || "",
-    carModel: itemData?.carModel || "Universal",
+    carMake: savedMake,
+    carModel: savedModel,
     stock: itemData?.stock ?? "",
     minLimit: itemData?.minLimit ?? "",
     costPrice: itemData?.costPrice ?? "",
@@ -142,7 +163,10 @@ export default function InventoryForm({
       name: formData.name,
       sku: formData.sku,
       category: formData.category,
-      carModel: formData.carModel,
+      carModel:
+        formData.carMake && formData.carModel
+          ? `${formData.carMake} ${formData.carModel}`
+          : "Universal",
       stock: formData.stock ? Number(formData.stock) : 0,
       minLimit: formData.minLimit ? Number(formData.minLimit) : 0,
       costPrice: formData.costPrice ? Number(formData.costPrice) : 0,
@@ -284,17 +308,42 @@ export default function InventoryForm({
                 />
               </div>
 
+              {/* Make dropdown */}
               <div>
-                <TextInput
+                <SelectDropdown
+                  id="inventory-carMake"
+                  label="Car Make"
+                  value={formData.carMake}
+                  onChange={(e) => {
+                    set("carMake", e.target.value);
+                    set("carModel", ""); // reset model when make changes
+                  }}
+                  placeholder="Select make"
+                  options={[
+                    { label: "Universal", value: "" },
+                    ...CAR_MAKE_OPTIONS.map((m) => ({ label: m, value: m })),
+                  ]}
+                  disabled={readOnly}
+                />
+              </div>
+
+              {/* Model dropdown — updates based on make */}
+              <div>
+                <SelectDropdown
                   id="inventory-carModel"
-                  label="Compatible Car"
+                  label="Compatible Model"
                   value={formData.carModel}
-                  onChange={(e) =>
-                    set("carModel", capitalizeWords(e.target.value))
+                  onChange={(e) => set("carModel", e.target.value)}
+                  placeholder="Select model"
+                  options={
+                    formData.carMake
+                      ? CAR_MAKES_MODELS[formData.carMake].map((m) => ({
+                          label: m,
+                          value: m,
+                        }))
+                      : [{ label: "Select a make first", value: "" }]
                   }
-                  required
-                  placeholder="e.g. Universal or Honda City"
-                  readOnly={readOnly}
+                  disabled={readOnly || !formData.carMake}
                 />
               </div>
 
