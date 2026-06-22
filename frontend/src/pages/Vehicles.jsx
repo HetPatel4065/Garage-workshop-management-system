@@ -63,6 +63,7 @@ export default function Vehicles() {
   const [loading, setLoading] = useState(true);
   const [vehicleErrors, setVehicleErrors] = useState([{}]);
   const [customerErrors, setCustomerErrors] = useState({});
+  const [chassisPhotos, setChassisPhotos] = useState([null]);
 
   const fetchData = async () => {
     if (!token) return;
@@ -111,7 +112,7 @@ export default function Vehicles() {
 
     const handleVehicleUpdated = (updatedVehicle) => {
       setVehicles((prev) =>
-        prev.map((v) => (v._id === updatedVehicle._id ? updatedVehicle : v))
+        prev.map((v) => (v._id === updatedVehicle._id ? updatedVehicle : v)),
       );
     };
 
@@ -128,7 +129,7 @@ export default function Vehicles() {
 
     const handleCustomerUpdated = (updatedCustomer) => {
       setCustomers((prev) =>
-        prev.map((c) => (c._id === updatedCustomer._id ? updatedCustomer : c))
+        prev.map((c) => (c._id === updatedCustomer._id ? updatedCustomer : c)),
       );
     };
 
@@ -208,6 +209,7 @@ export default function Vehicles() {
     setCustomerErrors({});
     setIsModalOpen(true);
     setIsReadOnly(false);
+    setChassisPhotos([v.chassisPhotoUrl || null]);
   };
 
   const handleAddNew = () => {
@@ -220,6 +222,7 @@ export default function Vehicles() {
     setCustomerErrors({});
     setIsModalOpen(true);
     setIsReadOnly(false);
+    setChassisPhotos([null]);
   };
 
   const validateNewCustomer = () => {
@@ -292,6 +295,8 @@ export default function Vehicles() {
       }
 
       if (isNew) {
+        // ── collect saved IDs ──
+        const savedIds = [];
         for (const v of vehiclesToCreate) {
           const { serviceDate, nextServiceDate, ...vehiclePayload } = v;
           const payload = {
@@ -310,7 +315,26 @@ export default function Vehicles() {
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Creation failed");
+          savedIds.push(data._id); // ← collect ID
         }
+
+        // ── upload chassis photos ──
+        for (let i = 0; i < savedIds.length; i++) {
+          if (chassisPhotos[i]) {
+            await fetch(
+              `${import.meta.env.VITE_API_URL}/vehicles/${savedIds[i]}/upload-chassis-photo`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ imageBase64: chassisPhotos[i] }),
+              },
+            );
+          }
+        }
+
         addToast("Vehicles added successfully", "success");
       } else {
         const v = vehiclesToCreate[0];
@@ -320,6 +344,7 @@ export default function Vehicles() {
           licensePlate: (v.licensePlate || "").trim().toUpperCase(),
           customerId: targetCustomerId,
         };
+
         const res = await fetch(
           `${import.meta.env.VITE_API_URL}/vehicles/${selectedVehicle._id}`,
           {
@@ -333,6 +358,21 @@ export default function Vehicles() {
         );
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Update failed");
+
+        // ── upload chassis photo on edit ──
+        if (chassisPhotos[0]) {
+          await fetch(
+            `${import.meta.env.VITE_API_URL}/vehicles/${selectedVehicle._id}/upload-chassis-photo`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ imageBase64: chassisPhotos[0] }),
+            },
+          );
+        }
 
         addToast("Vehicle profile updated", "success");
       }
@@ -790,6 +830,12 @@ export default function Vehicles() {
                           }}
                           isReadOnly={effectivelyReadOnly}
                           errors={vehicleErrors[i] || {}}
+                          chassisPhoto={chassisPhotos[i] || null}
+                          onChassisPhotoChange={(img) => {
+                            const arr = [...chassisPhotos];
+                            arr[i] = img;
+                            setChassisPhotos(arr);
+                          }}
                         />
                       </div>
                     ))}

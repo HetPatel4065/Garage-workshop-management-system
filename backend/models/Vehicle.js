@@ -34,6 +34,9 @@ const vehicleSchema = new mongoose.Schema(
       minlength: 17,
       maxlength: 17,
     },
+    chassisPhotoUrl: {
+      type: String,
+    },
     engineType: String,
     fuelType: {
       type: String,

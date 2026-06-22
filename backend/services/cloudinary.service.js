@@ -1,5 +1,3 @@
-
-
 import { v2 as cloudinary } from "cloudinary";
 
 // ─── Configure once at module load ───────────────────────────────────────────
@@ -10,10 +8,14 @@ function getConfiguredClient() {
     const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
       process.env;
 
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    if (
+      !CLOUDINARY_CLOUD_NAME ||
+      !CLOUDINARY_API_KEY ||
+      !CLOUDINARY_API_SECRET
+    ) {
       throw new Error(
         "[Cloudinary] Missing required environment variables: " +
-          "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET"
+          "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET",
       );
     }
 
@@ -46,7 +48,7 @@ export async function uploadInvoicePDF(filePath, ownerId) {
   const result = await client.uploader.upload(filePath, {
     folder: `invoices/${ownerId}`,
     resource_type: "raw",
-    type: "private",          // <-- private: requires signed URL to download
+    type: "private", // <-- private: requires signed URL to download
     use_filename: true,
     unique_filename: true,
     overwrite: false,
@@ -114,7 +116,9 @@ export function getSignedDownloadUrl(publicId, expiresInSeconds = 900) {
  */
 export async function deleteInvoicePDF(publicId) {
   if (!publicId) {
-    console.warn("[Cloudinary] deleteInvoicePDF called with no publicId – skipping");
+    console.warn(
+      "[Cloudinary] deleteInvoicePDF called with no publicId – skipping",
+    );
     return;
   }
 
@@ -123,12 +127,46 @@ export async function deleteInvoicePDF(publicId) {
   try {
     const result = await client.uploader.destroy(publicId, {
       resource_type: "raw",
-      type: "private",        // must match the upload type
+      type: "private", // must match the upload type
     });
 
-    console.log("[Cloudinary] PDF deleted", { publicId, result: result.result });
+    console.log("[Cloudinary] PDF deleted", {
+      publicId,
+      result: result.result,
+    });
   } catch (err) {
     // Log but do not re-throw – a failed delete should never block the main flow
-    console.error("[Cloudinary] Failed to delete PDF", { publicId, error: err.message });
+    console.error("[Cloudinary] Failed to delete PDF", {
+      publicId,
+      error: err.message,
+    });
   }
+}
+
+// ─── Upload chassis photo (base64 image) ─────────────────────────────────────
+/**
+ * Uploads a base64 image to Cloudinary under the "chassis-photos/<ownerId>" folder.
+ *
+ * @param {string} base64Image   base64 data URL (e.g. "data:image/jpeg;base64,...")
+ * @param {string} ownerId       Owner ID used to organise files in Cloudinary.
+ * @returns {string} secure_url
+ */
+export async function uploadChassisPhoto(base64Image, ownerId) {
+  const client = getConfiguredClient();
+
+  const result = await client.uploader.upload(base64Image, {
+    folder: `chassis-photos/${ownerId}`,
+    resource_type: "image",
+    use_filename: false,
+    unique_filename: true,
+    overwrite: false,
+  });
+
+  if (!result || !result.secure_url) {
+    throw new Error(
+      "[Cloudinary] Chassis photo upload failed: secure_url missing",
+    );
+  }
+
+  return result.secure_url;
 }

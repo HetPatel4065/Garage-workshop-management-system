@@ -120,7 +120,7 @@ export default function Customers() {
 
     const handleUpdated = (updatedCustomer) => {
       setCustomers((prev) =>
-        prev.map((c) => (c._id === updatedCustomer._id ? updatedCustomer : c))
+        prev.map((c) => (c._id === updatedCustomer._id ? updatedCustomer : c)),
       );
     };
 
@@ -260,7 +260,6 @@ export default function Customers() {
         );
         addToast("Customer updated", "success");
       } else {
-        setCustomers((prev) => [...prev, result]);
         addToast(
           "Customer registered. Check requests dropdown for approval.",
           "info",
@@ -357,7 +356,7 @@ export default function Customers() {
     <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div> 
+          <div>
             <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Customer Management
             </p>

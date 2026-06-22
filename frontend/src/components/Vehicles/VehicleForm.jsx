@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FormInput, FormSelect, FormRow } from "../layout/Form/forms";
 import {
   CAR_MAKE_OPTIONS,
@@ -64,6 +64,7 @@ export const validateVehicle = (vehicle) => {
   return errors;
 };
 
+// ─── Main VehicleForm ─────────────────────────────────────────────────────────
 export default function VehicleForm({
   vehicle,
   onChange,
@@ -73,8 +74,11 @@ export default function VehicleForm({
   errors = {},
   handleSubmit,
   isEditing = false,
+  chassisPhoto, // base64 string — controlled by parent
+  onChassisPhotoChange, // (base64 | null) => void
 }) {
-  // Detect category from existing saved transmission value (handles edit mode)
+  const fileInputRef = useRef(null);
+
   const [transmissionCategory, setTransmissionCategory] = useState(() => {
     return (
       Object.entries(TRANSMISSION_OPTIONS).find(([_, types]) =>
@@ -85,26 +89,27 @@ export default function VehicleForm({
 
   const handleChange = (field, value) => {
     let processedValue = value;
-
     if (field === "licensePlate") {
       const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
       processedValue = cleaned.substring(0, 10);
     }
-
     onChange({ ...vehicle, [field]: processedValue });
   };
 
   const handleTransmissionCategoryChange = (category) => {
     setTransmissionCategory(category);
-    handleChange("transmission", ""); // reset subtype when category changes
+    handleChange("transmission", "");
   };
 
-  const capitalizeWords = (value) => {
-    if (!value) return "";
-    return value.replace(/\b\w/g, (char) => char.toUpperCase());
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onChassisPhotoChange?.(reader.result);
+    reader.readAsDataURL(file);
+    e.target.value = ""; // reset so same file can be re-selected
   };
 
-  // Inline validation feedback for plate length
   const currentPlateLength = vehicle?.licensePlate?.length ?? 0;
   if (currentPlateLength > 0 && currentPlateLength < 10) {
     errors.licensePlate =
@@ -115,8 +120,17 @@ export default function VehicleForm({
 
   return (
     <>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+
       <div className="space-y-6">
-        {/* SECTION: Linked Customer Info (Visible in View Mode) */}
+        {/* SECTION: Linked Customer Info */}
         {isReadOnly && vehicle.customerId && (
           <div className="bg-gray-100 p-6 rounded-2xl border border-blue-100 cusr">
             <h4 className="text-xs font-bold text-blue-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
@@ -184,18 +198,142 @@ export default function VehicleForm({
               }}
               inputClassName="w-full uppercase py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none text-base font-semibold tracking-wider"
             />
-            <FormInput
-              value={vehicle.chassisnumber}
-              onChange={(e) => handleChange("chassisnumber", e.target.value)}
-              placeholder="17 Digit Number"
-              inputClassName="uppercase"
-              disabled={isReadOnly}
-              maxLength={17}
-              error={errors.chassisnumber}
-              required
-              label="Chassis No. (VIN)"
-              hint="Found on the driver-side door frame"
-            />
+
+            {/* Chassis No. + upload button */}
+            <div>
+              <div style={{ position: "relative" }}>
+                <FormInput
+                  value={vehicle.chassisnumber}
+                  onChange={(e) =>
+                    handleChange("chassisnumber", e.target.value)
+                  }
+                  placeholder="17 Digit Number"
+                  inputClassName="uppercase pr-12"
+                  disabled={isReadOnly}
+                  maxLength={17}
+                  error={errors.chassisnumber}
+                  required
+                  label="Chassis No. (VIN)"
+                  hint="Found on the driver-side door frame"
+                />
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Upload chassis photo"
+                    style={{
+                      position: "absolute",
+                      right: "10px",
+                      bottom: errors.chassisnumber ? "32px" : "2px",
+                      background: "#1e3a5f",
+                      border: "none",
+                      borderRadius: "8px",
+                      width: "32px",
+                      height: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      zIndex: 2,
+                      transition: "background 0.15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#2563eb")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "#1e3a5f")
+                    }
+                  >
+                    {/* Upload icon */}
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Chassis photo thumbnail */}
+              {chassisPhoto && (
+                <div
+                  style={{
+                    marginTop: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <img
+                    src={chassisPhoto}
+                    alt="Chassis plate"
+                    style={{
+                      width: "72px",
+                      height: "44px",
+                      objectFit: "cover",
+                      borderRadius: "6px",
+                      border: "1px solid #d1d5db",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => window.open(chassisPhoto, "_blank")}
+                    title="Click to view full photo"
+                  />
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        fontSize: "11px",
+                        color: "#16a34a",
+                        fontWeight: 600,
+                        margin: 0,
+                      }}
+                    >
+                      ✓ Photo uploaded
+                    </p>
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          fontSize: "11px",
+                          color: "#6b7280",
+                          background: "none",
+                          border: "none",
+                          padding: 0,
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Change
+                      </button>
+                    )}
+                  </div>
+                  {!isReadOnly && (
+                    <button
+                      type="button"
+                      onClick={() => onChassisPhotoChange?.(null)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#ef4444",
+                        cursor: "pointer",
+                        fontSize: "11px",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </FormRow>
         </div>
 
@@ -205,7 +343,6 @@ export default function VehicleForm({
             Technical Specifications
           </h4>
           <FormRow cols={3} className="p-4 bg-gray-100 rounded-xl">
-            {/* Make */}
             <FormSelect
               value={vehicle.make}
               onChange={(e) => handleChange("make", e.target.value)}
@@ -222,7 +359,6 @@ export default function VehicleForm({
               ))}
             </FormSelect>
 
-            {/* Model — filters by make if selected */}
             <FormSelect
               value={vehicle.model}
               onChange={(e) => handleChange("model", e.target.value)}
@@ -242,7 +378,6 @@ export default function VehicleForm({
               ))}
             </FormSelect>
 
-            {/* Year */}
             <FormSelect
               value={vehicle.year}
               onChange={(e) => handleChange("year", e.target.value)}
@@ -258,7 +393,6 @@ export default function VehicleForm({
               ))}
             </FormSelect>
 
-            {/* Engine Type */}
             <FormInput
               value={vehicle.engineType}
               onChange={(e) => handleChange("engineType", e.target.value)}
@@ -267,7 +401,6 @@ export default function VehicleForm({
               label="Engine Type"
             />
 
-            {/* Fuel Type */}
             <FormSelect
               value={vehicle.fuelType}
               onChange={(e) => handleChange("fuelType", e.target.value)}
@@ -281,7 +414,6 @@ export default function VehicleForm({
               ))}
             </FormSelect>
 
-            {/* Transmission Category */}
             <FormSelect
               value={transmissionCategory}
               onChange={(e) => handleTransmissionCategoryChange(e.target.value)}
@@ -296,7 +428,6 @@ export default function VehicleForm({
               ))}
             </FormSelect>
 
-            {/* Transmission Subtype — only shown when category is selected */}
             {transmissionCategory && (
               <FormSelect
                 value={vehicle.transmission}
@@ -378,15 +509,17 @@ export default function VehicleForm({
                 : "All systems go! Ready to save"}
           </span>
         </div>
-
         <div className="flex items-center gap-2">
           {!isReadOnly && handleSubmit && (
             <button
               type="button"
               onClick={handleSubmit}
               disabled={isInvalid}
-              className={`px-5 py-2 text-sm font-medium rounded-lg text-white transition
-                ${isInvalid ? "bg-gray-200 cursor-not-allowed" : "bg-gray-900 hover:bg-black"}`}
+              className={`px-5 py-2 text-sm font-medium rounded-lg text-white transition ${
+                isInvalid
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-gray-900 hover:bg-black"
+              }`}
             >
               {isEditing ? "Save changes" : "Register profile"}
             </button>

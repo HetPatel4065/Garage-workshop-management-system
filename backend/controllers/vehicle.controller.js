@@ -2,6 +2,7 @@ import Vehicle from "../models/Vehicle.js";
 import Customer from "../models/Customer.js";
 import { logActivity } from "../utils/activityLogger.js";
 import { emitToOwner } from "../utils/socket.js";
+import { uploadChassisPhoto } from "../services/cloudinary.service.js"; 
 
 const enrichVehiclesWithServiceDates = async (vehicles, ownerId) => {
   if (!vehicles || vehicles.length === 0) return [];
@@ -272,8 +273,30 @@ export const deleteVehicle = async (req, res) => {
       vehicle._id,
     );
 
-    emitToOwner(req.user.effectiveOwnerId, "vehicle:deleted", { _id: req.params.id });
+    emitToOwner(req.user.effectiveOwnerId, "vehicle:deleted", {
+      _id: req.params.id,
+    });
     res.json({ message: "Vehicle deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const uploadChassisPhotoController = async (req, res) => {
+  try {
+    const ownerId = req.user.effectiveOwnerId;
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64) return res.status(400).json({ error: "No image provided" });
+
+    const vehicle = await Vehicle.findOne({ _id: req.params.id, garageId: ownerId });
+    if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
+
+    const url = await uploadChassisPhoto(imageBase64, ownerId);
+    vehicle.chassisPhotoUrl = url;
+    await vehicle.save();
+
+    res.json({ chassisPhotoUrl: url });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
