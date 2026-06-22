@@ -1,6 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
+/* ─── Custom Breakpoints (Tailwind v4) ─── */
+@theme {
+  --breakpoint-xs: 20rem;     /* 320px  – smallest phones  */
+  --breakpoint-3xl: 120rem;   /* 1920px – full HD / 2K     */
+  --breakpoint-4xl: 160rem;   /* 2560px – 4K / ultrawide   */
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Smooth theme transitions */
@@ -188,24 +195,143 @@
   }
 }
 
-/* Make tables horizontally scrollable on small screens to improve admin responsiveness */
-@media (max-width: 768px) {
+/* ─── Responsive Table Handling (320px → 1024px) ─── */
+@media (max-width: 1024px) {
   main table,
   .flex-1 table,
-  .page-content table {
+  .page-content table,
+  [class*="overflow"] table {
     display: block !important;
     width: 100% !important;
+    max-width: 100% !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
   main table thead,
   main table tbody,
+  main table tfoot,
   main table tr {
     display: table !important;
     width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  main table th,
+  main table td {
+    white-space: nowrap !important;
   }
 }
+
+/* ─── Ultra-wide / 4K max-width containers ─── */
+@media (min-width: 1920px) {
+  .max-w-screen-xl {
+    max-width: 1400px !important;
+  }
+  .container {
+    max-width: 1600px !important;
+  }
+}
+
+/* ─── 320px smallest screen safety net ─── */
+@media (max-width: 359px) {
+  html {
+    font-size: 14px !important;
+  }
+  .text-5xl  { font-size: 2rem   !important; line-height: 1.1 !important; }
+  .text-6xl  { font-size: 2.4rem !important; line-height: 1.1 !important; }
+  .text-7xl  { font-size: 2.8rem !important; line-height: 1.05 !important; }
+  .text-8xl  { font-size: 3.2rem !important; line-height: 1.05 !important; }
+}
+
+/* ─── Global Page Container Responsive (all admin pages) ─── */
+/* Targets the standard "p-4 sm:p-6" page wrappers */
+@media (max-width: 639px) {
+  /* Prevent modal overflow on tiny screens */
+  [class*="fixed"][class*="inset-0"] > [class*="max-w"] {
+    max-width: calc(100vw - 16px) !important;
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+  }
+
+  /* Ensure buttons with icons don't overflow at 320px */
+  button[class*="gap-"] {
+    min-width: 0;
+  }
+}
+
+/* ─── Responsive Input / Button touch targets ─── */
+@media (max-width: 479px) {
+  /* Ensure all interactive form elements are at least 44px tall (Apple HIG) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px !important; /* prevents iOS zoom on focus */
+  }
+}
+
+/* ─── Prevent iOS font-size bump on input focus ─── */
+@media screen and (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
+/* ─── 4K / Ultra-wide global page container cap ─── */
+@media (min-width: 1920px) {
+  /* Admin pages with max-w-screen wrapper */
+  .max-w-screen {
+    max-width: 2400px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+@media (min-width: 2560px) {
+  /* Hard cap for 4K so content isn't too spread */
+  body > * {
+    max-width: 2560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ─── Global padding & spacing adjustments for responsive consistency (320px to 4K) ─── */
+@media (max-width: 639px) {
+  /* Scale down paddings on mobile viewports */
+  .p-8 { padding: 1.25rem !important; }
+  .p-6 { padding: 1rem !important; }
+  .p-5 { padding: 0.875rem !important; }
+  .p-4 { padding: 0.75rem !important; }
+  .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .px-8 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+  .py-16 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+  .py-12 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+  .gap-6 { gap: 1rem !important; }
+  .gap-8 { gap: 1.25rem !important; }
+}
+
+@media (max-width: 359px) {
+  /* Extra compact safety net for 320px screens */
+  .p-8 { padding: 0.75rem !important; }
+  .p-6 { padding: 0.625rem !important; }
+  .p-5 { padding: 0.5rem !important; }
+  .p-4 { padding: 0.5rem !important; }
+  .px-4 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+  .px-3 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
+  .gap-4 { gap: 0.5rem !important; }
+  .gap-3 { gap: 0.375rem !important; }
+}
+
 
 /* ─── Global Dark Theme Injection ─── */
 html.dark {

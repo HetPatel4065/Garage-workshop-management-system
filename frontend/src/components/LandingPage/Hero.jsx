@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 export const Hero = () => {
   return (
-    <section className="relative px-6 pt-24 pb-24 md:pt-36 md:pb-36 overflow-hidden">
+    <section className="relative px-4 xs:px-6 pt-20 pb-20 sm:pt-28 md:pt-36 md:pb-36 overflow-hidden">
       {/* Gradient mesh background */}
       <div className="absolute inset-0 -z-10">
         <div
@@ -53,13 +53,13 @@ export const Hero = () => {
         />
       </div>
 
-      <div className="relative max-w-5xl mx-auto text-center">
+      <div className="relative max-w-5xl mx-auto text-center w-full">
         {/* Status Badge */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 mb-8 md:mb-10 px-4 py-2 rounded-full shadow-md"
+          className="inline-flex items-center gap-2 mb-6 md:mb-10 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full shadow-md"
           style={{
             background:
               "linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(59,130,246,0.10) 100%)",
@@ -80,7 +80,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.7 }}
-          className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight mb-8 leading-[1.05] md:leading-[0.93]"
+          className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight mb-6 md:mb-8 leading-[1.1] md:leading-[0.93]"
           style={{ color: "var(--text-heading)" }}
         >
           The operating system <br className="hidden sm:block" />
@@ -102,7 +102,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7 }}
-          className="max-w-3xl mx-auto px-4 md:px-0 mb-10 md:mb-14 text-base md:text-xl font-medium leading-relaxed"
+          className="max-w-3xl mx-auto px-2 xs:px-4 md:px-0 mb-8 md:mb-14 text-sm xs:text-base md:text-xl font-medium leading-relaxed"
           style={{ color: "var(--text-body)" }}
         >
           Say goodbye to messy paperwork. GaragePro helps you manage job cards,
@@ -115,11 +115,11 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.7 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 md:px-0"
+          className="flex flex-col xs:flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-2 xs:px-4 md:px-0"
         >
           <Link
             to="/signup"
-            className="group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 flex items-center justify-center gap-2 font-bold text-base md:text-lg text-white rounded-2xl hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
+            className="group w-full sm:w-auto px-6 md:px-10 py-3.5 md:py-5 flex items-center justify-center gap-2 font-bold text-sm xs:text-base md:text-lg text-white rounded-2xl hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
             style={{
               background: "linear-gradient(135deg, #6366f1 0%, #3b82f6 100%)",
               boxShadow: "0 8px 32px rgba(99,102,241,0.32)",
@@ -134,7 +134,7 @@ export const Hero = () => {
 
           <Link
             to="/portal"
-            className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 font-bold text-center text-base md:text-lg rounded-2xl border backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
+            className="w-full sm:w-auto px-6 md:px-10 py-3.5 md:py-5 font-bold text-center text-sm xs:text-base md:text-lg rounded-2xl border backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
             style={{
               background: "rgba(99,102,241,0.08)",
               color: "#6366f1",
@@ -147,7 +147,7 @@ export const Hero = () => {
 
           <a
             href="#features"
-            className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 font-bold text-center text-base md:text-lg rounded-2xl border backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
+            className="w-full sm:w-auto px-6 md:px-10 py-3.5 md:py-5 font-bold text-center text-sm xs:text-base md:text-lg rounded-2xl border backdrop-blur-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
             style={{
               background: "var(--bg-tertiary)",
               color: "var(--text-body)",
@@ -164,7 +164,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.7 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-8 md:gap-10 mt-16 md:mt-20 pt-8 md:pt-10 border-t"
+          className="flex flex-wrap items-center justify-center gap-6 xs:gap-8 md:gap-10 mt-12 md:mt-20 pt-6 md:pt-10 border-t"
           style={{ borderColor: "rgba(99,102,241,0.10)" }}
         >
           {[

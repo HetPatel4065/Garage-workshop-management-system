@@ -1,0 +1,227 @@
+Perfect! Let’s create a **full roadmap + folder/code structure** for your small garage service + inventory system. I’ll break it **step by step**, including component hierarchy, backend integration points, and recommended practices.
+
+---
+
+# **1️⃣ Full Requirements**
+
+## **Functional Requirements (MVP)**
+
+1. **Customer Management**
+
+   * Add/Edit/Delete customer
+   * Store customer info: Name, Phone, Email
+   * Store vehicle info: Model, Number Plate
+
+2. **Service Management**
+
+   * Add/Edit/Delete service jobs
+   * Assign to customer & vehicle
+   * Track service status: Pending, In Progress, Completed, Delivered
+   * Add labor charges
+   * Add parts used
+
+3. **Inventory Management**
+
+   * Add/Edit/Delete parts
+   * Track stock quantity
+   * Auto reduce stock when used in service
+   * Low stock alerts
+
+4. **Billing**
+
+   * Calculate total (parts + labor)
+   * Generate invoice
+   * Optional: PDF download
+
+5. **Dashboard**
+
+   * Show statistics: Total services, Pending, Completed, Earnings
+   * Low stock alerts
+   * Recent service list
+
+6. **Optional Enhancements**
+
+   * SMS/WhatsApp notification to customers
+   * Mechanic assignment
+   * Service reminders
+   * Charts and analytics
+
+---
+
+# **2️⃣ Tech Stack**
+
+* **Frontend:** React + Tailwind CSS + React Router + Axios
+* **Backend:** Node.js + Express.js + MongoDB (Mongoose)
+* **Optional:** JWT Auth for admin/staff login, PDF generation for invoices
+
+---
+
+# **3️⃣ Folder / Code Structure (Frontend)**
+
+```
+src/
+├─ components/
+│  ├─ Dashboard/
+│  │  ├─ StatsCard.jsx
+│  │  ├─ LowStockAlert.jsx
+│  │  ├─ RecentServices.jsx
+│  │  └─ QuickActionButtons.jsx
+│  ├─ Customers/
+│  │  ├─ CustomerList.jsx
+│  │  ├─ CustomerCard.jsx
+│  │  ├─ CustomerForm.jsx
+│  │  └─ VehicleList.jsx
+│  ├─ Services/
+│  │  ├─ ServiceList.jsx
+│  │  ├─ ServiceCard.jsx
+│  │  ├─ ServiceForm.jsx
+│  │  ├─ StatusBadge.jsx
+│  │  └─ PartsUsedList.jsx
+│  ├─ Inventory/
+│  │  ├─ InventoryList.jsx
+│  │  ├─ InventoryItemCard.jsx
+│  │  ├─ InventoryForm.jsx
+│  │  ├─ StockUpdateModal.jsx
+│  │  └─ LowStockBadge.jsx
+│  ├─ Billing/
+│  │  ├─ InvoicePreview.jsx
+│  │  ├─ InvoicePDFButton.jsx
+│  │  └─ PaymentStatusBadge.jsx
+│  ├─ Layout/
+│  │  ├─ Sidebar.jsx
+│  │  ├─ TopNavbar.jsx
+│  │  └─ Footer.jsx
+│  └─ UI/
+│     ├─ TextInput.jsx
+│     ├─ NumberInput.jsx
+│     ├─ SelectDropdown.jsx
+│     ├─ Modal.jsx
+│     ├─ ToastNotification.jsx
+│     ├─ SearchBar.jsx
+│     └─ Table.jsx
+│
+├─ pages/
+│  ├─ Dashboard.jsx
+│  ├─ Customers.jsx
+│  ├─ Services.jsx
+│  ├─ Inventory.jsx
+│  ├─ Billing.jsx
+│  └─ Login.jsx
+│
+├─ api/
+│  ├─ customerApi.js
+│  ├─ serviceApi.js
+│  ├─ inventoryApi.js
+│  └─ billingApi.js
+│
+├─ context/
+│  └─ AuthContext.jsx
+│
+├─ utils/
+│  ├─ calculateTotal.js
+│  └─ formatDate.js
+│
+└─ App.jsx
+```
+
+---
+
+# **4️⃣ Backend Structure**
+
+```
+backend/
+├─ models/
+│  ├─ User.js
+│  ├─ Customer.js
+│  ├─ Vehicle.js
+│  ├─ Service.js
+│  └─ Inventory.js
+│
+├─ routes/
+│  ├─ auth.routes.js
+│  ├─ customer.routes.js
+│  ├─ service.routes.js
+│  ├─ inventory.routes.js
+│  └─ billing.routes.js
+│
+├─ controllers/
+│  ├─ auth.controller.js
+│  ├─ customer.controller.js
+│  ├─ service.controller.js
+│  ├─ inventory.controller.js
+│  └─ billing.controller.js
+│
+├─ middleware/
+│  ├─ auth.middleware.js
+│  └─ error.middleware.js
+│
+├─ utils/
+│  └─ generateInvoice.js
+│
+├─ server.js
+└─ .env
+```
+
+---
+
+# **5️⃣ Step-by-Step Development Flow**
+
+### **Step 1: Setup Backend**
+
+1. Initialize Node.js project, install dependencies (`express`, `mongoose`, `cors`, `dotenv`, `bcryptjs`, `jsonwebtoken`)
+2. Create models: User, Customer, Vehicle, Service, Inventory
+3. Build REST APIs for CRUD operations
+4. Test APIs with Postman
+
+---
+
+### **Step 2: Setup Frontend**
+
+1. Create React project with Vite or Create React App
+2. Setup Tailwind CSS
+3. Setup React Router (Dashboard, Customers, Services, Inventory)
+4. Create Axios API calls in `api/` folder
+
+---
+
+### **Step 3: Build Components**
+
+1. Start with **UI components** (TextInput, Table, Modal)
+2. Build **Customer management** pages & components
+3. Build **Inventory management**
+4. Build **Service management**, link inventory usage
+5. Build **Dashboard** (StatsCard, LowStockAlert, RecentServices)
+6. Build **Billing / Invoice** component
+
+---
+
+### **Step 4: Connect Frontend with Backend**
+
+1. Use Axios in React components to call backend APIs
+2. Display dynamic data in Tables / Cards
+3. Handle CRUD (add/edit/delete)
+4. Handle service status updates and stock changes
+
+---
+
+### **Step 5: Add Extra Features**
+
+1. Notifications (Toast)
+2. Optional: PDF invoice generation
+3. Optional: Charts (Revenue trends, Top used parts)
+4. Optional: Multi-user roles
+
+---
+
+### **Step 6: Final Touches**
+
+* Add proper error handling
+* Form validation
+* Responsive design
+* Deploy backend & frontend
+
+---
+
+If you want, I can **next create the full React component tree with folder mapping AND sample skeleton code** for each component. This will give you a **ready-to-start project template**.
+
+Do you want me to do that next?

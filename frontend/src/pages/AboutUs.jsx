@@ -18,7 +18,7 @@ export default function AboutUs() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8faff] dark:bg-[#030712] text-[#1e1b4b] dark:text-[#f8fafc] px-6 py-16 sm:px-8 lg:px-16">
+    <div className="min-h-screen bg-[#f8faff] dark:bg-[#030712] text-[#1e1b4b] dark:text-[#f8fafc] px-3 xs:px-4 sm:px-8 lg:px-16 py-8 xs:py-12 sm:py-16">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,7 +42,7 @@ export default function AboutUs() {
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
           <div className="space-y-10">
-            <section className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <section className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-4 xs:p-6 sm:p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
               <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
               <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
                 We help small and medium-size garages run more efficiently by
@@ -52,7 +52,7 @@ export default function AboutUs() {
               </p>
             </section>
 
-            <section className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <section className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-4 xs:p-6 sm:p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
               <h2 className="text-2xl font-bold mb-4">What We Value</h2>
               <ul className="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
                 <li>
@@ -79,7 +79,7 @@ export default function AboutUs() {
               </ul>
             </section>
 
-            <section className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <section className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-4 xs:p-6 sm:p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
               <h2 className="text-2xl font-bold mb-4">How We Help Garages</h2>
               <div className="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
                 <p>
@@ -98,7 +98,7 @@ export default function AboutUs() {
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-3xl bg-linear-to-br from-blue-600 to-violet-600 p-8 shadow-xl text-white">
+            <div className="rounded-3xl bg-linear-to-br from-blue-600 to-violet-600 p-4 xs:p-6 sm:p-8 shadow-xl text-white">
               <div className="text-sm uppercase tracking-[0.24em] font-bold mb-3">
                 Why GaragePro
               </div>
@@ -108,7 +108,7 @@ export default function AboutUs() {
               </p>
             </div>
 
-            <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-4 xs:p-6 sm:p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
               <h3 className="text-xl font-bold mb-4">Our Commitment</h3>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 We partner with workshops to launch faster, reduce manual tasks,
@@ -116,7 +116,7 @@ export default function AboutUs() {
               </p>
             </div>
 
-            <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/70 dark:border-zinc-800 p-4 xs:p-6 sm:p-8 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
               <h3 className="text-xl font-bold mb-4">Ready to get started?</h3>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 Join hundreds of garages already using GaragePro to manage

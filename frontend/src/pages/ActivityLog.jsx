@@ -18,6 +18,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import ExportButton from "../components/common/ExportButton";
 import ConfirmModal from "../components/UI/ConfirmModal";
+import EmptyState from "../components/UI/EmptyState";
 
 const MODULE_OPTIONS = [
   "All",
@@ -172,7 +173,7 @@ function timeAgo(dateStr) {
   return `${days}d ago`;
 }
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 25;
 
 const STAT_CARDS = [
   {
@@ -420,7 +421,7 @@ export default function ActivityLog() {
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">
+            <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Audit & Monitoring
             </p>
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
@@ -662,7 +663,7 @@ export default function ActivityLog() {
         ) : (
           <>
             {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
@@ -754,7 +755,7 @@ export default function ActivityLog() {
             </div>
 
             {/* Mobile Cards */}
-            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700">
+            <div className="lg:hidden divide-y divide-slate-100 dark:divide-slate-700">
               {paginated.map((log) => {
                 const avatarGrad = getAvatarColor(log.performedBy?.name || "");
                 return (

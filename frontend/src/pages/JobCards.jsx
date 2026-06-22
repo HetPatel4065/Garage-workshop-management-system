@@ -63,7 +63,6 @@ const getDateRange = (type) => {
     const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
     start.setDate(diffToMonday);
     start.setHours(0, 0, 0, 0);
-
     end.setDate(start.getDate() + 6);
     end.setHours(23, 59, 59, 999);
     return {
@@ -74,7 +73,6 @@ const getDateRange = (type) => {
   if (type === "this-month") {
     start.setDate(1);
     start.setHours(0, 0, 0, 0);
-
     end.setMonth(now.getMonth() + 1);
     end.setDate(0);
     end.setHours(23, 59, 59, 999);
@@ -91,6 +89,201 @@ import ExportButton from "../components/common/ExportButton";
 import EmptyState from "../components/UI/EmptyState";
 import { useSocket } from "../context/SocketContext";
 
+const SERVICE_CATALOG = [
+  {
+    category: "General Service",
+    services: [
+      "Basic Service",
+      "Periodic Service",
+      "Full Service",
+      "Major Service",
+      "Express Service",
+      "Vehicle Inspection",
+      "Preventive Maintenance",
+    ],
+  },
+  {
+    category: "Engine",
+    services: [
+      "Engine Oil Change",
+      "Oil Filter Replacement",
+      "Air Filter Replacement",
+      "Cabin Filter Replacement",
+      "Fuel Filter Replacement",
+      "Spark Plug Replacement",
+      "Engine Tuning",
+      "Injector Cleaning",
+      "Throttle Body Cleaning",
+      "Engine Diagnostics",
+      "Engine Repair",
+      "Engine Overhaul",
+      "Timing Belt Replacement",
+      "Timing Chain Replacement",
+      "Engine Mount Replacement",
+    ],
+  },
+  {
+    category: "Transmission",
+    services: [
+      "Clutch Replacement",
+      "Clutch Overhaul",
+      "Gearbox Repair",
+      "Gearbox Oil Change",
+      "Manual Transmission Service",
+      "Automatic Transmission Service",
+      "AMT Service",
+      "CVT Service",
+      "Differential Service",
+    ],
+  },
+  {
+    category: "Brakes",
+    services: [
+      "Brake Pad Replacement",
+      "Brake Shoe Replacement",
+      "Brake Disc Skimming",
+      "Brake Disc Replacement",
+      "Brake Drum Service",
+      "Brake Fluid Replacement",
+      "ABS Diagnostics",
+      "Brake Caliper Repair",
+      "Hand Brake Adjustment",
+    ],
+  },
+  {
+    category: "Suspension & Steering",
+    services: [
+      "Wheel Alignment",
+      "Wheel Balancing",
+      "Shock Absorber Replacement",
+      "Strut Replacement",
+      "Steering Rack Repair",
+      "Power Steering Service",
+      "Steering Oil Change",
+      "Suspension Repair",
+      "Tie Rod Replacement",
+      "Ball Joint Replacement",
+    ],
+  },
+  {
+    category: "Tyres & Wheels",
+    services: [
+      "Tyre Rotation",
+      "Tyre Replacement",
+      "Tyre Puncture Repair",
+      "Tubeless Puncture Repair",
+      "Nitrogen Filling",
+      "Tyre Pressure Check",
+      "Wheel Rim Repair",
+    ],
+  },
+  {
+    category: "Electrical & Battery",
+    services: [
+      "Battery Check",
+      "Battery Replacement",
+      "Alternator Repair",
+      "Starter Motor Repair",
+      "Wiring Repair",
+      "Fuse Replacement",
+      "Horn Repair",
+      "Headlight Repair",
+      "Tail Light Repair",
+      "Indicator Repair",
+      "Power Window Repair",
+      "Central Locking Repair",
+      "ECU Diagnostics",
+    ],
+  },
+  {
+    category: "AC & Cooling",
+    services: [
+      "AC Gas Refill",
+      "AC Service",
+      "AC Compressor Repair",
+      "AC Condenser Repair",
+      "AC Cooling Check",
+      "Radiator Cleaning",
+      "Radiator Replacement",
+      "Coolant Top-Up",
+      "Coolant Flush",
+      "Water Pump Replacement",
+    ],
+  },
+  {
+    category: "Body & Paint",
+    services: [
+      "Denting",
+      "Painting",
+      "Full Body Painting",
+      "Panel Painting",
+      "Scratch Removal",
+      "Bumper Repair",
+      "Bumper Replacement",
+      "Windshield Replacement",
+      "Glass Repair",
+      "Accident Repair",
+      "Chassis Repair",
+    ],
+  },
+  {
+    category: "Washing & Detailing",
+    services: [
+      "Car Wash",
+      "Foam Wash",
+      "Interior Cleaning",
+      "Vacuum Cleaning",
+      "Dashboard Polishing",
+      "Exterior Polishing",
+      "Wax Polishing",
+      "Ceramic Coating",
+      "Teflon Coating",
+      "Underbody Coating",
+      "Engine Bay Cleaning",
+    ],
+  },
+  {
+    category: "Accessories",
+    services: [
+      "Seat Cover Installation",
+      "Music System Installation",
+      "Reverse Camera Installation",
+      "Parking Sensor Installation",
+      "Dash Camera Installation",
+      "Fog Lamp Installation",
+      "Alloy Wheel Installation",
+      "GPS Installation",
+      "Mobile Holder Installation",
+    ],
+  },
+  {
+    category: "Diagnostics & Insurance",
+    services: [
+      "OBD Scan",
+      "Computer Diagnostics",
+      "Emission Check",
+      "PUC Preparation",
+      "Pre-Purchase Inspection",
+      "Insurance Inspection",
+      "Cashless Insurance Claim",
+      "Insurance Survey Support",
+      "Accident Claim Processing",
+      "Battery Jump Start",
+      "Flat Tyre Assistance",
+      "Towing Service",
+      "Emergency Breakdown Support",
+      "Wiper Replacement",
+      "Washer Motor Repair",
+      "Bulb Replacement",
+      "Door Lock Repair",
+      "Sunroof Repair",
+      "Key Programming",
+      "RC Transfer Assistance",
+      "Vehicle Fitness Check",
+    ],
+  },
+];
+
 export default function JobCards() {
   const { user, token: authToken } = useAuth();
   const { addToast } = useToast();
@@ -101,6 +294,7 @@ export default function JobCards() {
   const [vehicles, setVehicles] = useState([]);
   const [jobCards, setJobCards] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [openCategories, setOpenCategories] = useState({});
 
   const location = useLocation();
   const queryParam = new URLSearchParams(location.search).get("q") || "";
@@ -108,14 +302,12 @@ export default function JobCards() {
   const [isTyping, setIsTyping] = useState(false);
   const [activeSearch, setActiveSearch] = useState(queryParam);
 
-  // Sync activeSearch with URL on mount or URL change
   useEffect(() => {
     if (queryParam !== activeSearch) {
       setActiveSearch(queryParam);
     }
   }, [queryParam]);
 
-  // Persisted Filters State
   const [filterStatus, setFilterStatus] = useState(() => {
     return sessionStorage.getItem("jc_filterStatus") || "All";
   });
@@ -133,18 +325,14 @@ export default function JobCards() {
   });
 
   const [showFilters, setShowFilters] = useState(false);
-
   const [advisors, setAdvisors] = useState([]);
   const [mechanics, setMechanics] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Form State
   const createEmptyJc = () => ({
     vehicleId: "",
     instructionText: "1. ",
@@ -166,13 +354,8 @@ export default function JobCards() {
     try {
       setLoading(true);
       const ts = Date.now();
-
-      // Synchronize with API query-based filtering
       const params = new URLSearchParams();
       params.append("t", ts);
-
-      // We process status filter client-side to keep counts of other status tabs correct,
-      // but API supports it, so it's fully synchronized.
 
       if (filterStaff !== "All") {
         params.append("staff", filterStaff);
@@ -193,24 +376,18 @@ export default function JobCards() {
         }),
         fetch(
           `${import.meta.env.VITE_API_URL}/job-cards?${params.toString()}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         ),
         fetch(`${import.meta.env.VITE_API_URL}/customers?t=${ts}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(
           `${import.meta.env.VITE_API_URL}/auth/staff?role=advisor&t=${ts}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         ),
         fetch(
           `${import.meta.env.VITE_API_URL}/auth/staff?role=mechanic&t=${ts}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         ),
       ]);
 
@@ -240,7 +417,6 @@ export default function JobCards() {
     }
   };
 
-  // Sync state to sessionStorage
   useEffect(() => {
     sessionStorage.setItem("jc_filterStatus", filterStatus);
     sessionStorage.setItem("jc_filterDateType", filterDateType);
@@ -255,7 +431,6 @@ export default function JobCards() {
     filterStaff,
   ]);
 
-  // Fetch when token or any active filters change
   useEffect(() => {
     if (token) fetchData();
   }, [token, filterDateType, filterStartDate, filterEndDate, filterStaff]);
@@ -264,17 +439,12 @@ export default function JobCards() {
 
   useEffect(() => {
     if (!socket) return;
-
-    const triggerFetch = () => {
-      fetchData();
-    };
-
+    const triggerFetch = () => fetchData();
     socket.on("jobcard:created", triggerFetch);
     socket.on("jobcard:updated", triggerFetch);
     socket.on("jobcard:deleted", triggerFetch);
     socket.on("customer:updated", triggerFetch);
     socket.on("vehicle:updated", triggerFetch);
-
     return () => {
       socket.off("jobcard:created", triggerFetch);
       socket.off("jobcard:updated", triggerFetch);
@@ -284,7 +454,6 @@ export default function JobCards() {
     };
   }, [socket]);
 
-  // Count per status for pill badges (calculated dynamically from current staff & date filtered job cards)
   const statusCounts = jobCards.reduce((acc, jc) => {
     const s = jc.status || "pending-inspection";
     acc[s] = (acc[s] || 0) + 1;
@@ -326,7 +495,6 @@ export default function JobCards() {
       const jcStatus = jc.status || "pending-inspection";
       const matchesStatus = filterStatus === "All" || jcStatus === filterStatus;
 
-      // Staff/Technician filter (frontend sync)
       let matchesStaff = true;
       if (filterStaff !== "All") {
         if (filterStaff === "unassigned") {
@@ -348,7 +516,6 @@ export default function JobCards() {
         }
       }
 
-      // Date Range Filter (frontend sync)
       let matchesDate = true;
       const targetDate = jc.createdAt;
       if (filterDateType !== "all" && targetDate) {
@@ -403,6 +570,7 @@ export default function JobCards() {
     setSelectedJcId(null);
     setCustomerId("");
     setJobCardsToCreate([createEmptyJc()]);
+    setOpenCategories({});
     setIsReadOnly(false);
     setIsModalOpen(true);
   };
@@ -417,7 +585,6 @@ export default function JobCards() {
       ...vNative,
       ...(typeof jc.vehicleId === "object" ? jc.vehicleId : {}),
     };
-
     const cId =
       typeof v.customerId === "object" ? v.customerId?._id : v.customerId;
 
@@ -442,6 +609,7 @@ export default function JobCards() {
           : "",
       },
     ]);
+    setOpenCategories({});
     setIsReadOnly(false);
     setIsModalOpen(true);
   };
@@ -456,7 +624,6 @@ export default function JobCards() {
       ...vNative,
       ...(typeof jc.vehicleId === "object" ? jc.vehicleId : {}),
     };
-
     const cId =
       typeof v.customerId === "object" ? v.customerId?._id : v.customerId;
 
@@ -481,6 +648,7 @@ export default function JobCards() {
           : "",
       },
     ]);
+    setOpenCategories({});
     setIsReadOnly(true);
     setIsModalOpen(true);
   };
@@ -501,7 +669,6 @@ export default function JobCards() {
         },
       );
       if (!res.ok) throw new Error("Delete failed");
-
       setJobCards(jobCards.filter((jc) => jc._id !== itemToDelete));
       addToast("Job Card deleted", "delete");
       setDeleteModalOpen(false);
@@ -598,7 +765,34 @@ export default function JobCards() {
     }
   };
 
-  // Status pill config — derived from dynamic statuses
+  // Toggle a service checkbox — adds/removes from instructionText and renumbers
+  const handleServiceToggle = (checked, svc, i) => {
+    setJobCardsToCreate((prev) =>
+      prev.map((item, idx) => {
+        if (idx !== i) return item;
+        let lines = (item.instructionText || "")
+          .split("\n")
+          .map((l) => l.replace(/^\d+\.\s*/, "").trim())
+          .filter((l) => l !== "");
+
+        if (checked) {
+          if (!lines.map((l) => l.toLowerCase()).includes(svc.toLowerCase())) {
+            lines.push(svc);
+          }
+        } else {
+          lines = lines.filter((l) => l.toLowerCase() !== svc.toLowerCase());
+        }
+
+        const renumbered =
+          lines.length > 0
+            ? lines.map((l, n) => `${n + 1}. ${l}`).join("\n")
+            : "1. ";
+
+        return { ...item, instructionText: renumbered };
+      }),
+    );
+  };
+
   const statusTabs = [
     "All",
     "pending-inspection",
@@ -692,11 +886,9 @@ export default function JobCards() {
             <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Job Card Management
             </p>
-
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
               Job Cards
             </h1>
-
             <p className="text-sm font-medium text-slate-500 mt-3">
               Manage workshop instructions and job cards directly
             </p>
@@ -712,17 +904,7 @@ export default function JobCards() {
               />
               <button
                 onClick={handleAddNew}
-                className="
-                flex items-center gap-2
-                px-5 py-3
-                bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-700
-                text-white
-                rounded-2xl
-                text-sm font-bold
-                transition-all duration-300
-                shadow-md hover:shadow-xl
-                h-10.5
-              "
+                className="flex items-center gap-2 px-5 py-3 bg-blue-600 dark:bg-blue-950/90 hover:bg-blue-700 text-white rounded-2xl text-sm font-bold transition-all duration-300 shadow-md hover:shadow-xl h-10.5"
               >
                 <Plus size={17} />
                 Add Job Card
@@ -731,6 +913,7 @@ export default function JobCards() {
           )}
         </div>
       </div>
+
       {/* Search & Filter Bar */}
       <div className="mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -764,16 +947,11 @@ export default function JobCards() {
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`
-            flex items-center justify-center gap-2
-            px-4 py-2.5
-            rounded-xl border shadow-sm cursor-auto transition-all duration-300
-            ${
-              showFilters
-                ? "bg-slate-900 border-slate-900 text-white"
-                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-            }
-          `}
+          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border shadow-sm cursor-auto transition-all duration-300 ${
+            showFilters
+              ? "bg-slate-900 border-slate-900 text-white"
+              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+          }`}
           title="Date & Staff Filters"
         >
           <Filter size={18} />
@@ -783,6 +961,7 @@ export default function JobCards() {
           )}
         </button>
       </div>
+
       {/* Advanced Filter Panel */}
       {showFilters && (
         <div className="mb-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 transition-all duration-300 animate-fade-in">
@@ -810,22 +989,17 @@ export default function JobCards() {
                       <button
                         key={opt.value}
                         onClick={() => setFilterDateType(opt.value)}
-                        className={`
-                          py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-200 cursor-auto
-                          ${
-                            isActive
-                              ? "bg-slate-900 text-white shadow-sm"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-                          }
-                        `}
+                        className={`py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-200 cursor-auto ${
+                          isActive
+                            ? "bg-slate-900 text-white shadow-sm"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                        }`}
                       >
                         {opt.label}
                       </button>
                     );
                   })}
                 </div>
-
-                {/* Custom Date Range Picker */}
                 {filterDateType === "custom" && (
                   <div className="flex items-center gap-2 mt-3 animate-fade-in">
                     <input
@@ -862,7 +1036,6 @@ export default function JobCards() {
                 >
                   <option value="All">All Staff Members</option>
                   <option value="unassigned">Unassigned Jobs</option>
-
                   {advisors.length > 0 && (
                     <optgroup label="Service Advisors">
                       {advisors.map((s) => (
@@ -872,7 +1045,6 @@ export default function JobCards() {
                       ))}
                     </optgroup>
                   )}
-
                   {mechanics.length > 0 && (
                     <optgroup label="Technicians & Mechanics">
                       {mechanics.map((s) => (
@@ -901,7 +1073,6 @@ export default function JobCards() {
                     <button
                       onClick={() => setFilterStatus("All")}
                       className="hover:bg-blue-100 rounded-full p-0.5 transition-colors cursor-auto"
-                      title="Remove filter"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -923,7 +1094,6 @@ export default function JobCards() {
                         setFilterEndDate("");
                       }}
                       className="hover:bg-indigo-100 rounded-full p-0.5 transition-colors cursor-auto"
-                      title="Remove filter"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -943,7 +1113,6 @@ export default function JobCards() {
                     <button
                       onClick={() => setFilterStaff("All")}
                       className="hover:bg-emerald-100 rounded-full p-0.5 transition-colors cursor-auto"
-                      title="Remove filter"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -961,6 +1130,7 @@ export default function JobCards() {
           </div>
         </div>
       )}
+
       <div className="mt-4 border-t border-gray-100 p-4">
         <p className="text-sm font-medium text-gray-600">
           Total Job Card Items:{" "}
@@ -969,6 +1139,7 @@ export default function JobCards() {
           </span>
         </p>
       </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
@@ -1073,6 +1244,8 @@ export default function JobCards() {
           )}
         </div>
       )}
+
+      {/* ── MODAL ── */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -1086,6 +1259,7 @@ export default function JobCards() {
         size="xl"
       >
         <div className="space-y-6">
+          {/* Customer Selector */}
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 flex items-center gap-4">
             <label className="text-sm font-bold text-gray-700 w-24">
               Customer
@@ -1137,11 +1311,23 @@ export default function JobCards() {
                 ? `${selectedVehicle.licensePlate} - ${selectedVehicle.make} ${selectedVehicle.model}`
                 : "No vehicle assigned";
 
+              // Compute currently checked services from instructionText
+              const checkedServices = (jc.instructionText || "")
+                .split("\n")
+                .map((l) =>
+                  l
+                    .replace(/^\d+\.\s*/, "")
+                    .trim()
+                    .toLowerCase(),
+                )
+                .filter(Boolean);
+
               return (
                 <div
                   key={jc.id || i}
                   className="relative bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-sm space-y-4"
                 >
+                  {/* Job Card header */}
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-50">
                     <h4 className="text-sm font-bold text-gray-700">
                       Job Card {i + 1}
@@ -1149,11 +1335,11 @@ export default function JobCards() {
                     {!selectedJcId && jobCardsToCreate.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={() =>
                           setJobCardsToCreate((prev) =>
                             prev.filter((_, index) => index !== i),
-                          );
-                        }}
+                          )
+                        }
                         className="text-xs font-bold text-red-500 hover:text-red-700 px-3 py-1.5 bg-red-50 rounded-lg transition-colors"
                       >
                         Remove
@@ -1161,6 +1347,7 @@ export default function JobCards() {
                     )}
                   </div>
 
+                  {/* Vehicle + Advisor + Mechanic */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block mb-1.5">
@@ -1276,9 +1463,125 @@ export default function JobCards() {
                     )}
                   </div>
 
-                  <div className="flex flex-col h-48 mt-4">
+                  {/* ── SERVICE CHECKLIST ── */}
+                  {!isReadOnly && (
+                    <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden">
+                      {/* Checklist header */}
+                      <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-200 flex items-center justify-between">
+                        <p className="text-xs font-black text-gray-500 uppercase tracking-widest">
+                          Select Services
+                        </p>
+                        {checkedServices.length > 0 && (
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                            {checkedServices.length} selected
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Scrollable category list */}
+                      <div className="max-h-60 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+                        {SERVICE_CATALOG.map((cat) => {
+                          const isOpen = !!openCategories[cat.category];
+
+                          const checkedCount = cat.services.filter((svc) =>
+                            checkedServices.includes(svc.toLowerCase()),
+                          ).length;
+
+                          return (
+                            <div key={cat.category}>
+                              {/* Category toggle row */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setOpenCategories((prev) => ({
+                                    ...prev,
+                                    [cat.category]: !prev[cat.category],
+                                  }))
+                                }
+                                className="w-full flex items-center justify-between px-4 py-2.5 text-left
+                     hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                                    {cat.category}
+                                  </span>
+
+                                  {checkedCount > 0 && (
+                                    <span
+                                      className="text-[10px] font-bold
+                           text-green-700 dark:text-green-300
+                           bg-green-50 dark:bg-green-900/30
+                           border border-green-200 dark:border-green-700
+                           px-1.5 py-0.5 rounded-full"
+                                    >
+                                      {checkedCount} ✓
+                                    </span>
+                                  )}
+                                </div>
+
+                                <span className="text-gray-400 dark:text-gray-500 text-xs">
+                                  {isOpen ? "▲" : "▼"}
+                                </span>
+                              </button>
+
+                              {/* Services grid */}
+                              {isOpen && (
+                                <div
+                                  className="px-4 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2
+                       gap-y-1.5 gap-x-4
+                       bg-white dark:bg-gray-900"
+                                >
+                                  {cat.services.map((svc) => {
+                                    const isChecked = checkedServices.includes(
+                                      svc.toLowerCase(),
+                                    );
+
+                                    return (
+                                      <label
+                                        key={svc}
+                                        className="flex items-center gap-2 cursor-pointer group py-0.5"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={(e) =>
+                                            handleServiceToggle(
+                                              e.target.checked,
+                                              svc,
+                                              i,
+                                            )
+                                          }
+                                          className="w-3.5 h-3.5 accent-blue-600 dark:accent-blue-500
+                               cursor-pointer shrink-0"
+                                        />
+
+                                        <span
+                                          className={`text-xs transition-colors ${
+                                            isChecked
+                                              ? "text-blue-700 dark:text-blue-400 font-semibold"
+                                              : "text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
+                                          }`}
+                                        >
+                                          {svc}
+                                        </span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── SERVICE INSTRUCTIONS TEXTAREA ── */}
+                  <div className="flex flex-col mt-4">
                     <label className="text-sm font-semibold text-gray-700 mb-2.5">
-                      Service Instructions
+                      {isReadOnly
+                        ? "Service Instructions"
+                        : "Additional Notes / Custom Instructions"}
                     </label>
                     <textarea
                       value={jc.instructionText || ""}
@@ -1295,8 +1598,17 @@ export default function JobCards() {
                       onKeyDown={(e) => handleKeyDown(e, i)}
                       readOnly={isReadOnly}
                       placeholder="1. Oil Change..."
-                      className={`w-full flex-1 capitalize bg-white border border-gray-200 rounded-xl p-5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-100 resize-none ${isReadOnly ? "bg-gray-800" : ""}`}
+                      rows={isReadOnly ? 8 : 5}
+                      className={`w-full capitalize bg-white border border-gray-200 rounded-xl p-4 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-100 resize-none ${
+                        isReadOnly ? "bg-gray-50 text-gray-600" : ""
+                      }`}
                     />
+                    {!isReadOnly && (
+                      <p className="text-[10px] text-gray-400 mt-1.5">
+                        Tip: Press Enter to auto-number the next line. Ticked
+                        services above are added automatically.
+                      </p>
+                    )}
                   </div>
                 </div>
               );
@@ -1310,9 +1622,7 @@ export default function JobCards() {
                 Services.
               </p>
               <button
-                onClick={() => {
-                  navigate(`/services?jobId=${selectedJcId}`);
-                }}
+                onClick={() => navigate(`/services?jobId=${selectedJcId}`)}
                 className="px-6 py-2 bg-slate-900 text-white rounded-xl shadow-sm text-sm font-bold w-full sm:w-auto"
               >
                 Manage Services & Tasks
@@ -1339,6 +1649,7 @@ export default function JobCards() {
           </div>
         </div>
       </Modal>
+
       <ConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

@@ -148,7 +148,7 @@ export const Features = () => {
   return (
     <section
       id="features"
-      className="relative px-6 overflow-hidden"
+      className="relative px-4 xs:px-6 py-16 md:py-24 overflow-hidden"
       style={{ background: "var(--bg-primary)" }}
     >
       {/* Ambient Radial Mesh Background Art */}
@@ -169,9 +169,9 @@ export const Features = () => {
         }}
       />
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto 3xl:max-w-[1600px] 4xl:max-w-[2000px]">
         {/* Section Header */}
-        <div className="text-center mb-12 md:mb-20">
+        <div className="text-center mb-10 md:mb-20">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -195,7 +195,7 @@ export const Features = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="max-w-3xl mx-auto mb-6 text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] md:leading-tight"
+            className="max-w-3xl mx-auto mb-4 xs:mb-6 text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] md:leading-tight"
             style={{ color: "var(--text-heading)" }}
           >
             Everything you need to{" "}
@@ -216,7 +216,7 @@ export const Features = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="max-w-2xl mx-auto px-4 md:px-0 text-base md:text-lg font-medium leading-relaxed"
+            className="max-w-2xl mx-auto px-2 xs:px-4 md:px-0 text-sm xs:text-base md:text-lg font-medium leading-relaxed"
             style={{ color: "var(--text-body)" }}
           >
             Stop juggling apps and spreadsheets. GaragePro brings every part of
@@ -225,7 +225,7 @@ export const Features = () => {
         </div>
 
         {/* Feature Grid Container */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-3 gap-4 xs:gap-6 md:gap-8">
           {features.map((feature, index) => (
             <FeatureItem
               key={index}

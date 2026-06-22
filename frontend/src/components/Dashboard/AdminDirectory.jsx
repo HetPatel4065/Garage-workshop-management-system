@@ -238,16 +238,16 @@ export default function AdminDirectory() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen px-4 sm:px-6 lg:px-8 py-6">
+    <div className="bg-gray-100 min-h-screen px-2 xs:px-4 sm:px-6 lg:px-8 3xl:px-12 py-4 xs:py-6">
       {/* Directory Header */}
-      <div className="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
+      <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 xs:mb-8 gap-3 xs:gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="bg-orange-500/10 text-orange-600 border border-orange-500/20 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md">
               Central Command
             </span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl xs:text-3xl font-black text-slate-900 tracking-tight">
             Garages Directory
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -258,7 +258,7 @@ export default function AdminDirectory() {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 xs:p-4 mb-5 xs:mb-6 flex flex-col md:flex-row gap-3 xs:gap-4 items-stretch md:items-center">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -321,7 +321,7 @@ export default function AdminDirectory() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 3xl:grid-cols-4 4xl:grid-cols-5 gap-4 xs:gap-6">
           {garages.map((garage) => (
             <motion.div
               key={garage._id}

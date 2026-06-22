@@ -240,7 +240,7 @@ export default function GarageLayout({ children }) {
 
         {/* ── Page content ── */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300 relative min-w-0">
-          <div className="max-w-screen-6xl h-full mx-auto">
+          <div className="w-full h-full max-w-[2400px] mx-auto">
             <Suspense fallback={<PageLoadingFallback />}>
               <AnimatePresence mode="wait">
                 {outlet

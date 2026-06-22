@@ -5,7 +5,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 
 export const CTA = () => {
   return (
-    <section className="relative px-6 py-12 md:py-24 overflow-hidden">
+    <section className="relative px-4 xs:px-6 py-10 xs:py-12 md:py-24 overflow-hidden">
       {/* Gradient card wrapper */}
       <div className="relative max-w-5xl mx-auto">
         <motion.div
@@ -13,7 +13,7 @@ export const CTA = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative px-6 md:px-10 py-16 md:py-20 text-center rounded-3xl overflow-hidden"
+          className="relative px-4 xs:px-6 md:px-10 py-12 xs:py-16 md:py-20 text-center rounded-2xl xs:rounded-3xl overflow-hidden"
           style={{
             background:
               "linear-gradient(135deg, #6366f1 0%, #4f46e5 40%, #3b82f6 100%)",
@@ -96,7 +96,7 @@ export const CTA = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.15 }}
-              className="mb-6 text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] md:leading-tight text-white"
+              className="mb-4 xs:mb-6 text-2xl xs:text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] md:leading-tight text-white"
             >
               Ready to modernize
               <br />
@@ -109,7 +109,7 @@ export const CTA = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.22 }}
-              className="max-w-xl mx-auto mb-10 md:mb-12 px-4 text-base md:text-lg font-medium leading-relaxed"
+              className="max-w-xl mx-auto mb-8 md:mb-12 px-2 xs:px-4 text-sm xs:text-base md:text-lg font-medium leading-relaxed"
               style={{ color: "rgba(255,255,255,0.78)" }}
             >
               Join 500+ workshops already running smarter with GaragePro. Set up
@@ -122,12 +122,12 @@ export const CTA = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4"
+              className="flex flex-col xs:flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-0"
             >
               {/* Primary Call to Action */}
               <Link
                 to="/signup"
-                className="group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 flex items-center justify-center gap-2 text-base font-bold transition-all duration-300 rounded-2xl"
+                className="group w-full sm:w-auto px-6 md:px-10 py-3.5 md:py-5 flex items-center justify-center gap-2 text-sm xs:text-base font-bold transition-all duration-300 rounded-2xl"
                 style={{
                   background: "#fff",
                   color: "#6366f1",
@@ -155,7 +155,7 @@ export const CTA = () => {
               {/* Secondary Alternate Link */}
               <Link
                 to="/login"
-                className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 text-center text-base font-bold transition-all duration-300 rounded-2xl"
+                className="w-full sm:w-auto px-6 md:px-10 py-3.5 md:py-5 text-center text-sm xs:text-base font-bold transition-all duration-300 rounded-2xl"
                 style={{
                   background: "rgba(255,255,255,0.12)",
                   color: "#fff",

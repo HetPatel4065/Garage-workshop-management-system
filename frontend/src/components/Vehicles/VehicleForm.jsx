@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormInput, FormSelect, FormRow } from "../layout/Form/forms";
+import {
+  CAR_MAKE_OPTIONS,
+  CAR_MAKES_MODELS,
+  YEAR_OPTIONS,
+  TRANSMISSION_OPTIONS,
+  TRANSMISSION_TYPES,
+} from "../../constants/vehicleMarketplaceOptions";
 
 export const FUEL_TYPES = ["Petrol", "Diesel", "Electric", "CNG", "Hybrid"];
-export const TRANSMISSION_TYPES = ["Automatic", "Manual"];
 export const VEHICLE_STATUSES = ["In Garage", "With Owner", "Archived"];
 
 export function createEmptyVehicle() {
@@ -15,7 +21,7 @@ export function createEmptyVehicle() {
     serviceDate: "",
     engineType: "",
     fuelType: "Petrol",
-    transmission: "Automatic",
+    transmission: "",
     currentMileage: "",
     nextServiceDate: "",
     status: "With Owner",
@@ -30,7 +36,6 @@ export const validateVehicle = (vehicle) => {
   if (!plate) {
     errors.licensePlate = "License plate is required";
   } else {
-    // Strict Indian Vehicle Plate Regex: 2 Letters, 2 Digits, 2 Letters, 4 Digits (e.g., GJ01RY7585)
     const strictPlateRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}$/;
     if (!strictPlateRegex.test(plate)) {
       errors.licensePlate =
@@ -69,11 +74,19 @@ export default function VehicleForm({
   handleSubmit,
   isEditing = false,
 }) {
+  // Detect category from existing saved transmission value (handles edit mode)
+  const [transmissionCategory, setTransmissionCategory] = useState(() => {
+    return (
+      Object.entries(TRANSMISSION_OPTIONS).find(([_, types]) =>
+        types.includes(vehicle.transmission),
+      )?.[0] ?? ""
+    );
+  });
+
   const handleChange = (field, value) => {
     let processedValue = value;
 
     if (field === "licensePlate") {
-      // Clean up input and force uppercase characters only
       const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
       processedValue = cleaned.substring(0, 10);
     }
@@ -81,12 +94,17 @@ export default function VehicleForm({
     onChange({ ...vehicle, [field]: processedValue });
   };
 
+  const handleTransmissionCategoryChange = (category) => {
+    setTransmissionCategory(category);
+    handleChange("transmission", ""); // reset subtype when category changes
+  };
+
   const capitalizeWords = (value) => {
     if (!value) return "";
     return value.replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  // Inline validation feedback for field lengths beneath 10 characters
+  // Inline validation feedback for plate length
   const currentPlateLength = vehicle?.licensePlate?.length ?? 0;
   if (currentPlateLength > 0 && currentPlateLength < 10) {
     errors.licensePlate =
@@ -97,7 +115,6 @@ export default function VehicleForm({
 
   return (
     <>
-      {/* Scrollable form content */}
       <div className="space-y-6">
         {/* SECTION: Linked Customer Info (Visible in View Mode) */}
         {isReadOnly && vehicle.customerId && (
@@ -135,7 +152,7 @@ export default function VehicleForm({
           </div>
         )}
 
-        {/* SECTION: Identity */}
+        {/* SECTION: Registration Details */}
         <div>
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Registration Details
@@ -155,8 +172,6 @@ export default function VehicleForm({
                   .toUpperCase()
                   .replace(/[^A-Z0-9]/g, "");
                 let formattedValue = "";
-
-                // Enforces sequence positional limits as the user types
                 for (let i = 0; i < value.length; i++) {
                   const char = value[i];
                   if (i === 0 || i === 1 || i === 4 || i === 5) {
@@ -184,42 +199,66 @@ export default function VehicleForm({
           </FormRow>
         </div>
 
-        {/* SECTION: Specifications */}
+        {/* SECTION: Technical Specifications */}
         <div>
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Technical Specifications
           </h4>
           <FormRow cols={3} className="p-4 bg-gray-100 rounded-xl">
-            <FormInput
+            {/* Make */}
+            <FormSelect
               value={vehicle.make}
-              onChange={(e) =>
-                handleChange("make", capitalizeWords(e.target.value))
-              }
-              placeholder="Toyota"
+              onChange={(e) => handleChange("make", e.target.value)}
               disabled={isReadOnly}
               error={errors.make}
               label="Make"
               required
-            />
-            <FormInput
+            >
+              <option value="">Select Make</option>
+              {CAR_MAKE_OPTIONS.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </FormSelect>
+
+            {/* Model — filters by make if selected */}
+            <FormSelect
               value={vehicle.model}
-              onChange={(e) =>
-                handleChange("model", capitalizeWords(e.target.value))
-              }
-              placeholder="Camry"
+              onChange={(e) => handleChange("model", e.target.value)}
               disabled={isReadOnly}
               error={errors.model}
               label="Model"
               required
-            />
-            <FormInput
+            >
+              <option value="">Select Model</option>
+              {(vehicle.make && CAR_MAKES_MODELS[vehicle.make]
+                ? CAR_MAKES_MODELS[vehicle.make]
+                : Object.values(CAR_MAKES_MODELS).flat()
+              ).map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </FormSelect>
+
+            {/* Year */}
+            <FormSelect
               value={vehicle.year}
               onChange={(e) => handleChange("year", e.target.value)}
-              placeholder="2022"
               disabled={isReadOnly}
               error={errors.year}
               label="Year"
-            />
+            >
+              <option value="">Select Year</option>
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </FormSelect>
+
+            {/* Engine Type */}
             <FormInput
               value={vehicle.engineType}
               onChange={(e) => handleChange("engineType", e.target.value)}
@@ -227,6 +266,8 @@ export default function VehicleForm({
               disabled={isReadOnly}
               label="Engine Type"
             />
+
+            {/* Fuel Type */}
             <FormSelect
               value={vehicle.fuelType}
               onChange={(e) => handleChange("fuelType", e.target.value)}
@@ -234,23 +275,47 @@ export default function VehicleForm({
               label="Fuel Type"
             >
               {FUEL_TYPES.map((f) => (
-                <option key={f}>{f}</option>
+                <option key={f} value={f}>
+                  {f}
+                </option>
               ))}
             </FormSelect>
+
+            {/* Transmission Category */}
             <FormSelect
-              value={vehicle.transmission}
-              onChange={(e) => handleChange("transmission", e.target.value)}
+              value={transmissionCategory}
+              onChange={(e) => handleTransmissionCategoryChange(e.target.value)}
               disabled={isReadOnly}
-              label="Transmission"
+              label="Transmission Type"
             >
+              <option value="">Select Category</option>
               {TRANSMISSION_TYPES.map((t) => (
-                <option key={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </FormSelect>
+
+            {/* Transmission Subtype — only shown when category is selected */}
+            {transmissionCategory && (
+              <FormSelect
+                value={vehicle.transmission}
+                onChange={(e) => handleChange("transmission", e.target.value)}
+                disabled={isReadOnly}
+                label={`${transmissionCategory} Subtype`}
+              >
+                <option value="">Select Subtype</option>
+                {TRANSMISSION_OPTIONS[transmissionCategory].map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </FormSelect>
+            )}
           </FormRow>
         </div>
 
-        {/* SECTION: Status */}
+        {/* SECTION: Maintenance Status */}
         <div>
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
             Maintenance Status
@@ -270,7 +335,9 @@ export default function VehicleForm({
               label="Garage Status"
             >
               {VEHICLE_STATUSES.map((s) => (
-                <option key={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </FormSelect>
           </FormRow>
@@ -289,14 +356,20 @@ export default function VehicleForm({
         )}
       </div>
 
-      {/* Footer — outside scrollable area, stays fixed at bottom */}
+      {/* Footer */}
       <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div
-            className={`w-2 h-2 rounded-full ${isInvalid && !isReadOnly ? "bg-red-500 animate-pulse" : "bg-emerald-500"}`}
+            className={`w-2 h-2 rounded-full ${
+              isInvalid && !isReadOnly
+                ? "bg-red-500 animate-pulse"
+                : "bg-emerald-500"
+            }`}
           />
           <span
-            className={`text-xs sm:text-sm font-medium ${isInvalid && !isReadOnly ? "text-red-500" : "text-emerald-600"}`}
+            className={`text-xs sm:text-sm font-medium ${
+              isInvalid && !isReadOnly ? "text-red-500" : "text-emerald-600"
+            }`}
           >
             {isReadOnly
               ? "View Only Mode"
@@ -313,7 +386,7 @@ export default function VehicleForm({
               onClick={handleSubmit}
               disabled={isInvalid}
               className={`px-5 py-2 text-sm font-medium rounded-lg text-white transition
-                ${isInvalid ? "bg-gray-200 cursor-not-allowed" : "bg-gray-900 hover:bg-black "}`}
+                ${isInvalid ? "bg-gray-200 cursor-not-allowed" : "bg-gray-900 hover:bg-black"}`}
             >
               {isEditing ? "Save changes" : "Register profile"}
             </button>

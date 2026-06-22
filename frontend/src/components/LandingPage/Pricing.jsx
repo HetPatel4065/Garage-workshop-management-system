@@ -43,7 +43,7 @@ export const Pricing = () => {
   return (
     <section
       id="pricing"
-      className="py-24 md:py-32 px-6 relative overflow-hidden"
+      className="py-16 xs:py-20 md:py-32 px-4 xs:px-6 relative overflow-hidden"
       style={{ background: "var(--bg-primary)" }}
     >
       {/* Glow */}
@@ -56,7 +56,7 @@ export const Pricing = () => {
         }}
       />
 
-      <div className="max-w-5xl mx-auto relative z-10">
+      <div className="max-w-5xl mx-auto relative z-10 3xl:max-w-[1200px] 4xl:max-w-[1400px]">
         <div className="text-center mb-12 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -80,7 +80,7 @@ export const Pricing = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-8"
+            className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-8"
             style={{ color: "var(--text-heading)" }}
           >
             Fair pricing.{" "}
@@ -106,7 +106,7 @@ export const Pricing = () => {
           >
             <button
               onClick={() => setAnnual(false)}
-              className="px-6 md:px-8 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200"
+              className="px-4 xs:px-6 md:px-8 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200"
               style={{
                 background: !annual ? "var(--pricing-btn-bg)" : "transparent",
                 color: !annual ? "var(--pricing-btn-text)" : "#94a3b8",
@@ -119,7 +119,7 @@ export const Pricing = () => {
             </button>
             <button
               onClick={() => setAnnual(true)}
-              className="px-6 md:px-8 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 flex items-center gap-2"
+              className="px-4 xs:px-6 md:px-8 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 flex items-center gap-2"
               style={{
                 background: annual ? "var(--pricing-btn-bg)" : "transparent",
                 color: annual ? "var(--pricing-btn-text)" : "#94a3b8",
@@ -131,7 +131,7 @@ export const Pricing = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto px-4 sm:px-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xs:gap-6 md:gap-8 max-w-4xl mx-auto px-0 sm:px-0">
           {plans.map((plan, i) => {
             const isSelected = selectedPlan === plan.name;
             const isPro = plan.popular;
@@ -144,7 +144,7 @@ export const Pricing = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
                 onClick={() => setSelectedPlan(plan.name)}
-                className="relative p-8 md:p-10 rounded-3xl flex flex-col cursor-auto transition-all duration-300"
+                className="relative p-6 xs:p-8 md:p-10 rounded-2xl xs:rounded-3xl flex flex-col cursor-auto transition-all duration-300"
                 style={
                   isPro
                     ? {

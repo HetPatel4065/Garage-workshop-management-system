@@ -245,9 +245,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-y-auto">
+    <div className="w-full min-h-screen bg-gray-100 px-2 xs:px-3 sm:px-6 lg:px-8 3xl:px-12 4xl:px-16 py-3 xs:py-4 sm:py-6 overflow-y-auto">
       {/* ── Header ── */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:mb-8">
+      <div className="mb-4 xs:mb-6 flex flex-col gap-3 xs:gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:mb-8">
         {/* Left Side: Identity & Greetings */}
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex items-center">
@@ -256,7 +256,7 @@ export default function Dashboard() {
             </span>
           </div>
 
-          <h1 className="text-2xl font-extrabold leading-tight tracking-normal text-white sm:text-2xl lg:text-3xl">
+          <h1 className="text-xl xs:text-2xl font-extrabold leading-tight tracking-normal text-white sm:text-2xl lg:text-3xl 3xl:text-4xl">
             {roleLabel} Dashboard
           </h1>
 
@@ -280,7 +280,7 @@ export default function Dashboard() {
 
       {/* ── Stats Cards ── */}
       {["owner", "admin"].includes(role) && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 mb-4 xs:mb-6 sm:mb-8">
           <StatsCard
             title="Total Revenue"
             value={`₹ ${Math.floor(data.stats.totalRevenue).toLocaleString("en-IN")}`}
@@ -326,10 +326,10 @@ export default function Dashboard() {
 
       {/* ── Charts Row ── */}
       {["owner", "admin"].includes(role) && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 3xl:grid-cols-3 gap-3 xs:gap-4 sm:gap-6 mb-4 xs:mb-6 sm:mb-8">
           {/* Business Analytics — takes 2 of 3 cols on lg+ */}
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 sm:p-6 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 mb-6 gap-4">
+          <div className="lg:col-span-2 bg-white rounded-2xl xs:rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-3 xs:p-4 sm:p-5 md:p-6 pb-4 flex flex-col xs:flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 mb-4 xs:mb-6 gap-3 xs:gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm shadow-blue-100">
                   <TrendingUp size={20} />
@@ -355,8 +355,8 @@ export default function Dashboard() {
                 <option value="30">Last 30 Days</option>
               </select>
             </div>
-            <div className="px-6 pb-6 flex-1">
-              <div className="h-56 sm:h-64 lg:h-72 w-full">
+            <div className="px-3 xs:px-4 sm:px-6 pb-4 xs:pb-6 flex-1">
+              <div className="h-44 xs:h-52 sm:h-56 md:h-64 lg:h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
                     data={filteredRevenue}
@@ -449,8 +449,8 @@ export default function Dashboard() {
           </div>
 
           {/* Job Distribution — takes 1 of 3 cols on lg+ */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-            <div className="p-5 sm:p-6 pb-4 flex items-center gap-3 border-b border-slate-50 mb-6">
+          <div className="bg-white rounded-2xl xs:rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-3 xs:p-4 sm:p-5 md:p-6 pb-4 flex items-center gap-3 border-b border-slate-50 mb-4 xs:mb-6">
               <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm shadow-emerald-100">
                 <Wrench size={20} />
               </div>
@@ -463,8 +463,8 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="px-6 pb-6">
-              <div className="h-56 sm:h-64">
+            <div className="px-3 xs:px-4 sm:px-6 pb-4 xs:pb-6">
+              <div className="h-44 xs:h-52 sm:h-56 md:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -522,9 +522,9 @@ export default function Dashboard() {
       )}
 
       {/* ── Bottom Row: Recent Activity + Sidebar ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 3xl:grid-cols-3 gap-3 xs:gap-4 sm:gap-6 items-start">
         {/* Recent Activity — 2 cols */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl xs:rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-5 flex items-center justify-between border-b border-slate-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-800/50 text-indigo-400 rounded-2xl flex items-center justify-center shadow-sm shadow-indigo-100">

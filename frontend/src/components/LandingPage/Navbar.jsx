@@ -341,7 +341,7 @@ export const Navbar = () => {
           : { background: "transparent" }
       }
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 xs:px-4 md:px-6 3xl:max-w-[1600px] 4xl:max-w-[2000px] flex items-center justify-between">
         {/* ── Logo ── */}
         <Link
           to="/"
@@ -358,7 +358,7 @@ export const Navbar = () => {
             GP
           </div>
           <span
-            className="text-lg md:text-xl font-extrabold tracking-tight"
+            className="text-base md:text-xl font-extrabold tracking-tight"
             style={{ color: "var(--text-heading)" }}
           >
             GaragePro
@@ -466,7 +466,7 @@ export const Navbar = () => {
         </div>
 
         {/* ── Desktop CTA ── */}
-        <div className="hidden md:flex items-center gap-2 md:gap-3">
+        <div className="hidden md:flex items-center gap-2 md:gap-3 shrink-0">
           <Link
             to="/login"
             className="px-4 md:px-5 py-2 text-xs md:text-sm font-bold transition-colors duration-200 hover:text-indigo-600 rounded-xl hover:bg-indigo-50"
@@ -500,7 +500,7 @@ export const Navbar = () => {
 
         {/* ── Mobile Hamburger ── */}
         <button
-          className="md:hidden p-1.5 rounded-xl transition-colors"
+          className="md:hidden p-1.5 rounded-xl transition-colors flex-shrink-0"
           style={{ color: "#6366f1" }}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
@@ -525,7 +525,7 @@ export const Navbar = () => {
               boxShadow: "0 12px 40px rgba(99,102,241,0.10)",
             }}
           >
-            <div className="p-4 flex flex-col gap-1 divide-y divide-indigo-50">
+            <div className="p-3 xs:p-4 flex flex-col gap-1 divide-y divide-indigo-50">
               {NAV_ITEMS.map((item) => (
                 <div key={item.label} className="py-1">
                   <MobileNavItem
@@ -536,7 +536,7 @@ export const Navbar = () => {
               ))}
 
               {/* Mobile CTA */}
-              <div className="flex flex-col gap-3 pt-4 mt-2">
+              <div className="flex flex-col gap-2 xs:gap-3 pt-3 xs:pt-4 mt-2">
                 <Link
                   to="/login"
                   className="w-full py-3.5 font-bold text-center rounded-xl transition-all"

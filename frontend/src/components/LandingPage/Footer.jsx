@@ -43,7 +43,7 @@ export const FAQ = () => {
   ];
 
   return (
-    <section id="faq" className="max-w-3xl mx-auto px-6">
+    <section id="faq" className="max-w-3xl mx-auto px-4 xs:px-6">
       {/* FAQ Header */}
       <div className="text-center mb-12 md:mb-16">
         <motion.div
@@ -120,10 +120,10 @@ export const FAQ = () => {
             <button
               type="button"
               onClick={() => setActive(active === i ? -1 : i)}
-              className="w-full px-5 md:px-8 py-5 md:py-6 flex items-center justify-between text-left"
+              className="w-full px-4 xs:px-5 md:px-8 py-4 xs:py-5 md:py-6 flex items-center justify-between text-left"
             >
               <span
-                className="text-sm md:text-base font-bold"
+                className="text-sm md:text-base font-bold pr-2"
                 style={{ color: "var(--text-heading)" }}
               >
                 {item.q}
@@ -153,7 +153,7 @@ export const FAQ = () => {
                   transition={{ duration: 0.25 }}
                 >
                   <div
-                    className="px-5 md:px-8 pb-5 md:pb-8 text-xs md:text-sm font-medium leading-relaxed"
+                    className="px-4 xs:px-5 md:px-8 pb-4 xs:pb-5 md:pb-8 text-xs md:text-sm font-medium leading-relaxed"
                     style={{ color: "var(--text-body)" }}
                   >
                     {item.a}
@@ -173,7 +173,7 @@ export const Footer = () => {
 
   return (
     <footer
-      className="relative py-24 px-6 overflow-hidden"
+      className="relative py-16 xs:py-20 md:py-24 px-4 xs:px-6 overflow-hidden"
       style={{
         background:
           "linear-gradient(180deg, var(--bg-primary) 0%, var(--nav-bg) 100%)",
@@ -190,7 +190,7 @@ export const Footer = () => {
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-12">
+      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 xs:gap-10 md:gap-12 3xl:max-w-[1600px] 4xl:max-w-[2000px]">
         {/* Branding & Info Column */}
         <div className="md:col-span-2">
           <div className="flex items-center gap-2.5 mb-6">

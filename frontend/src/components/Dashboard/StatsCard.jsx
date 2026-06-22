@@ -56,7 +56,7 @@ export default function StatsCard({
   const isPositiveTrend = trend && !trend.startsWith("-");
 
   return (
-    <div className="group relative flex flex-col min-w-0 h-full p-6 bg-white dark:bg-[#16161a] border border-zinc-200 dark:border-zinc-800/40 rounded-2xl shadow-md dark:shadow-xl overflow-hidden transition-all duration-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 hover:-translate-y-1.5 hover:-translate-x-1.5">
+    <div className="group relative flex flex-col min-w-0 h-full p-4 xs:p-5 sm:p-6 bg-white dark:bg-[#16161a] border border-zinc-200 dark:border-zinc-800/40 rounded-xl xs:rounded-2xl shadow-md dark:shadow-xl overflow-hidden transition-all duration-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 hover:-translate-y-1.5 hover:-translate-x-1.5">
       {/* Top Section: Icon & Optional Trend Badge */}
       <div className="flex justify-between items-start mb-5 z-10">
         <div
@@ -84,7 +84,7 @@ export default function StatsCard({
           {title}
         </p>
         <div className="flex items-baseline gap-2 flex-wrap">
-          <p className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-800 dark:text-zinc-100">
+          <p className="text-base xs:text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-zinc-800 dark:text-zinc-100 leading-tight break-all">
             {value}
           </p>
         </div>

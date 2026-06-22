@@ -42,7 +42,20 @@ const vehicleSchema = new mongoose.Schema(
     },
     transmission: {
       type: String,
-      enum: ["Automatic", "Manual"],
+      enum: [
+        // Manual
+        "Manual Transmission (MT)",
+        "Automated Manual Transmission (AMT)",
+        // Automatic
+        "Torque Converter AT",
+        "CVT",
+        "DCT/DSG",
+        "AMT",
+        "e-CVT",
+        // fallback for old data
+        "Automatic",
+        "Manual",
+      ],
     },
     currentMileage: {
       type: Number,
