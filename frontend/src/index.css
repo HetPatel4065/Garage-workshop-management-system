@@ -3,9 +3,9 @@
 
 /* ─── Custom Breakpoints (Tailwind v4) ─── */
 @theme {
-  --breakpoint-xs: 20rem;     /* 320px  – smallest phones  */
-  --breakpoint-3xl: 120rem;   /* 1920px – full HD / 2K     */
-  --breakpoint-4xl: 160rem;   /* 2560px – 4K / ultrawide   */
+  --breakpoint-xs: 20rem; /* 320px  – smallest phones  */
+  --breakpoint-3xl: 120rem; /* 1920px – full HD / 2K     */
+  --breakpoint-4xl: 160rem; /* 2560px – 4K / ultrawide   */
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -238,10 +238,22 @@
   html {
     font-size: 14px !important;
   }
-  .text-5xl  { font-size: 2rem   !important; line-height: 1.1 !important; }
-  .text-6xl  { font-size: 2.4rem !important; line-height: 1.1 !important; }
-  .text-7xl  { font-size: 2.8rem !important; line-height: 1.05 !important; }
-  .text-8xl  { font-size: 3.2rem !important; line-height: 1.05 !important; }
+  .text-5xl {
+    font-size: 2rem !important;
+    line-height: 1.1 !important;
+  }
+  .text-6xl {
+    font-size: 2.4rem !important;
+    line-height: 1.1 !important;
+  }
+  .text-7xl {
+    font-size: 2.8rem !important;
+    line-height: 1.05 !important;
+  }
+  .text-8xl {
+    font-size: 3.2rem !important;
+    line-height: 1.05 !important;
+  }
 }
 
 /* ─── Global Page Container Responsive (all admin pages) ─── */
@@ -308,30 +320,71 @@
 /* ─── Global padding & spacing adjustments for responsive consistency (320px to 4K) ─── */
 @media (max-width: 639px) {
   /* Scale down paddings on mobile viewports */
-  .p-8 { padding: 1.25rem !important; }
-  .p-6 { padding: 1rem !important; }
-  .p-5 { padding: 0.875rem !important; }
-  .p-4 { padding: 0.75rem !important; }
-  .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
-  .px-8 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
-  .py-16 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
-  .py-12 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
-  .gap-6 { gap: 1rem !important; }
-  .gap-8 { gap: 1.25rem !important; }
+  .p-8 {
+    padding: 1.25rem !important;
+  }
+  .p-6 {
+    padding: 1rem !important;
+  }
+  .p-5 {
+    padding: 0.875rem !important;
+  }
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+  .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .px-8 {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+  .py-16 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+  .py-12 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  .gap-6 {
+    gap: 1rem !important;
+  }
+  .gap-8 {
+    gap: 1.25rem !important;
+  }
 }
 
 @media (max-width: 359px) {
   /* Extra compact safety net for 320px screens */
-  .p-8 { padding: 0.75rem !important; }
-  .p-6 { padding: 0.625rem !important; }
-  .p-5 { padding: 0.5rem !important; }
-  .p-4 { padding: 0.5rem !important; }
-  .px-4 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-  .px-3 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
-  .gap-4 { gap: 0.5rem !important; }
-  .gap-3 { gap: 0.375rem !important; }
+  .p-8 {
+    padding: 0.75rem !important;
+  }
+  .p-6 {
+    padding: 0.625rem !important;
+  }
+  .p-5 {
+    padding: 0.5rem !important;
+  }
+  .p-4 {
+    padding: 0.5rem !important;
+  }
+  .px-4 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .px-3 {
+    padding-left: 0.375rem !important;
+    padding-right: 0.375rem !important;
+  }
+  .gap-4 {
+    gap: 0.5rem !important;
+  }
+  .gap-3 {
+    gap: 0.375rem !important;
+  }
 }
-
 
 /* ─── Global Dark Theme Injection ─── */
 html.dark {
@@ -641,4 +694,59 @@ html.dark .theme-indicator-active {
   box-shadow: none !important;
   text-shadow: none !important;
   drop-shadow: none !important;
+}
+
+@layer utilities {
+  /* Default close button */
+  .close-btn-default {
+    background-color: rgb(241 245 249); /* slate-100 */
+    color: rgb(100 116 139); /* slate-500 */
+  }
+  .close-btn-default:hover {
+    background-color: rgb(239 68 68); /* red-500 */
+    color: white;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+  .dark .close-btn-default {
+    background-color: rgb(30 41 59); /* slate-800 */
+    color: rgb(148 163 184); /* slate-400 */
+  }
+  .dark .close-btn-default:hover {
+    background-color: rgb(239 68 68); /* red-500 */
+    color: white;
+  }
+
+  /* Error close button */
+  .close-btn-error {
+    background-color: rgb(254 226 226); /* red-100 */
+    color: rgb(220 38 38); /* red-600 */
+  }
+  .close-btn-error:hover {
+    background-color: rgb(220 38 38); /* red-600 */
+    color: white;
+  }
+  .dark .close-btn-error {
+    background-color: rgb(69 10 10); /* red-950 */
+    color: rgb(248 113 113); /* red-400 */
+  }
+  .dark .close-btn-error:hover {
+    background-color: rgb(239 68 68); /* red-500 */
+    color: white;
+  }
+
+  /* Colored header close button */
+  .close-btn-colored {
+    background-color: rgb(255 255 255 / 0.1);
+    color: white;
+  }
+  .close-btn-colored:hover {
+    background-color: rgb(255 255 255 / 0.2);
+    transform: scale(1.05);
+  }
+  .dark .close-btn-colored {
+    background-color: rgb(255 255 255 / 0.05);
+  }
+  .dark .close-btn-colored:hover {
+    background-color: rgb(255 255 255 / 0.15);
+  }
 }

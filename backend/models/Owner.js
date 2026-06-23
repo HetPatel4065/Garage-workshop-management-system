@@ -102,13 +102,17 @@ const ownerSchema = new mongoose.Schema(
       enum: ["Pending", "Verified", "Rejected"],
       default: "Pending",
     },
+    // Add inside ownerSchema, after verificationStatus field:
+    resetToken: { type: String, select: false },
+    resetTokenExpiry: { type: Date, select: false },
   },
   { timestamps: true },
 );
 
 ownerSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
-  if (this.password?.startsWith("$2a$") || this.password?.startsWith("$2b$")) return;
+  if (this.password?.startsWith("$2a$") || this.password?.startsWith("$2b$"))
+    return;
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);

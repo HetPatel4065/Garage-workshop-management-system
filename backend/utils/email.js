@@ -319,3 +319,46 @@ export const sendGarageOnboardingEmail = async (
     return false;
   }
 };
+
+export const sendPasswordResetEmail = async (email, name, resetLink) => {
+  const mailOptions = {
+    from: `"GaragePro Security" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: "Password Reset Request",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 30px; border-radius: 12px;">
+        <h2 style="color: #111827; margin-bottom: 8px;">Reset Your Password</h2>
+        <p style="color: #6b7280; margin-bottom: 24px;">Hi <strong>${name}</strong>, we received a request to reset your GaragePro password.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: bold; display: inline-block; font-size: 15px;">
+            Reset Password
+          </a>
+        </div>
+
+        <p style="color: #6b7280; font-size: 13px; text-align: center;">
+          This link expires in <strong>30 minutes</strong>. If you didn't request this, you can safely ignore this email.
+        </p>
+
+        <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 16px; word-break: break-all;">
+          ${resetLink}
+        </p>
+
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+        <p style="font-size: 11px; color: #9ca3af; text-align: center;">
+          &copy; ${new Date().getFullYear()} GaragePro. All rights reserved.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    if (!transporter) return false;
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    return false;
+  }
+};

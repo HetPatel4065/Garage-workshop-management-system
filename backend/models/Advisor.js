@@ -54,9 +54,12 @@ const advisorSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Add inside ownerSchema, after verificationStatus field:
+    resetToken: { type: String, select: false },
+    resetTokenExpiry: { type: Date, select: false },
     lastLogin: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 advisorSchema.pre("save", async function () {

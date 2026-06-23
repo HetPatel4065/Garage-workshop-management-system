@@ -11,6 +11,8 @@ import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
 import { logActivity } from "../utils/activityLogger.js";
+import crypto from "crypto";
+import { sendPasswordResetEmail } from "../utils/email.js";
 
 const resolveUserByIdAcrossCollections = async (id) => {
   if (typeof id === "string" && id.includes("_co_")) {
@@ -32,7 +34,9 @@ const resolveUserByIdAcrossCollections = async (id) => {
         mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
         isActive: parentOwner.isActive,
         permissions: parentOwner.permissions || ["all"],
-        toObject: function() { return this; }
+        toObject: function () {
+          return this;
+        },
       };
       return coObj;
     }
@@ -162,7 +166,7 @@ export const register = async (req, res) => {
         // skip garage creation
         const existingGarage = await Owner.findOne({
           garageId: garageId,
-          isCoOwner: { $ne: true }
+          isCoOwner: { $ne: true },
         });
         if (!existingGarage) {
           return res
@@ -176,7 +180,7 @@ export const register = async (req, res) => {
           garageId: existingGarage.garageId,
         });
         const alreadyCoOwnerOfGarage = existingGarage.coOwners?.some(
-          (co) => co.email.toLowerCase() === email.toLowerCase()
+          (co) => co.email.toLowerCase() === email.toLowerCase(),
         );
         if (alreadyOwnerOfGarage || alreadyCoOwnerOfGarage) {
           return res.status(400).json({
@@ -212,7 +216,9 @@ export const register = async (req, res) => {
           logo: existingGarage.logo,
           verificationStatus: existingGarage.verificationStatus || "Verified",
           isActive: existingGarage.isActive,
-          toObject: function() { return this; }
+          toObject: function () {
+            return this;
+          },
         };
 
         isCoOwnerAdded = true;
@@ -397,9 +403,13 @@ export const login = async (req, res) => {
     if (!user) user = await Mechanic.findOne({ email }).select("+password");
 
     if (!user) {
-      const parentOwner = await Owner.findOne({ "coOwners.email": email.toLowerCase() }).select("+password");
+      const parentOwner = await Owner.findOne({
+        "coOwners.email": email.toLowerCase(),
+      }).select("+password");
       if (parentOwner) {
-        const co = parentOwner.coOwners.find(c => c.email.toLowerCase() === email.toLowerCase());
+        const co = parentOwner.coOwners.find(
+          (c) => c.email.toLowerCase() === email.toLowerCase(),
+        );
         if (co) {
           user = {
             _id: `${parentOwner._id}_co_${parentOwner.coOwners.indexOf(co)}`,
@@ -413,16 +423,19 @@ export const login = async (req, res) => {
             address: parentOwner.address,
             mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
             isActive: parentOwner.isActive,
-            comparePassword: async function(candidatePassword) {
+            comparePassword: async function (candidatePassword) {
               if (!candidatePassword) return false;
               if (this.password) {
                 return await bcrypt.compare(candidatePassword, this.password);
               }
-              return await bcrypt.compare(candidatePassword, parentOwner.password);
+              return await bcrypt.compare(
+                candidatePassword,
+                parentOwner.password,
+              );
             },
-            toObject: function() {
+            toObject: function () {
               return { ...this };
-            }
+            },
           };
         }
       }
@@ -437,9 +450,10 @@ export const login = async (req, res) => {
 
     if (user.isActive === false) {
       console.warn("Login Failed: Account inactive", { email });
-      return res
-        .status(403)
-        .json({ error: "Your garage has been susupended. Please contact the Administrator." });
+      return res.status(403).json({
+        error:
+          "Your garage has been susupended. Please contact the Administrator.",
+      });
     }
 
     // Check if user's garage is suspended (only for non-admin users)
@@ -470,11 +484,10 @@ export const login = async (req, res) => {
 
       if (garageSuspended) {
         console.warn("Login Failed: Garage suspended", { email });
-        const errMsg = user.role === "owner" &&
-           "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
-        return res
-          .status(403)
-          .json({ error: errMsg });
+        const errMsg =
+          user.role === "owner" &&
+          "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
+        return res.status(403).json({ error: errMsg });
       }
     }
 
@@ -704,9 +717,10 @@ export const refreshToken = async (req, res) => {
       }
 
       if (garageSuspended) {
-        const errMsg = role === "owner"
-          ? "Access denied. Your garage has been suspended by the administrator."
-          : "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
+        const errMsg =
+          role === "owner"
+            ? "Access denied. Your garage has been suspended by the administrator."
+            : "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
         return res.status(403).json({ error: errMsg });
       }
     }
@@ -789,12 +803,12 @@ export const getStaff = async (req, res) => {
               mobileNumber: co.mobileNumber,
               role: "owner",
               isCoOwner: true,
-              parentOwnerId: obj._id,        // needed for admin toggle endpoint
+              parentOwnerId: obj._id, // needed for admin toggle endpoint
               garageId: obj.garageId,
               garageName: obj.garageName,
               address: obj.address,
               verificationStatus: obj.verificationStatus,
-              isActive: co.isActive !== undefined ? co.isActive : true,  // co-owner's own status
+              isActive: co.isActive !== undefined ? co.isActive : true, // co-owner's own status
               createdAt: co.createdAt || obj.createdAt,
             });
           });
@@ -1160,5 +1174,104 @@ export const completeOwnerOnboarding = async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to complete onboarding: " + error.message });
+  }
+};
+
+// 📧 FORGOT PASSWORD
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    // Search Owner first, then Advisor, then Mechanic
+    let user = await Owner.findOne({ email: email.toLowerCase() });
+    let model = "Owner";
+
+    if (!user) {
+      user = await Advisor.findOne({ email: email.toLowerCase() });
+      model = "Advisor";
+    }
+    if (!user) {
+      user = await Mechanic.findOne({ email: email.toLowerCase() });
+      model = "Mechanic";
+    }
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.status(200).json({
+        message: "If this email exists, a reset link has been sent.",
+      });
+    }
+
+    // Generate secure token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 mins
+
+    // Save to user
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
+
+    // Send email
+    const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}&role=${model.toLowerCase()}`;
+    await sendPasswordResetEmail(user.email, user.name, resetLink);
+
+    res.status(200).json({
+      message: "If this email exists, a reset link has been sent.",
+    });
+  } catch (err) {
+    console.error("Forgot Password Error:", err);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+};
+
+// 🔑 RESET PASSWORD
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token and password are required" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Search for valid token across all models
+    let user =
+      (await Owner.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: new Date() },
+      }).select("+password +resetToken +resetTokenExpiry")) ||
+      (await Advisor.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: new Date() },
+      }).select("+password +resetToken +resetTokenExpiry")) ||
+      (await Mechanic.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: new Date() },
+      }).select("+password +resetToken +resetTokenExpiry"));
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Invalid or expired reset link. Please request a new one.",
+      });
+    }
+
+    // Update password and clear token
+    user.password = password;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save(); // pre-save hook will hash it
+
+    res
+      .status(200)
+      .json({ message: "Password reset successfully. You can now log in." });
+  } catch (err) {
+    console.error("Reset Password Error:", err);
+    res.status(500).json({ error: "Failed to reset password" });
   }
 };

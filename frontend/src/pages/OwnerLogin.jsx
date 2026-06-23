@@ -5,7 +5,11 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Wrench } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { FaCar } from "react-icons/fa";
-import { FormInput, FormError, FormButton } from "../components/layout/Form/forms";
+import {
+  FormInput,
+  FormError,
+  FormButton,
+} from "../components/layout/Form/forms";
 
 const GREETINGS = [
   "Welcome back, boss",
@@ -26,6 +30,13 @@ export default function OwnerLogin() {
   const [showSuspendedModal, setShowSuspendedModal] = useState(false);
   const [suspendedMessage, setSuspendedMessage] = useState("");
 
+  // Forgot Password State
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState("");
+  const [forgotError, setForgotError] = useState("");
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -39,7 +50,6 @@ export default function OwnerLogin() {
     setError("");
     setIsLoading(true);
     try {
-      // Owners do not need a Garage ID to authenticate
       await login(email, password, undefined);
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes("suspended")) {
@@ -51,6 +61,44 @@ export default function OwnerLogin() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotMessage("");
+    setForgotLoading(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setForgotMessage(data.message);
+    } catch (err) {
+      setForgotError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleOpenForgot = () => {
+    setForgotEmail(email); // pre-fill with whatever they typed
+    setForgotMessage("");
+    setForgotError("");
+    setShowForgotModal(true);
+  };
+
+  const handleCloseForgot = () => {
+    setShowForgotModal(false);
+    setForgotMessage("");
+    setForgotError("");
+    setForgotEmail("");
   };
 
   return (
@@ -67,7 +115,7 @@ export default function OwnerLogin() {
             className="group inline-flex items-center gap-3 mb-3 cursor-auto select-none"
             onClick={() => navigate("/")}
           >
-            <div className="bg-emerald-500 p-2.5 rounded-xl  transition-all duration-300  group-hover:scale-110">
+            <div className="bg-emerald-500 p-2.5 rounded-xl transition-all duration-300 group-hover:scale-110">
               <Wrench className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-black text-slate-900 tracking-tighter">
@@ -124,32 +172,44 @@ export default function OwnerLogin() {
                 inputClassName="border-emerald-200 bg-emerald-50/60 focus:ring-emerald-400/30 focus:border-emerald-400 focus:bg-white"
               />
 
-              {/* Password */}
-              <FormInput
-                id="owner-password"
-                type={showPassword ? "text" : "password"}
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                label="Password"
-                inputClassName="border-emerald-200 bg-emerald-50/60 focus:ring-emerald-400/30 focus:border-emerald-400 focus:bg-white pr-11"
-                rightAction={
+              {/* Password + Forgot link */}
+              <div>
+                <FormInput
+                  id="owner-password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  label="Password"
+                  inputClassName="border-emerald-200 bg-emerald-50/60 focus:ring-emerald-400/30 focus:border-emerald-400 focus:bg-white pr-11"
+                  rightAction={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-slate-400 hover:text-slate-600 transition-colors"
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon style={{ width: 18, height: 18 }} />
+                      ) : (
+                        <EyeIcon style={{ width: 18, height: 18 }} />
+                      )}
+                    </button>
+                  }
+                />
+                {/* Forgot Password link */}
+                <div className="flex justify-end mt-1.5">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label="Toggle password visibility"
+                    onClick={handleOpenForgot}
+                    className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
                   >
-                    {showPassword ? (
-                      <EyeSlashIcon style={{ width: 18, height: 18 }} />
-                    ) : (
-                      <EyeIcon style={{ width: 18, height: 18 }} />
-                    )}
+                    Forgot password?
                   </button>
-                }
-              />
+                </div>
+              </div>
 
               {/* Submit */}
               <FormButton
@@ -208,7 +268,115 @@ export default function OwnerLogin() {
         </div>
       </motion.div>
 
-      {/* 🛡️ Suspension Modal Popup */}
+      {/* ── Forgot Password Modal ──────────────────────────────── */}
+      <AnimatePresence>
+        {showForgotModal && (
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="bg-white rounded-2xl shadow-2xl border border-emerald-100 max-w-md w-full overflow-hidden"
+            >
+              {/* Accent bar */}
+              <div className="h-1.5 w-full bg-emerald-500" />
+
+              <div className="p-6">
+                {forgotMessage ? (
+                  /* ── Success state ── */
+                  <div className="text-center py-2">
+                    <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-50 mb-4">
+                      <span className="text-4xl">✉️</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">
+                      Check Your Inbox
+                    </h3>
+                    <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                      {forgotMessage}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCloseForgot}
+                      className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors"
+                    >
+                      Done
+                    </button>
+                  </div>
+                ) : (
+                  /* ── Form state ── */
+                  <>
+                    <div className="mb-5">
+                      <h3 className="text-lg font-bold text-slate-900 mb-1">
+                        Forgot Password?
+                      </h3>
+                      <p className="text-sm text-slate-500">
+                        Enter your owner email and we'll send you a secure reset
+                        link valid for 30 minutes.
+                      </p>
+                    </div>
+
+                    {/* Error */}
+                    {forgotError && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.97 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mb-4 px-3 py-2.5 bg-red-50 border border-red-100 rounded-xl"
+                      >
+                        <p className="text-sm text-red-600 font-medium">
+                          {forgotError}
+                        </p>
+                      </motion.div>
+                    )}
+
+                    <form onSubmit={handleForgotPassword} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 mb-1.5">
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="owner@yourgarage.com"
+                          className="w-full h-11 px-4 rounded-xl border border-emerald-200 bg-emerald-50/60 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:bg-white text-sm transition-all"
+                        />
+                      </div>
+
+                      <div className="flex gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={handleCloseForgot}
+                          className="flex-1 py-2.5 border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-sm"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={forgotLoading}
+                          className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+                        >
+                          {forgotLoading ? (
+                            <>
+                              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              Sending…
+                            </>
+                          ) : (
+                            "Send Reset Link"
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Suspension Modal ───────────────────────────────────── */}
       <AnimatePresence>
         {showSuspendedModal && (
           <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
@@ -219,9 +387,7 @@ export default function OwnerLogin() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="bg-white rounded-2xl shadow-2xl border border-red-100 max-w-md w-full overflow-hidden"
             >
-              {/* Top Accent bar */}
               <div className="h-1.5 w-full bg-red-500" />
-              
               <div className="p-6 text-center">
                 <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-4">
                   <span className="text-red-500 text-3xl">⚠️</span>

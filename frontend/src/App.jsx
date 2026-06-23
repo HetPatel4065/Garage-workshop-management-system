@@ -23,6 +23,7 @@ import StaffSignup from "./pages/StaffSignup";
 import Unauthorized from "./pages/Unauthorized";
 import ProtectedRoute from "./context/ProtectedRoutes";
 import PortalHome from "./pages/portal/PortalHome";
+import ResetPassword from "./pages/ResetPassword";
 
 const DashboardLayout = lazy(() => import("./pages/portal/DashboardLayout"));
 const PortalDashboardOverview = lazy(() =>
@@ -296,6 +297,14 @@ function App() {
                     <CustomerLogin />
                   </PageTransition>
                 </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <PageTransition>
+                  <ResetPassword />
+                </PageTransition>
               }
             />
 

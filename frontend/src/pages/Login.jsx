@@ -70,7 +70,7 @@ const ROLE_CARDS = [
     tooltip: TOOLTIP_MESSAGES.admin,
     tooltipColor: "text-orange-500 dark:text-orange-400",
     tooltipBg:
-      "bg-orange-50 dark:bg-orange-950/80 border-orange-200 dark:border-orange-800/60",
+      "bg-orange-100 dark:bg-orange-950 border-orange-300 dark:border-orange-800/60",
     tooltipText: "text-orange-800 dark:text-orange-200",
   },
   {
@@ -91,7 +91,7 @@ const ROLE_CARDS = [
     tooltip: TOOLTIP_MESSAGES.customer,
     tooltipColor: "text-blue-500 dark:text-blue-400",
     tooltipBg:
-      "bg-blue-50 dark:bg-blue-950/80 border-blue-200 dark:border-blue-800/60",
+      "bg-blue-100 dark:bg-blue-950 border-blue-300 dark:border-blue-800/60",
     tooltipText: "text-blue-800 dark:text-blue-200",
   },
 ];

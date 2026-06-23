@@ -1498,28 +1498,28 @@ export default function JobCards() {
                                     [cat.category]: !prev[cat.category],
                                   }))
                                 }
-                                className="w-full flex items-center justify-between px-4 py-2.5 text-left
-                     hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                className="w-full flex items-center justify-between px-5 py-3.5 text-left
+                                hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                               >
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                                     {cat.category}
                                   </span>
 
                                   {checkedCount > 0 && (
                                     <span
                                       className="text-[10px] font-bold
-                           text-green-700 dark:text-green-300
-                           bg-green-50 dark:bg-green-900/30
-                           border border-green-200 dark:border-green-700
-                           px-1.5 py-0.5 rounded-full"
+                                      text-green-700 dark:text-green-300
+                                      bg-green-50 dark:bg-green-900/30
+                                      border border-green-200 dark:border-green-700
+                                      px-1.5 py-0.5 rounded-full"
                                     >
                                       {checkedCount} ✓
                                     </span>
                                   )}
                                 </div>
 
-                                <span className="text-gray-400 dark:text-gray-500 text-xs">
+                                <span className="text-gray-400 dark:text-gray-500 text-sm">
                                   {isOpen ? "▲" : "▼"}
                                 </span>
                               </button>
@@ -1551,12 +1551,11 @@ export default function JobCards() {
                                               i,
                                             )
                                           }
-                                          className="w-3.5 h-3.5 accent-blue-600 dark:accent-blue-500
-                               cursor-pointer shrink-0"
+                                          className="w-3.5 h-3.5 accent-blue-600 dark:accent-blue-500 cursor-pointer shrink-0"
                                         />
 
                                         <span
-                                          className={`text-xs transition-colors ${
+                                          className={`text-sm transition-colors ${
                                             isChecked
                                               ? "text-blue-700 dark:text-blue-400 font-semibold"
                                               : "text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -1578,7 +1577,7 @@ export default function JobCards() {
 
                   {/* ── SERVICE INSTRUCTIONS TEXTAREA ── */}
                   <div className="flex flex-col mt-4">
-                    <label className="text-sm font-semibold text-gray-700 mb-2.5">
+                    <label className="text-sm font-semibold text-gray-700 mb-3.5">
                       {isReadOnly
                         ? "Service Instructions"
                         : "Additional Notes / Custom Instructions"}
@@ -1604,7 +1603,7 @@ export default function JobCards() {
                       }`}
                     />
                     {!isReadOnly && (
-                      <p className="text-[10px] text-gray-400 mt-1.5">
+                      <p className="text-[11.5px] text-gray-400 mt-1.5">
                         Tip: Press Enter to auto-number the next line. Ticked
                         services above are added automatically.
                       </p>

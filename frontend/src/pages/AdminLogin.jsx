@@ -4,7 +4,11 @@ import { useAuth } from "../context/AuthContext";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { ShieldCheck, Wrench } from "lucide-react";
 import { motion } from "framer-motion";
-import { FormInput, FormError, FormButton } from "../components/layout/Form/forms";
+import {
+  FormInput,
+  FormError,
+  FormButton,
+} from "../components/layout/Form/forms";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -28,9 +32,6 @@ export default function AdminLogin() {
       setLoading(false);
     }
   };
-
-  const ADMIN_GREETING =
-    "Accessing secure command center. Let's manage today's operations.";
 
   return (
     <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -66,7 +67,7 @@ export default function AdminLogin() {
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {ADMIN_GREETING}
+            Accessing secure command center. Let's manage today's operations.
           </h1>
           <p className="mt-1.5 text-sm text-slate-500">
             Authorised person only — enter your admin credentials

@@ -131,23 +131,53 @@ export default function Modal({
 
                 {/* Fixed and Unified Close Action Button with Night Mode Support */}
                 {showCloseButton && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClose();
-                    }}
-                    className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full font-bold text-xs shrink-0 transition-all duration-200 ease-in-out active:scale-90 cursor-auto ${
-                      coloredHeader
-                        ? "bg-white/10 text-white hover:bg-white/20 hover:scale-105 dark:bg-white/5 dark:hover:bg-white/15"
-                        : isError
-                          ? "bg-red-100 text-red-600 hover:bg-red-600 hover:text-white dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
-                          : "bg-slate-100 text-slate-500 hover:bg-red-500 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-red-500 dark:hover:text-white hover:shadow-sm"
-                    }`}
-                    aria-label="Close dialog"
-                  >
-                    ✕
-                  </button>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                      }}
+                      className={`w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full shrink-0 font-bold text-xs cursor-pointer transition-all duration-200 ease-in-out active:scale-90 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-40 disabled:pointer-events-none
+                        ${
+                          coloredHeader
+                            ? "close-btn-colored focus:ring-white/40"
+                            : isError
+                              ? "close-btn-error focus:ring-red-400"
+                              : "close-btn-default focus:ring-red-400"
+                        }
+                      `}
+                      aria-label="Close"
+                    >
+                      ✕
+                    </button>
+
+                    {/* Tooltip */}
+                    <div
+                      className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 text-[11px] font-medium whitespace-nowrap rounded-md pointer-events-none opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 ease-in-out z-50 text-white
+                      ${
+                        coloredHeader
+                          ? "bg-white/20"
+                          : isError
+                            ? "bg-red-600 dark:bg-red-500"
+                            : "bg-slate-700 dark:bg-slate-600"
+                      }
+                    `}
+                    >
+                      Dismiss
+                      <div
+                        className={`absolute left-1/2 -top-2 -translate-x-1/2 border-4 border-transparent
+                        ${
+                          coloredHeader
+                            ? "border-b-white/20"
+                            : isError
+                              ? "border-b-red-600 dark:border-b-red-500"
+                              : "border-b-slate-700 dark:border-b-slate-600"
+                        }
+                      `}
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
             )}
