@@ -14,12 +14,16 @@ import {
   SEATS_OPTIONS,
   OWNERSHIP_OPTIONS,
   COLOR_OPTIONS,
+  TRANSMISSION_OPTIONS, // add this
 } from "../constants/vehicleMarketplaceOptions";
 
 // Filter Options
 const filterOptions = {
   fuelType: ["Petrol", "Diesel", "CNG", "Electric", "Hybrid"],
-  transmission: ["Manual", "Automatic"],
+  transmission: [
+    ...TRANSMISSION_OPTIONS.Manual,
+    ...TRANSMISSION_OPTIONS.Automatic,
+  ],
   ownership: OWNERSHIP_OPTIONS,
   bodyType: BODY_TYPE_OPTIONS,
   seats: SEATS_OPTIONS,
@@ -46,7 +50,7 @@ const brandModels = {
     "Jimny",
     "Invicto",
     "Eeco",
-    "e Vitara" // First All-Electric SUV launch
+    "e Vitara", // First All-Electric SUV launch
   ],
   Hyundai: [
     "i20",
@@ -61,81 +65,70 @@ const brandModels = {
     "Tucson",
     "Exter",
     "Alcazar",
-    "Ioniq 5" // Premium EV
+    "Ioniq 5", // Premium EV
   ],
   Tata: [
-    "Nexon", 
+    "Nexon",
     "Nexon EV",
-    "Punch", 
+    "Punch",
     "Punch EV",
-    "Tiago", 
+    "Tiago",
     "Tiago EV",
-    "Altroz", 
-    "Harrier", 
+    "Altroz",
+    "Harrier",
     "Safari",
     "Tigor",
     "Tigor EV",
     "Curvv", // SUV-Coupe offering
-    "Curvv EV"
+    "Curvv EV",
   ],
   Mahindra: [
-    "Thar", 
+    "Thar",
     "Thar ROXX", // 5-Door variant
     "XUV700", // Often badged as XUV 7XO line transitions
-    "Scorpio-N", 
+    "Scorpio-N",
     "Scorpio Classic",
-    "Bolero", 
+    "Bolero",
     "Bolero Neo",
     "XUV 3XO", // The updated XUV300 facelift
     "XUV400 EV",
     "XEV 9e", // New flagship electric lineup
-    "BE 6"
+    "BE 6",
   ],
-  Kia: [
-    "Seltos", 
-    "Sonet", 
-    "Carens",
-    "EV6",
-    "EV9"
-  ],
+  Kia: ["Seltos", "Sonet", "Carens", "EV6", "EV9"],
   Toyota: [
-    "Fortuner", 
-    "Innova Crysta", 
+    "Fortuner",
+    "Innova Crysta",
     "Innova Hycross",
-    "Glanza", 
+    "Glanza",
     "Urban Cruiser Hyryder",
     "Taisor", // Baleno/Fronx-based crossover offering
     "Hilux",
     "Camry",
-    "Vellfire"
+    "Vellfire",
   ],
-  Honda: [
-    "City", 
-    "City Hybrid (e:HEV)",
-    "Amaze", 
-    "Elevate"
-  ],
+  Honda: ["City", "City Hybrid (e:HEV)", "Amaze", "Elevate"],
   Volkswagen: [
-    "Virtus", 
+    "Virtus",
     "Taigun",
     "Tiguan",
-    "ID.4" // EV additions
+    "ID.4", // EV additions
   ],
   Skoda: [
-    "Slavia", 
+    "Slavia",
     "Kushaq",
     "Kodiaq",
-    "Kylaq" // Sub-4m compact SUV addition
+    "Kylaq", // Sub-4m compact SUV addition
   ],
   MG: [
-    "Hector", 
+    "Hector",
     "Hector Plus",
-    "Astor", 
+    "Astor",
     "Comet EV",
     "ZS EV",
     "Gloster",
-    "Windsor EV" // Crossover EV offering
-  ]
+    "Windsor EV", // Crossover EV offering
+  ],
 };
 
 // Accordion modified to look like an independent card block matching Cardekho layout mechanics

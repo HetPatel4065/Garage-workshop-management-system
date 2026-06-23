@@ -694,7 +694,7 @@ export const sendLiveBackup = async (req, res) => {
           <tr>
             <td bgcolor="#1e293b" align="center" style="padding:32px 24px;border-radius:12px 12px 0 0;">
               <h1 style="margin:0 0 8px;font-size:24px;color:#ffffff;font-weight:700;">${owner.garageName || "Your Garage"}</h1>
-              <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.85);">Live Project Backup &mdash; ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+              <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.85);">Live Data of your Garage System Backup &mdash; ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
             </td>
           </tr>
           <tr>

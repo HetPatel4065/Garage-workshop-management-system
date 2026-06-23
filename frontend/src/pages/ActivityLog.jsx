@@ -173,7 +173,7 @@ function timeAgo(dateStr) {
   return `${days}d ago`;
 }
 
-const ITEMS_PER_PAGE = 25;
+const ITEMS_PER_PAGE = 20;
 
 const STAT_CARDS = [
   {

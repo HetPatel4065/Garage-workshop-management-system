@@ -34,6 +34,7 @@ import {
   SEATS_OPTIONS,
   OWNERSHIP_OPTIONS,
   COLOR_OPTIONS,
+  TRANSMISSION_OPTIONS, // add this
 } from "../constants/vehicleMarketplaceOptions";
 import { buildPortalAuthHeaders } from "../utils/portalPreview";
 import Modal from "../components/UI/Modal";
@@ -166,7 +167,7 @@ export default function MarketplaceListings({
   const [price, setPrice] = useState("");
   const [fuelType, setFuelType] = useState("Petrol");
   const [kmDriven, setKmDriven] = useState("");
-  const [transmission, setTransmission] = useState("Manual");
+  const [transmission, setTransmission] = useState("");
   const [bodyType, setBodyType] = useState("");
   const [seats, setSeats] = useState("5");
   const [ownership, setOwnership] = useState("");
@@ -1634,14 +1635,13 @@ export default function MarketplaceListings({
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-zinc-400 mb-1.5">
-                  Price (₹) <span className="text-red-500">*</span>
+                  Registration Year
                 </label>
                 <input
                   type="number"
-                  required
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="e.g. 650000"
+                  value={regYear}
+                  onChange={(e) => setRegYear(e.target.value)}
+                  placeholder="e.g. 2021"
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 focus:outline-none text-sm transition-all dark:text-white"
                 />
               </div>
@@ -1651,13 +1651,14 @@ export default function MarketplaceListings({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-zinc-400 mb-1.5">
-                  Registration Year
+                  Price (₹) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
-                  value={regYear}
-                  onChange={(e) => setRegYear(e.target.value)}
-                  placeholder="e.g. 2021"
+                  required
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="e.g. 650000"
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 focus:outline-none text-sm transition-all dark:text-white"
                 />
               </div>
@@ -1777,8 +1778,18 @@ export default function MarketplaceListings({
                   onChange={(e) => setTransmission(e.target.value)}
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 focus:outline-none text-sm transition-all dark:text-white"
                 >
-                  <option value="Manual">Manual</option>
-                  <option value="Automatic">Automatic</option>
+                  <option value="">Select transmission</option>
+                  {Object.entries(TRANSMISSION_OPTIONS).map(
+                    ([group, options]) => (
+                      <optgroup key={group} label={group}>
+                        {options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ),
+                  )}
                 </select>
               </div>
 

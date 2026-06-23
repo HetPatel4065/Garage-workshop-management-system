@@ -222,7 +222,7 @@ export const deleteBooking = async (req, res) => {
     }
 
     await Booking.findByIdAndDelete(id);
-    emitToOwner(booking.ownerId, "booking:deleted", { _id: id });
+    emitToOwner(booking.ownerId, "Booking:deleted", { _id: id });
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("DELETE BOOKING ERROR:", error);

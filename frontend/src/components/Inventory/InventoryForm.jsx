@@ -269,7 +269,8 @@ export default function InventoryForm({
       <div className="flex-1 overflow-y-auto px-3 sm:px-5 py-4 sm:py-5 space-y-5 sm:space-y-6">
         {activeTab === "details" && (
           <Section title="Item Details">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-100 border border-gray-200 rounded-lg p-3 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-gray-100 border border-gray-200 rounded-lg p-3 sm:p-4">
+              {/* Part Name */}
               <div>
                 <TextInput
                   id="inventory-name"
@@ -281,6 +282,8 @@ export default function InventoryForm({
                   readOnly={readOnly}
                 />
               </div>
+
+              {/* SKU / Part Number */}
               <div>
                 <TextInput
                   id="inventory-sku"
@@ -293,6 +296,7 @@ export default function InventoryForm({
                 />
               </div>
 
+              {/* Category Dropdown */}
               <div>
                 <SelectDropdown
                   id="inventory-category"
@@ -308,7 +312,7 @@ export default function InventoryForm({
                 />
               </div>
 
-              {/* Make dropdown */}
+              {/* Car Make Dropdown */}
               <div>
                 <SelectDropdown
                   id="inventory-carMake"
@@ -316,7 +320,7 @@ export default function InventoryForm({
                   value={formData.carMake}
                   onChange={(e) => {
                     set("carMake", e.target.value);
-                    set("carModel", ""); // reset model when make changes
+                    set("carModel", ""); // Reset model when make changes
                   }}
                   placeholder="Select make"
                   options={[
@@ -327,7 +331,7 @@ export default function InventoryForm({
                 />
               </div>
 
-              {/* Model dropdown — updates based on make */}
+              {/* Compatible Model Dropdown */}
               <div>
                 <SelectDropdown
                   id="inventory-carModel"
@@ -336,7 +340,7 @@ export default function InventoryForm({
                   onChange={(e) => set("carModel", e.target.value)}
                   placeholder="Select model"
                   options={
-                    formData.carMake
+                    formData.carMake && CAR_MAKES_MODELS[formData.carMake]
                       ? CAR_MAKES_MODELS[formData.carMake].map((m) => ({
                           label: m,
                           value: m,
@@ -347,6 +351,7 @@ export default function InventoryForm({
                 />
               </div>
 
+              {/* Compatible Year */}
               <div>
                 <TextInput
                   id="inventory-carYear"
@@ -358,6 +363,7 @@ export default function InventoryForm({
                 />
               </div>
 
+              {/* Supplier Name */}
               <div>
                 <TextInput
                   id="inventory-supplierName"
@@ -370,6 +376,7 @@ export default function InventoryForm({
                 />
               </div>
 
+              {/* Supplier Phone Contact */}
               <div>
                 <TextInput
                   id="inventory-supplierContact"
@@ -379,9 +386,12 @@ export default function InventoryForm({
                   onChange={(e) => {
                     if (readOnly) return;
                     let v = e.target.value;
-                    if (!v.startsWith("+91 "))
+                    if (!v.startsWith("+91 ")) {
                       v = "+91 " + v.replace("+91", "").trim();
-                    if (v.length <= 14) set("supplierContact", v);
+                    }
+                    if (v.length <= 14) {
+                      set("supplierContact", v);
+                    }
                   }}
                   error={errors.supplierContact}
                   placeholder="+91 9000000000"
@@ -390,10 +400,11 @@ export default function InventoryForm({
                 />
               </div>
 
+              {/* Supplier Location */}
               <div>
                 <TextInput
                   id="inventory-location"
-                  label="Location"
+                  label="Supplier Location"
                   value={formData.location}
                   onChange={(e) =>
                     set("location", capitalizeWords(e.target.value))

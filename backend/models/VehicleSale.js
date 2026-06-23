@@ -51,7 +51,10 @@ const vehicleSaleSchema = new mongoose.Schema(
     },
     transmission: {
       type: String,
-      enum: ["Automatic", "Manual"],
+      enum: [
+        ...["Manual Transmission (MT)", "Automated Manual Transmission (AMT)"],
+        ...["Torque Converter AT", "CVT", "DCT/DSG", "AMT", "e-CVT"],
+      ],
       required: [true, "Transmission is required"],
     },
     bodyType: {
