@@ -165,7 +165,7 @@ export default function StaffLogin() {
           </p>
         </div>
 
-        {/* ── Card ─────────────────────────────────────────────── */}
+        {/* ── Card ── */}
         <div className="bg-white rounded-2xl border border-violet-100 overflow-hidden">
           <div className="h-1 w-full bg-linear-to-r from-violet-400 via-violet-500 to-purple-500" />
 
@@ -324,7 +324,7 @@ export default function StaffLogin() {
         </div>
       </motion.div>
 
-      {/* ── Forgot Password Modal ──────────────────────────────── */}
+      {/* ── Forgot Password Modal ── */}
       <AnimatePresence>
         {showForgotModal && (
           <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">

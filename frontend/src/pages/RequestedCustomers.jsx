@@ -106,7 +106,7 @@ const SkeletonCard = () => (
   </div>
 );
 
-// ─── Stat Card ────────────────────────────────────────────────────
+// ─── Stat Card ───
 const StatCard = ({
   label,
   count,
@@ -147,7 +147,7 @@ const StatCard = ({
   </button>
 );
 
-// ─── Request Card (mirrors CustomerCard layout) ───────────────────
+// ─── Request Card (mirrors CustomerCard layout) ───
 function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
   const dateObj = new Date(req.createdAt);
   const apponintmwntTime = req.appointmentTime
@@ -276,7 +276,7 @@ function RequestCard({ req, onView, onApprove, onReject, onDelete }) {
   );
 }
 
-// ─── Section Heading (for modal) ─────────────────────────────────
+// ─── Section Heading (for modal) ───
 function SectionHeading({ title }) {
   return (
     <div className="flex items-center gap-2 pt-4.5 pb-2">
@@ -288,7 +288,7 @@ function SectionHeading({ title }) {
   );
 }
 
-// ─── Detail Row (for modal) ───────────────────────────────────────
+// ─── Detail Row (for modal) ───
 function DetailRow({ icon, label, value }) {
   return (
     <div className="flex items-start gap-3 py-2.5 px-4">
@@ -305,7 +305,7 @@ function DetailRow({ icon, label, value }) {
   );
 }
 
-// ─── Meta Card (for modal) ────────────────────────────────────────
+// ─── Meta Card (for modal) ───
 function MetaCard({ title, children, wide = false }) {
   return (
     <div
@@ -319,7 +319,7 @@ function MetaCard({ title, children, wide = false }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────
+// ─── Main Component ───
 export default function RequestedCustomers() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
