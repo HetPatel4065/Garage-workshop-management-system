@@ -492,12 +492,11 @@ export default function TopNavbar({ userName = "User", onToggleSidebar }) {
           ${scrolled ? "shadow-md dark:shadow-[0_10px_30px_rgba(0,0,0,0.3)]" : ""}
         `}
       >
-        <div className="flex items-center justify-between w-full max-w-[2400px] min-w-0 mx-auto gap-1 xs:gap-1.5 sm:gap-4">
+        <div className="flex items-center justify-between w-full max-w-600px min-w-0 mx-auto gap-1 xs:gap-1.5 sm:gap-4">
           {/* Sidebar toggle (mobile only) */}
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 xs:p-2.5 rounded-xl text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-95 flex-shrink-0"
-          >
+            className="lg:hidden p-2 xs:p-2.5 rounded-xl text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-95 shrink-0">
             <Menu size={22} />
           </button>
 
