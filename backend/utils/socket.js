@@ -7,11 +7,11 @@ export const initSocket = (server) => {
     cors: {
       origin: process.env.FRONTEND_URL || "http://localhost:5173",
       methods: ["GET", "POST"],
-      credentials: true
-    }
+      credentials: true,
+    },
   });
 
-console.log(" Socket.io server successfully initialized and attached.");
+  console.log(" Socket.io server successfully initialized and attached.");
   io.on("connection", (socket) => {
     console.log("Client connected:", socket.id);
 

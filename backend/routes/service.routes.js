@@ -1,14 +1,14 @@
-import express from 'express'
+import express from "express";
 const router = express.Router();
 import {
   getAllServices,
   getServiceById,
   createService,
   updateService,
-  deleteService
-} from '../controllers/service.controller.js'
+  deleteService,
+} from "../controllers/service.controller.js";
 
-import { auth, authorize } from '../middleware/auth.middleware.js'
+import { auth, authorize } from "../middleware/auth.middleware.js";
 
 // Anyone can view based on their role restrictions natively in the controller
 router.get("/", auth, getAllServices);
@@ -23,4 +23,4 @@ router.put("/:id", auth, authorize("edit_service"), updateService);
 // Delete restricted
 router.delete("/:id", auth, authorize("delete_service"), deleteService);
 
-export default router
+export default router;

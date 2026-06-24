@@ -25,7 +25,8 @@ const backendDir = path.resolve(__dirname, "..");
 if (process.env.CLOUDINARY_URL) {
   cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
 } else {
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+    process.env;
   if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
     cloudinary.config({
       cloud_name: CLOUDINARY_CLOUD_NAME,
@@ -67,7 +68,9 @@ async function migrate() {
     console.log(`Found ${owners.length} owners to inspect.`);
     for (const owner of owners) {
       if (isLocalPath(owner.logo)) {
-        console.log(`Owner: ${owner.name} (${owner._id}) has local logo: ${owner.logo}`);
+        console.log(
+          `Owner: ${owner.name} (${owner._id}) has local logo: ${owner.logo}`,
+        );
         const localPath = resolveLocalPath(owner.logo);
         if (localPath) {
           try {
@@ -78,10 +81,15 @@ async function migrate() {
             if (uploadRes && uploadRes.secure_url) {
               owner.logo = uploadRes.secure_url;
               await owner.save();
-              console.log(`Successfully migrated logo for ${owner.name} to ${uploadRes.secure_url}`);
+              console.log(
+                `Successfully migrated logo for ${owner.name} to ${uploadRes.secure_url}`,
+              );
             }
           } catch (uploadErr) {
-            console.error(`Failed to upload logo for Owner ${owner.name}:`, uploadErr.message);
+            console.error(
+              `Failed to upload logo for Owner ${owner.name}:`,
+              uploadErr.message,
+            );
           }
         } else {
           console.warn(`Local file not found for owner logo: ${owner.logo}`);
@@ -91,11 +99,15 @@ async function migrate() {
 
     // 2. MIGRATE GARAGE SETTINGS LOGOS
     console.log("\n--- Migrating Garage Settings Logos ---");
-    const settingsList = await GarageSettings.find({ invoiceLogo: { $exists: true, $ne: null } });
+    const settingsList = await GarageSettings.find({
+      invoiceLogo: { $exists: true, $ne: null },
+    });
     console.log(`Found ${settingsList.length} settings to inspect.`);
     for (const settings of settingsList) {
       if (isLocalPath(settings.invoiceLogo)) {
-        console.log(`Settings for owner: ${settings.ownerId} has local invoiceLogo: ${settings.invoiceLogo}`);
+        console.log(
+          `Settings for owner: ${settings.ownerId} has local invoiceLogo: ${settings.invoiceLogo}`,
+        );
         const localPath = resolveLocalPath(settings.invoiceLogo);
         if (localPath) {
           try {
@@ -106,20 +118,29 @@ async function migrate() {
             if (uploadRes && uploadRes.secure_url) {
               settings.invoiceLogo = uploadRes.secure_url;
               await settings.save();
-              console.log(`Successfully migrated invoiceLogo to ${uploadRes.secure_url}`);
+              console.log(
+                `Successfully migrated invoiceLogo to ${uploadRes.secure_url}`,
+              );
             }
           } catch (uploadErr) {
-            console.error(`Failed to upload invoice logo for settings of owner ${settings.ownerId}:`, uploadErr.message);
+            console.error(
+              `Failed to upload invoice logo for settings of owner ${settings.ownerId}:`,
+              uploadErr.message,
+            );
           }
         } else {
-          console.warn(`Local file not found for invoice logo: ${settings.invoiceLogo}`);
+          console.warn(
+            `Local file not found for invoice logo: ${settings.invoiceLogo}`,
+          );
         }
       }
     }
 
     // 3. MIGRATE VEHICLE SALE PHOTOS
     console.log("\n--- Migrating Vehicle Sale Photos ---");
-    const vehicleSales = await VehicleSale.find({ photos: { $exists: true, $ne: [] } });
+    const vehicleSales = await VehicleSale.find({
+      photos: { $exists: true, $ne: [] },
+    });
     console.log(`Found ${vehicleSales.length} vehicle sales to inspect.`);
     for (const sale of vehicleSales) {
       let updated = false;
@@ -127,7 +148,9 @@ async function migrate() {
       for (let i = 0; i < updatedPhotos.length; i++) {
         const photo = updatedPhotos[i];
         if (isLocalPath(photo)) {
-          console.log(`Listing: ${sale.title} (${sale._id}) has local photo: ${photo}`);
+          console.log(
+            `Listing: ${sale.title} (${sale._id}) has local photo: ${photo}`,
+          );
           const localPath = resolveLocalPath(photo);
           if (localPath) {
             try {
@@ -141,7 +164,10 @@ async function migrate() {
                 console.log(`Uploaded to Cloudinary: ${uploadRes.secure_url}`);
               }
             } catch (uploadErr) {
-              console.error(`Failed to upload photo for sale ${sale.title}:`, uploadErr.message);
+              console.error(
+                `Failed to upload photo for sale ${sale.title}:`,
+                uploadErr.message,
+              );
             }
           } else {
             console.warn(`Local file not found for photo: ${photo}`);
@@ -151,7 +177,9 @@ async function migrate() {
       if (updated) {
         sale.photos = updatedPhotos;
         await sale.save();
-        console.log(`Updated photos in database for vehicle sale listing: ${sale.title}`);
+        console.log(
+          `Updated photos in database for vehicle sale listing: ${sale.title}`,
+        );
       }
     }
 
@@ -162,8 +190,10 @@ async function migrate() {
     for (const invoice of invoices) {
       const needsCloudinary = !invoice.publicId || isLocalPath(invoice.pdfUrl);
       if (needsCloudinary) {
-        console.log(`Invoice ${invoice.invoiceNumber} (${invoice._id}) needs Cloudinary PDF.`);
-        
+        console.log(
+          `Invoice ${invoice.invoiceNumber} (${invoice._id}) needs Cloudinary PDF.`,
+        );
+
         // Let's populate the invoice properly
         const populatedInvoice = await Invoice.findById(invoice._id)
           .populate("customerId")
@@ -171,7 +201,7 @@ async function migrate() {
             path: "serviceId",
             populate: [{ path: "vehicleId" }, { path: "partsUsed.partId" }],
           });
-        
+
         if (!populatedInvoice) {
           console.error(`Could not populate invoice ${invoice._id}`);
           continue;
@@ -179,35 +209,51 @@ async function migrate() {
 
         const ownerId = invoice.ownerId;
         if (!ownerId) {
-          console.error(`Invoice ${invoice.invoiceNumber} is missing ownerId context! Skipping.`);
+          console.error(
+            `Invoice ${invoice.invoiceNumber} is missing ownerId context! Skipping.`,
+          );
           continue;
         }
 
         const [settings, owner] = await Promise.all([
           GarageSettings.findOne({ ownerId }),
-          Owner.findById(ownerId).select("logo mobileNumber garageName address"),
+          Owner.findById(ownerId).select(
+            "logo mobileNumber garageName address",
+          ),
         ]);
 
         const branding = {
           ...(settings ? settings.toObject() : {}),
           logo: settings?.invoiceLogo || owner?.logo || "",
           mobileNumber: settings?.contactNumber || owner?.mobileNumber || "",
-          garageName: settings?.garageName || owner?.garageName || "Garage Name",
-          businessAddress: settings?.businessAddress || owner?.address || "Garage Address",
+          garageName:
+            settings?.garageName || owner?.garageName || "Garage Name",
+          businessAddress:
+            settings?.businessAddress || owner?.address || "Garage Address",
         };
 
         try {
-          console.log(`Regenerating PDF for invoice ${invoice.invoiceNumber}...`);
-          const relativePath = await generateAndSaveInvoicePDF(populatedInvoice, branding);
+          console.log(
+            `Regenerating PDF for invoice ${invoice.invoiceNumber}...`,
+          );
+          const relativePath = await generateAndSaveInvoicePDF(
+            populatedInvoice,
+            branding,
+          );
           const filePath = path.join(backendDir, "uploads", relativePath);
 
           console.log(`Uploading regenerated PDF to Cloudinary: ${filePath}`);
-          const { secure_url, public_id } = await uploadInvoicePDF(filePath, ownerId);
+          const { secure_url, public_id } = await uploadInvoicePDF(
+            filePath,
+            ownerId,
+          );
 
           invoice.pdfUrl = secure_url;
           invoice.publicId = public_id;
           await invoice.save();
-          console.log(`Successfully migrated invoice ${invoice.invoiceNumber} to Cloudinary. URL: ${secure_url}`);
+          console.log(
+            `Successfully migrated invoice ${invoice.invoiceNumber} to Cloudinary. URL: ${secure_url}`,
+          );
 
           // Remove local temp file
           try {
@@ -216,7 +262,10 @@ async function migrate() {
             // ignore
           }
         } catch (genErr) {
-          console.error(`Failed to regenerate/upload invoice ${invoice.invoiceNumber}:`, genErr.message);
+          console.error(
+            `Failed to regenerate/upload invoice ${invoice.invoiceNumber}:`,
+            genErr.message,
+          );
         }
       }
     }

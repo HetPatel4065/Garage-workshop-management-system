@@ -60,15 +60,24 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
       const logoPathToUse = settings.logo || settings.invoiceLogo;
       if (logoPathToUse) {
         try {
-          if (logoPathToUse.startsWith("http://") || logoPathToUse.startsWith("https://")) {
-            console.log("[PDF Generation] Fetching remote logo:", logoPathToUse);
+          if (
+            logoPathToUse.startsWith("http://") ||
+            logoPathToUse.startsWith("https://")
+          ) {
+            console.log(
+              "[PDF Generation] Fetching remote logo:",
+              logoPathToUse,
+            );
             const response = await fetch(logoPathToUse);
             if (response.ok) {
               const arrayBuffer = await response.arrayBuffer();
               const buffer = Buffer.from(arrayBuffer);
               doc.image(buffer, 40, 15, { height: 50 });
             } else {
-              console.error("[PDF Generation] Failed to fetch remote logo. Status:", response.statusText);
+              console.error(
+                "[PDF Generation] Failed to fetch remote logo. Status:",
+                response.statusText,
+              );
             }
           } else {
             // Ensure we handle absolute paths or paths starting with /
@@ -246,12 +255,10 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
           width: 65,
           align: "right",
         });
-        doc
-          .font("Helvetica-Bold")
-          .text(formatCurrency(total), 480, rowY, {
-            width: 75,
-            align: "right",
-          });
+        doc.font("Helvetica-Bold").text(formatCurrency(total), 480, rowY, {
+          width: 75,
+          align: "right",
+        });
 
         const textHeight = doc.heightOfString(capitalizedDesc, { width: 280 });
         rowY += Math.max(textHeight + 10, 25);

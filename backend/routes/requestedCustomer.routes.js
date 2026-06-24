@@ -7,7 +7,7 @@ import {
   rejectRequestedCustomer,
   deleteRequestedCustomer,
   getTodaysInspections,
-  updateAppointment
+  updateAppointment,
 } from "../controllers/requestedCustomer.controller.js";
 import { auth, authorize } from "../middleware/auth.middleware.js";
 

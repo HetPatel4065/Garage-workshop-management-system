@@ -35,12 +35,13 @@ export const createNotification = async ({
 
     // 3. Handle Email Notification
     const settings = await GarageSettings.findOne({ ownerId });
-    const shouldSendEmail = forceEmail || (
-      (type === "service_reminder" && settings?.notifications?.serviceReminders) ||
+    const shouldSendEmail =
+      forceEmail ||
+      (type === "service_reminder" &&
+        settings?.notifications?.serviceReminders) ||
       (type === "low_stock" && settings?.notifications?.lowStock) ||
       (type === "new_customer" && settings?.notifications?.emailReports) ||
-      (type === "billing" && settings?.notifications?.emailReports)
-    );
+      (type === "billing" && settings?.notifications?.emailReports);
 
     if (shouldSendEmail) {
       const owner = await Owner.findById(ownerId);
@@ -56,7 +57,8 @@ export const createNotification = async ({
             </div>
           `,
           smtpConfig: settings?.smtp,
-          fromName: settings?.garageName || owner.garageName || "Garage Project Alert"
+          fromName:
+            settings?.garageName || owner.garageName || "Garage Project Alert",
         });
       }
     }

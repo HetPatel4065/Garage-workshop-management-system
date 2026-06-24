@@ -92,7 +92,7 @@ const PageTransition = ({ children }) => (
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -8 }}
     transition={{ duration: 0.25, ease: "easeInOut" }}
-    className="max-w-screen max-h-screen mx-auto"
+    className="w-full h-full"
   >
     {children}
   </motion.div>

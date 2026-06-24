@@ -62,7 +62,9 @@ export const addWatermark = async (filePath, text) => {
       .toBuffer();
 
     await fs.promises.writeFile(filePath, watermarkedBuffer);
-    console.log(`[Watermark] Successfully watermarked ${filePath} with "${text}"`);
+    console.log(
+      `[Watermark] Successfully watermarked ${filePath} with "${text}"`,
+    );
   } catch (error) {
     console.error(`[Watermark] Failed to add watermark to ${filePath}:`, error);
   }

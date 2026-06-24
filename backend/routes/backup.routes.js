@@ -1,5 +1,8 @@
 import express from "express";
-import { generateBackup, restoreBackup } from "../controllers/backup.controller.js";
+import {
+  generateBackup,
+  restoreBackup,
+} from "../controllers/backup.controller.js";
 import { auth, authorize } from "../middleware/auth.middleware.js";
 import multer from "multer";
 import path from "path";
@@ -31,6 +34,12 @@ const upload = multer({
 router.get("/download", auth, authorize("all"), generateBackup);
 
 // 📤 Restore
-router.post("/restore", auth, authorize("all"), upload.single("backup"), restoreBackup);
+router.post(
+  "/restore",
+  auth,
+  authorize("all"),
+  upload.single("backup"),
+  restoreBackup,
+);
 
 export default router;

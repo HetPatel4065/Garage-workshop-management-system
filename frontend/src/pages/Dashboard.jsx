@@ -47,6 +47,59 @@ const STATUS_COLORS = {
 // Fallback color for any other status
 const DEFAULT_COLOR = "#8b5cf6";
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+
+  const uniquePayload = payload.filter(
+    (item, index, self) =>
+      index === self.findIndex((t) => t.dataKey === item.dataKey),
+  );
+
+  return (
+    <div className="bg-white p-4 rounded-xl shadow-xl border border-slate-100 text-xs min-w-50">
+      {/* Date Header */}
+      <div className="mb-2 text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">
+        {typeof label === "string" && label.includes("-")
+          ? new Date(label).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+            })
+          : label}
+      </div>
+
+      <div className="space-y-1.5">
+        {uniquePayload.map((item, i) => {
+          const isPaid = item.dataKey === "paid";
+
+          return (
+            <div
+              key={i}
+              className="flex justify-between items-center gap-4 px-1"
+            >
+              <div className="flex items-center gap-2">
+                {/* Visual indicator matching the chart colors */}
+                <div
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: isPaid ? "#059669" : "#334155" }}
+                />
+                <span
+                  className={`font-bold ${isPaid ? "text-emerald-600" : "text-slate-700"}`}
+                >
+                  {isPaid ? "Revenue Collected" : "Total Work Invoiced"}
+                </span>
+              </div>
+
+              <span className="font-black text-slate-900">
+                ₹{Math.floor(item.value).toLocaleString("en-IN")}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, token, selectedGarage } = useAuth();
@@ -191,59 +244,6 @@ export default function Dashboard() {
 
   if (loading || !showCharts) return <DashboardSkeleton />;
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-
-    const uniquePayload = payload.filter(
-      (item, index, self) =>
-        index === self.findIndex((t) => t.dataKey === item.dataKey),
-    );
-
-    return (
-      <div className="bg-white p-4 rounded-xl shadow-xl border border-slate-100 text-xs min-w-50">
-        {/* Date Header */}
-        <div className="mb-2 text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">
-          {typeof label === "string" && label.includes("-")
-            ? new Date(label).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-              })
-            : label}
-        </div>
-
-        <div className="space-y-1.5">
-          {uniquePayload.map((item, i) => {
-            const isPaid = item.dataKey === "paid";
-
-            return (
-              <div
-                key={i}
-                className="flex justify-between items-center gap-4 px-1"
-              >
-                <div className="flex items-center gap-2">
-                  {/* Visual indicator matching the chart colors */}
-                  <div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: isPaid ? "#059669" : "#334155" }}
-                  />
-                  <span
-                    className={`font-bold ${isPaid ? "text-emerald-600" : "text-slate-700"}`}
-                  >
-                    {isPaid ? "Revenue Collected" : "Total Work Invoiced"}
-                  </span>
-                </div>
-
-                <span className="font-black text-slate-900">
-                  ₹{Math.floor(item.value).toLocaleString("en-IN")}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="w-full min-h-screen bg-gray-100 px-2 xs:px-3 sm:px-6 lg:px-8 3xl:px-12 4xl:px-16 py-3 xs:py-4 sm:py-6 overflow-y-auto">
       {/* ── Header ── */}
@@ -251,16 +251,16 @@ export default function Dashboard() {
         {/* Left Side: Identity & Greetings */}
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex items-center">
-            <span className="inline-flex items-center whitespace-nowrap rounded-md bg-blue-950/80 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-blue-500">
+            <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2">
               Hi, {user?.name}
-            </span>
+            </p>
           </div>
 
-          <h1 className="text-xl xs:text-2xl font-extrabold leading-tight tracking-normal text-white sm:text-2xl lg:text-3xl 3xl:text-4xl">
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
             {roleLabel} Dashboard
           </h1>
 
-          <p className="mt-1 text-sm font-bold tracking-tight text-zinc-300">
+          <p className="text-sm font-medium text-slate-500 mt-3">
             {roleDescription}
           </p>
         </div>
@@ -414,7 +414,7 @@ export default function Dashboard() {
                       }
                     />
 
-                    <RechartsTooltip content={<CustomTooltip />} />
+                    <RechartsTooltip content={CustomTooltip} />
 
                     <Bar
                       dataKey="invoiced"

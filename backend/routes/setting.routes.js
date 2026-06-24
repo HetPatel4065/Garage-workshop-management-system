@@ -29,7 +29,7 @@ router.put(
     { name: "logo", maxCount: 1 },
     { name: "invoiceLogo", maxCount: 1 },
   ]),
-  updateSettings
+  updateSettings,
 );
 router.post("/change-password", changePassword);
 router.post("/test-notification", sendTestNotification);

@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  createContext,
+  useContext,
+} from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -25,10 +32,9 @@ import { FaCar } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
 import { useNotifications } from "../../../context/NotificationContext";
 import ThemeToggle from "../../theme/ThemeToggle";
-import { motion, AnimatePresence } from "framer-motion";
 import { ROLE_LABELS } from "../../../utils/roles";
 
-// ─── Navigation config ──
+// ─── Navigation config ────────────────────────────────────────────────────────
 
 const NAV_SECTIONS = [
   {
@@ -144,20 +150,24 @@ const NAV_SECTIONS = [
   },
 ];
 
-// ─── Quick-link paths (rendered separately, excluded from main nav) ────────────
-
 const QUICK_LINK_PATHS = new Set(["/dashboard", "/partnership-leads"]);
 
-// ─── Sub-components ──
+// ─── Context (avoids prop-drilling isCollapsedDesktop to every nav link) ──────
+
+const SidebarCtx = createContext(false);
+
+// ─── SidebarNavLink ───────────────────────────────────────────────────────────
 
 const SidebarNavLink = React.memo(function SidebarNavLink({
   to,
   icon: Icon,
   label,
   showBadge = false,
-  isCollapsedDesktop,
   unreadCount,
 }) {
+  // Read from context — changing collapsed won't re-render via prop
+  const isCollapsedDesktop = useContext(SidebarCtx);
+
   return (
     <NavLink
       to={to}
@@ -165,7 +175,7 @@ const SidebarNavLink = React.memo(function SidebarNavLink({
       className={({ isActive }) =>
         [
           "relative flex w-full min-h-11 items-center rounded-xl text-sm font-semibold",
-          "transition-colors duration-200 group",
+          "transition-colors duration-150 group",
           isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5",
           isActive
             ? "bg-blue-600 text-white"
@@ -175,12 +185,11 @@ const SidebarNavLink = React.memo(function SidebarNavLink({
     >
       {({ isActive }) => (
         <>
-          {/* Icon + optional badge */}
           <div className="relative flex shrink-0 items-center justify-center">
             <Icon
               size={18}
               className={[
-                "transition-colors duration-200",
+                "transition-colors duration-150",
                 isActive
                   ? "text-white"
                   : "text-slate-500 dark:text-gray-500 group-hover:text-slate-700 dark:group-hover:text-gray-300",
@@ -190,13 +199,12 @@ const SidebarNavLink = React.memo(function SidebarNavLink({
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950 shadow-sm animate-pulse" />
             )}
           </div>
-
-          {/* Label (expanded mode) */}
           {!isCollapsedDesktop && <span className="truncate">{label}</span>}
 
-          {/* Tooltip (collapsed mode) */}
+          {/* Appears next to the current component on hover when in collapsed mode */}
+
           {isCollapsedDesktop && (
-            <div className="absolute left-full ml-3 px-2 py-1 bg-slate-800 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-100 border border-slate-700 dark:border-white/10 shadow-xl">
+            <div className="absolute left-full ml-3 px-2 py-1 bg-slate-800 dark:bg-white text-white text-sm rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-100 border border-slate-700 dark:border-white shadow-xl">
               {label}
             </div>
           )}
@@ -206,22 +214,19 @@ const SidebarNavLink = React.memo(function SidebarNavLink({
   );
 });
 
+// ─── LogoEl ───
+
 const LogoEl = React.memo(function LogoEl({ size = "w-9 h-9", iconSize = 18 }) {
   const { user, selectedGarage } = useAuth();
   const role = user?.role?.toLowerCase() ?? "mechanic";
   const targetUser = role === "admin" && selectedGarage ? selectedGarage : user;
 
+  // Stable cache-buster — only recomputes when updatedAt or logo actually changes
   const cacheBuster = useMemo(() => {
     if (targetUser?.updatedAt) {
       return `t=${new Date(targetUser.updatedAt).getTime()}`;
     }
-    if (typeof window !== "undefined") {
-      return `t_init=${
-        window.__sidebar_mount_time ??
-        (window.__sidebar_mount_time = Date.now())
-      }`;
-    }
-    return "t_init=0";
+    return "t=0";
   }, [targetUser?.updatedAt, targetUser?.logo]);
 
   if (!targetUser) return null;
@@ -254,12 +259,11 @@ const LogoEl = React.memo(function LogoEl({ size = "w-9 h-9", iconSize = 18 }) {
   );
 });
 
-// ─── Main component ──
+// ─── Main component ───
 
 export default function GarageSidebar({
   isOpen,
   onClose,
-  showNotifications,
   collapsed,
   setCollapsed,
 }) {
@@ -280,8 +284,12 @@ export default function GarageSidebar({
   // ── Local state ──
 
   const [openSections, setOpenSections] = useState(() => {
-    const saved = sessionStorage.getItem("sidebar_open_sections");
-    return saved ? JSON.parse(saved) : NAV_SECTIONS.map(() => true);
+    try {
+      const saved = sessionStorage.getItem("sidebar_open_sections");
+      return saved ? JSON.parse(saved) : NAV_SECTIONS.map(() => true);
+    } catch {
+      return NAV_SECTIONS.map(() => true);
+    }
   });
 
   const [isDesktop, setIsDesktop] = useState(
@@ -314,7 +322,6 @@ export default function GarageSidebar({
 
   // ── Side effects ──
 
-  // Responsive breakpoint listener
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const handler = (e) => setIsDesktop(e.matches);
@@ -322,35 +329,39 @@ export default function GarageSidebar({
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Persist collapsed state + CSS variable
   useEffect(() => {
-    sessionStorage.setItem("sidebar_collapsed", collapsed);
+    try {
+      sessionStorage.setItem("sidebar_collapsed", String(collapsed));
+    } catch {}
     document.documentElement.style.setProperty(
       "--sidebar-width",
       collapsed ? "80px" : "280px",
     );
   }, [collapsed]);
 
-  // Persist open sections
   useEffect(() => {
-    sessionStorage.setItem(
-      "sidebar_open_sections",
-      JSON.stringify(openSections),
-    );
+    try {
+      sessionStorage.setItem(
+        "sidebar_open_sections",
+        JSON.stringify(openSections),
+      );
+    } catch {}
   }, [openSections]);
 
   // Restore scroll position
   useEffect(() => {
     const nav = sidebarRef.current;
     if (!nav) return;
-
-    const saved = sessionStorage.getItem("sidebar_scroll");
-    if (saved) nav.scrollTop = parseInt(saved, 10);
-
-    const handleScroll = () =>
-      sessionStorage.setItem("sidebar_scroll", nav.scrollTop);
-
-    nav.addEventListener("scroll", handleScroll);
+    try {
+      const saved = sessionStorage.getItem("sidebar_scroll");
+      if (saved) nav.scrollTop = parseInt(saved, 10);
+    } catch {}
+    const handleScroll = () => {
+      try {
+        sessionStorage.setItem("sidebar_scroll", String(nav.scrollTop));
+      } catch {}
+    };
+    nav.addEventListener("scroll", handleScroll, { passive: true });
     return () => nav.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -368,52 +379,41 @@ export default function GarageSidebar({
     if (isDesktop) setCollapsed((c) => !c);
   };
 
-  // ── Animation variants ──
-
-  const sidebarVariants = {
-    open: {
-      x: 0,
-      transition: { duration: 0.12, ease: "linear" },
-    },
-    closed: {
-      x: isDesktop ? 0 : "-100%",
-      transition: { duration: 0.12, ease: "linear" },
-    },
-  };
-
   // ── Render ──
 
   return (
-    <>
-      {/* Mobile overlay */}
-      <AnimatePresence>
-        {isOpen && !isDesktop && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
-            onClick={onClose}
-          />
-        )}
-      </AnimatePresence>
-
-      <motion.aside
-        initial={false}
-        animate={isOpen || isDesktop ? "open" : "closed"}
-        variants={sidebarVariants}
+    <SidebarCtx.Provider value={isCollapsedDesktop}>
+      {/* Mobile overlay — pure CSS transition, no framer-motion */}
+      <div
+        style={{
+          transform:
+            isDesktop && collapsed ? `scaleX(${280 / 80})` : "scaleX(1)",
+          transformOrigin: "left center",
+          transition: "transform 300ms cubic-bezier(0.25,0.46,0.45,0.94)",
+        }}
+        className="h-full flex flex-col"
+      />
+      <aside
+        style={{
+          width: isDesktop ? (collapsed ? "80px" : "280px") : undefined,
+          transition: isDesktop
+            ? "width 300ms cubic-bezier(0.25,0.46,0.45,0.94)"
+            : undefined,
+          willChange: "width",
+        }}
         className={[
-          "fixed top-0 left-0 z-50 h-screen flex flex-col",
+          isDesktop
+            ? "relative shrink-0 z-50 h-screen flex flex-col overflow-hidden"
+            : "fixed top-0 left-0 z-50 h-screen flex flex-col overflow-hidden w-[85vw] max-w-80",
           "bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800",
-          "overflow-hidden transition-[width] duration-300 ease-in-out",
-          "shadow-xl lg:shadow-none",
-          isDesktop ? (collapsed ? "w-20" : "w-68") : "w-[85vw] max-w-80",
+          !isDesktop && (isOpen ? "translate-x-0" : "-translate-x-full"),
+          !isDesktop &&
+            "transition-transform duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]",
         ].join(" ")}
       >
         {/* ── Header ── */}
         <div className="flex flex-col shrink-0 border-b border-slate-200 dark:border-white/5">
           {isCollapsedDesktop ? (
-            // Collapsed: just the logo
             <div className="flex items-center justify-center py-4 px-2">
               <div
                 onClick={toggleCollapsed}
@@ -423,8 +423,7 @@ export default function GarageSidebar({
               </div>
             </div>
           ) : (
-            // Expanded: logo + garage info
-            <div className="flex flex-col gap-3 pt-5.5 pb-4.5 px-5.5">
+            <div className="flex flex-col gap-3 pt-5 pb-4 px-5">
               <div className="flex items-center justify-between">
                 <div
                   onClick={toggleCollapsed}
@@ -444,7 +443,7 @@ export default function GarageSidebar({
               </div>
 
               <div className="min-w-0 flex flex-col">
-                <h2 className="text-[17px] font-bold text-slate-900 dark:text-white leading-snug tracking-tight wrap-break-words">
+                <h2 className="text-[17px] font-bold text-slate-900 dark:text-white leading-snug tracking-tight break-word">
                   {garageName}
                 </h2>
 
@@ -454,7 +453,7 @@ export default function GarageSidebar({
                       size={14}
                       className="mt-0.5 shrink-0 text-blue-500 dark:text-blue-400"
                     />
-                    <p className="text-xs text-slate-500 dark:text-gray-400 leading-relaxed font-medium wrap-break-words">
+                    <p className="text-xs text-slate-500 dark:text-gray-400 leading-relaxed font-medium break-word">
                       {formattedAddress}
                     </p>
                   </div>
@@ -471,16 +470,13 @@ export default function GarageSidebar({
               to="/dashboard"
               icon={LayoutDashboard}
               label="Dashboard"
-              isCollapsedDesktop={isCollapsedDesktop}
               unreadCount={unreadCount}
             />
-
             {role === "admin" && (
               <SidebarNavLink
                 to="/partnership-leads"
                 icon={Store}
                 label="Partnership Leads"
-                isCollapsedDesktop={isCollapsedDesktop}
                 unreadCount={unreadCount}
               />
             )}
@@ -535,7 +531,6 @@ export default function GarageSidebar({
                         icon={item.icon}
                         label={item.name}
                         showBadge={item.name === "Notifications"}
-                        isCollapsedDesktop={isCollapsedDesktop}
                         unreadCount={unreadCount}
                       />
                     ))}
@@ -555,23 +550,19 @@ export default function GarageSidebar({
             <div
               className={`mb-3 flex flex-col gap-2 ${isCollapsedDesktop ? "items-center" : "items-start"}`}
             >
-              {/* Theme Toggle Container */}
+              {/* Theme Toggle */}
               <div
                 className={[
-                  "flex w-full items-center rounded-xl text-[15px] font-medium transition-colors duration-200",
-                  // Spacing aur alignment baki buttons ke sath match kiya
+                  "flex w-full items-center rounded-xl text-[15px] font-medium transition-colors duration-150",
                   isCollapsedDesktop
                     ? "justify-center p-2.5"
                     : "justify-start gap-3 px-3 py-2.5",
-                  // Background aur text jo dark/light mode me bindas chalega
                   "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5",
                 ].join(" ")}
               >
-                {/* Toggle ko center karne ke liye flex wrapper */}
                 <div className="flex items-center justify-center shrink-0">
                   <ThemeToggle />
                 </div>
-
                 {!isCollapsedDesktop && (
                   <span className="select-none text-sm font-medium text-slate-600 dark:text-slate-400">
                     Appearance
@@ -586,7 +577,7 @@ export default function GarageSidebar({
                 title="Customer Portal"
                 className={[
                   "inline-flex w-full items-center rounded-2xl text-[15px] font-medium",
-                  "transition-colors duration-200",
+                  "transition-colors duration-150",
                   isCollapsedDesktop
                     ? "justify-center p-3"
                     : "justify-start gap-4 px-4 py-3",
@@ -604,7 +595,7 @@ export default function GarageSidebar({
                 title="Sign Out"
                 className={[
                   "inline-flex w-full items-center rounded-2xl text-[15px] font-medium",
-                  "transition-colors duration-200",
+                  "transition-colors duration-150",
                   isCollapsedDesktop
                     ? "justify-center p-3"
                     : "justify-start gap-4 px-4 py-3",
@@ -624,7 +615,7 @@ export default function GarageSidebar({
             disabled={!isOwner}
             aria-disabled={!isOwner}
             className={[
-              "w-full flex items-center rounded-xl text-sm font-semibold transition-colors duration-200",
+              "w-full flex items-center rounded-xl text-sm font-semibold transition-colors duration-150",
               isCollapsedDesktop ? "justify-center py-3" : "gap-3 px-3 py-2.5",
               isProfileActive
                 ? "bg-indigo-600 text-white"
@@ -632,7 +623,6 @@ export default function GarageSidebar({
               !isOwner ? "cursor-auto opacity-70" : "",
             ].join(" ")}
           >
-            {/* Avatar */}
             <div
               className={[
                 "w-8 h-8 rounded-lg flex items-center justify-center font-bold shrink-0 transition-colors",
@@ -644,7 +634,6 @@ export default function GarageSidebar({
               {user?.name?.[0]?.toUpperCase() ?? "U"}
             </div>
 
-            {/* User details + role badge */}
             {!isCollapsedDesktop && (
               <>
                 <div className="flex-1 min-w-0 text-left">
@@ -673,7 +662,7 @@ export default function GarageSidebar({
             )}
           </button>
         </div>
-      </motion.aside>
-    </>
+      </aside>
+    </SidebarCtx.Provider>
   );
 }

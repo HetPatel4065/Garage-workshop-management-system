@@ -1,5 +1,10 @@
 import express from "express";
-import { getAdvisorProfile, getAllAdvisors, updateAdvisor, deleteAdvisor } from "../controllers/advisor.controller.js";
+import {
+  getAdvisorProfile,
+  getAllAdvisors,
+  updateAdvisor,
+  deleteAdvisor,
+} from "../controllers/advisor.controller.js";
 import { auth, authorize } from "../middleware/auth.middleware.js";
 
 const router = express.Router();

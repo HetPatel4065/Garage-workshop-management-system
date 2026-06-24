@@ -1,6 +1,10 @@
 import express from "express";
 import { auth, requireRole } from "../middleware/auth.middleware.js";
-import { getActivityLog, getMyActivityLog, deleteMyActivityLogs } from "../controllers/activityLog.controller.js";
+import {
+  getActivityLog,
+  getMyActivityLog,
+  deleteMyActivityLogs,
+} from "../controllers/activityLog.controller.js";
 
 const router = express.Router();
 

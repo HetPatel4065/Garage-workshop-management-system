@@ -241,6 +241,32 @@ export default function Settings() {
     confirm: false,
   });
 
+  // ── Sliding pill tab refs ──────────────────────────────────────────────────
+  const tabRefs = useRef({});
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
+  const tabTrackRef = useRef(null);
+
+  const updatePill = useCallback((tabId) => {
+    const el = tabRefs.current[tabId];
+    if (el) {
+      setPillStyle({ left: el.offsetLeft, width: el.offsetWidth });
+    }
+  }, []);
+
+  useEffect(() => {
+    // Small delay to let the DOM settle after tab list renders
+    const raf = requestAnimationFrame(() => updatePill(activeTab));
+    return () => cancelAnimationFrame(raf);
+  }, [activeTab, updatePill]);
+
+  // Re-measure on window resize (handles font-scale / zoom changes)
+  useEffect(() => {
+    const onResize = () => updatePill(activeTab);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [activeTab, updatePill]);
+  // ──────────────────────────────────────────────────────────────────────────
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -330,19 +356,16 @@ export default function Settings() {
   };
 
   const handlePhone = (e) => {
-    const { name, value } = e.target; // Get name (mobileNumber or whatsappNumber)
+    const { name, value } = e.target;
 
-    // 1. Force the +91 prefix
     if (!value.startsWith("+91 ")) {
       setFormData((prev) => ({ ...prev, mobileNumber: "+91 " }));
       return;
     }
 
-    // 2. Extract digits after "+91 "
     const phoneNumberPart = value.slice(4);
     const digitsOnly = phoneNumberPart.replace(/\D/g, "");
 
-    // 3. Limit to 10 digits and update state
     if (digitsOnly.length <= 10) {
       setFormData((prev) => ({
         ...prev,
@@ -372,10 +395,8 @@ export default function Settings() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Use FormData to support image uploads
       const data = new FormData();
 
-      // Append regular fields
       Object.keys(formData).forEach((key) => {
         if (typeof formData[key] === "object" && formData[key] !== null) {
           data.append(key, JSON.stringify(formData[key]));
@@ -385,7 +406,6 @@ export default function Settings() {
       });
 
       data.append("logoRemoved", logoRemoved ? "true" : "false");
-      // Append files
       if (logoFile) data.append("logo", logoFile);
       if (invoiceLogoFile) data.append("invoiceLogo", invoiceLogoFile);
 
@@ -397,13 +417,12 @@ export default function Settings() {
         body: data,
       });
 
-      // Filter out empty catalog items before saving
       const validCatalog = catalog.filter((item) => item.name?.trim());
 
       const catalogPromises = validCatalog.map((item) => {
         const isNew = !item._id;
         const wasEdited = editedCatalogIds.has(item._id);
-        if (!isNew && !wasEdited) return Promise.resolve(); // ✅ skip untouched items
+        if (!isNew && !wasEdited) return Promise.resolve();
         const url = isNew
           ? `${import.meta.env.VITE_API_URL}/service-catalog`
           : `${import.meta.env.VITE_API_URL}/service-catalog/${item._id}`;
@@ -419,7 +438,6 @@ export default function Settings() {
 
       await Promise.all(catalogPromises);
 
-      // Step 3: Handle Deletions
       const deletePromises = deletedCatalogIds.map((id) =>
         fetch(`${import.meta.env.VITE_API_URL}/service-catalog/${id}`, {
           method: "DELETE",
@@ -435,7 +453,7 @@ export default function Settings() {
         setInvoiceLogoFile(null);
         setLogoRemoved(false);
         setDeletedCatalogIds([]);
-        setEditedCatalogIds(new Set()); // ✅ ADD THIS LINE
+        setEditedCatalogIds(new Set());
         await refreshUser();
         addToast("Settings saved successfully!");
         fetchData();
@@ -504,7 +522,6 @@ export default function Settings() {
       if (formatType === "xlsx") {
         const workbook = XLSX.utils.book_new();
 
-        // 1. Customers
         const customerRows = (rawData.customers || []).map((c) => ({
           "Customer ID": c.customerId || "-",
           Name: c.name || "-",
@@ -519,7 +536,6 @@ export default function Settings() {
         const customerWS = XLSX.utils.json_to_sheet(customerRows);
         XLSX.utils.book_append_sheet(workbook, customerWS, "Customers");
 
-        // 2. Services
         const serviceRows = (rawData.services || []).map((s) => ({
           "Service ID": s.serviceId || s._id || "-",
           "Vehicle Number":
@@ -536,7 +552,6 @@ export default function Settings() {
         const serviceWS = XLSX.utils.json_to_sheet(serviceRows);
         XLSX.utils.book_append_sheet(workbook, serviceWS, "Services");
 
-        // 3. Invoices
         const invoiceRows = (rawData.invoices || []).map((i) => ({
           "Invoice Number": i.invoiceNumber || "-",
           "Customer Name": i.customerId?.name || i.customerName || "-",
@@ -554,7 +569,6 @@ export default function Settings() {
         const invoiceWS = XLSX.utils.json_to_sheet(invoiceRows);
         XLSX.utils.book_append_sheet(workbook, invoiceWS, "Invoices");
 
-        // 4. Inventory
         const inventoryRows = (rawData.inventory || []).map((iv) => ({
           "Part Name": iv.name || "-",
           "SKU / Part Number": iv.sku || "-",
@@ -574,7 +588,6 @@ export default function Settings() {
         const inventoryWS = XLSX.utils.json_to_sheet(inventoryRows);
         XLSX.utils.book_append_sheet(workbook, inventoryWS, "Inventory");
 
-        // 5. Vehicles
         const vehicleRows = (rawData.vehicles || []).map((v) => ({
           "Vehicle Make": v.make || "-",
           "Vehicle Model": v.model || "-",
@@ -588,7 +601,6 @@ export default function Settings() {
         const vehicleWS = XLSX.utils.json_to_sheet(vehicleRows);
         XLSX.utils.book_append_sheet(workbook, vehicleWS, "Vehicles");
 
-        // 6. Job Cards
         const jobCardRows = (rawData.jobCards || []).map((jc) => ({
           "Job Card ID": jc.jobCardId || jc._id || "-",
           "License Plate": jc.vehicleId?.licensePlate || jc.licensePlate || "-",
@@ -650,7 +662,6 @@ export default function Settings() {
           });
         };
 
-        // 1. Customers
         const customerCols = [
           { header: "Customer ID", accessor: "id" },
           { header: "Name", accessor: "name" },
@@ -672,7 +683,6 @@ export default function Settings() {
         }));
         drawPDFSection("1. Customers", customerCols, customerRows);
 
-        // 2. Services
         const serviceCols = [
           { header: "Service ID", accessor: "id" },
           { header: "Vehicle", accessor: "vehicle" },
@@ -696,7 +706,6 @@ export default function Settings() {
         }));
         drawPDFSection("2. Services", serviceCols, serviceRows);
 
-        // 3. Invoices
         const invoiceCols = [
           { header: "Invoice No", accessor: "id" },
           { header: "Customer", accessor: "customer" },
@@ -718,7 +727,6 @@ export default function Settings() {
         }));
         drawPDFSection("3. Invoices", invoiceCols, invoiceRows);
 
-        // 4. Inventory
         const inventoryCols = [
           { header: "Part Name", accessor: "name" },
           { header: "SKU", accessor: "sku" },
@@ -741,7 +749,6 @@ export default function Settings() {
         }));
         drawPDFSection("4. Inventory", inventoryCols, inventoryRows);
 
-        // 5. Vehicles
         const vehicleCols = [
           { header: "Make", accessor: "make" },
           { header: "Model", accessor: "model" },
@@ -760,7 +767,6 @@ export default function Settings() {
         }));
         drawPDFSection("5. Vehicles", vehicleCols, vehicleRows);
 
-        // 6. Job Cards
         const jobCardCols = [
           { header: "Job Card ID", accessor: "id" },
           { header: "License Plate", accessor: "plate" },
@@ -905,7 +911,7 @@ export default function Settings() {
 
       setRestoreResult(data);
       addToast("Data restored successfully!", "success");
-      fetchData(); // Refresh UI data
+      fetchData();
     } catch (err) {
       addToast(err.message || "Failed to restore backup", "error");
     } finally {
@@ -954,10 +960,9 @@ export default function Settings() {
       adminOnly: true,
     },
     { id: "catalog", label: "Services", icon: <List size={18} /> },
-
     {
       id: "notifications",
-      label: "Notifications & Live Data ",
+      label: "Notifications & Live Data",
       icon: <Bell size={18} />,
     },
     {
@@ -988,10 +993,9 @@ export default function Settings() {
               {garageId && isAdmin && (
                 <div className="mt-4 flex flex-wrap items-center gap-2 w-fit">
                   <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-2 rounded-2xl shadow-sm">
-                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:bg-swhite">
+                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
                       Garage ID
                     </span>
-
                     <code className="text-xs font-black text-slate-900 tracking-wide bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
                       {garageId}
                     </code>
@@ -1004,20 +1008,7 @@ export default function Settings() {
                       navigator.clipboard.writeText(garageId);
                       addToast("Garage ID copied!", "info");
                     }}
-                    className="
-              p-2
-              flex items-center justify-center
-              bg-white
-              border border-slate-200
-              rounded-2xl
-              shadow-sm
-              text-slate-500
-              hover:text-blue-600
-              hover:border-blue-200
-              hover:bg-blue-50
-              transition-all duration-300
-              active:scale-90
-            "
+                    className="p-2 flex items-center justify-center bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all duration-300 active:scale-90"
                     title="Copy ID"
                   >
                     <Copy size={16} strokeWidth={2.5} />
@@ -1030,27 +1021,13 @@ export default function Settings() {
               <button
                 onClick={handleSave}
                 disabled={isSaving || !hasChanges}
-                className="
-          self-start sm:self-auto
-          flex items-center gap-2
-          px-6 py-3
-          bg-blue-600 hover:bg-blue-700
-          disabled:bg-slate-300
-          disabled:cursor-not-allowed
-          text-white
-          rounded-2xl
-          text-sm font-bold
-          transition-all duration-300
-          shadow-md hover:shadow-xl
-          shrink-0
-        "
+                className="self-start sm:self-auto flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-2xl text-sm font-bold transition-all duration-300 shadow-md hover:shadow-xl shrink-0"
               >
                 {isSaving ? (
                   <Loader2 size={17} className="animate-spin" />
                 ) : (
                   <Save size={17} />
                 )}
-
                 {isSaving ? "Saving..." : "Save Changes"}
               </button>
             )}
@@ -1058,28 +1035,52 @@ export default function Settings() {
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="flex flex-row items-center justify-start gap-3.5 overflow-x-auto pb-2.5 scrollbar-hide">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3.5 text-sm font-bold rounded-2xl transition-all whitespace-nowrap
-                  ${
-                    isActive
-                      ? "bg-blue-600 text-white dark:bg-blue-950/90"
-                      : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-100"
-                  }`}
-                >
-                  <span className={isActive ? "text-white" : "text-slate-400"}>
-                    {tab.icon}
-                  </span>
-                  {tab.label}
-                </button>
-              );
-            })}
+          {/* ── SMOOTH SLIDING PILL TAB BAR ─────────────────────────────── */}
+          <div
+            ref={tabTrackRef}
+            className="relative flex flex-row items-center justify-start overflow-x-auto pb-2.5 scrollbar-hide"
+          >
+            {/* Track background */}
+            <div className="relative flex items-center gap-1 bg-white border border-slate-100 rounded-2xl p-1.5 w-full sm:w-auto">
+              {/* Sliding pill */}
+              <div
+                className="absolute top-1.5 h-[calc(100%-12px)] bg-blue-600 dark:bg-blue-950/90 rounded-xl pointer-events-none z-0"
+                style={{
+                  left: pillStyle.left,
+                  width: pillStyle.width,
+                  transition:
+                    "left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              />
+
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    ref={(el) => (tabRefs.current[tab.id] = el)}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative z-10 flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-xl whitespace-nowrap transition-colors duration-300
+                      ${
+                        isActive
+                          ? "text-white"
+                          : "text-slate-500 hover:text-slate-700"
+                      }`}
+                  >
+                    <span
+                      className={`transition-colors duration-300 ${
+                        isActive ? "text-white" : "text-slate-400"
+                      }`}
+                    >
+                      {tab.icon}
+                    </span>
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+          {/* ────────────────────────────────────────────────────────────── */}
 
           <div className="flex-1 bg-white rounded-2xl md:rounded-4xl border border-slate-100 overflow-hidden">
             <div className="p-6 md:p-10">
@@ -1178,7 +1179,6 @@ export default function Settings() {
                     </div>
 
                     <div className="flex flex-col items-center gap-6 p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem] relative group transition-all hover:bg-white hover:border-blue-200 shadow-sm">
-                      {/* Logo Preview */}
                       {logoFile || formData.logo ? (
                         <div className="w-60 h-60 rounded-3xl bg-white shadow-2xl shadow-slate-200/50 overflow-hidden flex items-center justify-center p-4 border border-slate-100">
                           <img
@@ -1199,7 +1199,6 @@ export default function Settings() {
                         </div>
                       )}
 
-                      {/* Actions */}
                       <div className="flex flex-col items-center gap-3">
                         {canEdit && (
                           <div className="flex flex-wrap justify-center gap-3">
@@ -1253,10 +1252,9 @@ export default function Settings() {
                 </div>
               )}
 
-              {/* ── CATALOG TAB ──────────────────────────────────────────── */}
+              {/* ── CATALOG TAB ── */}
               {activeTab === "catalog" && (
                 <div className="space-y-6">
-                  {/* Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                     <div className="flex items-start gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1304,7 +1302,6 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  {/* Catalog Content */}
                   <div className="space-y-4">
                     {catalog.length > 0 && (
                       <div className="hidden md:flex gap-4 px-5 mb-2">
@@ -1333,7 +1330,6 @@ export default function Settings() {
                         className="relative overflow-hidden group cursor-auto bg-slate-50 dark:bg-slate-950/20 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-300"
                       >
                         <div className="relative z-10 w-full flex flex-col md:flex-row items-start md:items-center gap-4">
-                          {/* Service Name */}
                           <div className="flex-1 w-full">
                             <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 mb-1 block md:hidden">
                               Service Name
@@ -1351,14 +1347,13 @@ export default function Settings() {
                                 if (catalog[idx]._id) {
                                   setEditedCatalogIds((prev) =>
                                     new Set(prev).add(catalog[idx]._id),
-                                  ); // ✅ ADD THIS
+                                  );
                                 }
                               }}
                               className="w-full border border-slate-200 dark:border-slate-800 rounded-2xl px-6 py-4 text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 disabled:bg-slate-100 dark:disabled:bg-slate-950 disabled:text-slate-500"
                             />
                           </div>
 
-                          {/* Default Price */}
                           <div className="w-full md:w-48">
                             <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 mb-1 block md:hidden">
                               Default Price
@@ -1378,7 +1373,7 @@ export default function Settings() {
                                   if (catalog[idx]._id) {
                                     setEditedCatalogIds((prev) =>
                                       new Set(prev).add(catalog[idx]._id),
-                                    ); // ✅ ADD THIS
+                                    );
                                   }
                                 }}
                                 className="w-full border border-slate-200 dark:border-slate-800 rounded-2xl pl-10 pr-6 py-4 text-sm font-black text-slate-800 dark:text-slate-200 focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 disabled:bg-slate-100 dark:disabled:bg-slate-950 disabled:text-slate-500"
@@ -1386,7 +1381,6 @@ export default function Settings() {
                             </div>
                           </div>
 
-                          {/* Delete */}
                           <button
                             type="button"
                             onClick={() => {
@@ -1411,10 +1405,9 @@ export default function Settings() {
                 </div>
               )}
 
-              {/* ── NOTIFICATIONS TAB ────────────────────────────────────── */}
+              {/* ── NOTIFICATIONS TAB ── */}
               {activeTab === "notifications" && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                  {/* Header */}
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1446,7 +1439,6 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  {/* Toggles */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <ToggleItem
                       title="Low Stock Alerts"
@@ -1466,10 +1458,9 @@ export default function Settings() {
                 </div>
               )}
 
-              {/* ── ADVANCED TAB ─────────────────────────────────────────── */}
+              {/* ── ADVANCED TAB ── */}
               {activeTab === "advanced" && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
-                  {/* Backup & Restore */}
                   <section className="space-y-8">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-black dark:bg-white rounded-full" />
@@ -1501,7 +1492,6 @@ export default function Settings() {
                           safekeeping.
                         </p>
 
-                        {/* Time Range Selector */}
                         <div className="space-y-3">
                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider px-1 block">
                             Time Range
@@ -1531,7 +1521,6 @@ export default function Settings() {
                           </div>
                         </div>
 
-                        {/* Export Buttons */}
                         <div className="space-y-3">
                           <button
                             type="button"
@@ -1665,7 +1654,6 @@ export default function Settings() {
                       </div>
                     </div>
 
-                    {/* Restore Results */}
                     {restoreResult && (
                       <div className="animate-in fade-in zoom-in-95 duration-300 bg-emerald-50 border border-emerald-100 rounded-4xl p-6 space-y-4">
                         <div className="flex items-center gap-2 text-emerald-700">

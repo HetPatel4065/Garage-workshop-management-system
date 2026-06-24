@@ -491,7 +491,12 @@ export default function HelpCenter() {
                     support@garageapp.com
                   </span>
                 </a>
-                <button className="w-full flex items-center justify-center gap-2 bg-white text-blue-600 py-3 rounded-xl font-black text-sm hover:bg-blue-50 transition-all">
+                <button
+                  onClick={() =>
+                    window.open("https://wa.me/919978972413", "_blank")
+                  }
+                  className="w-full flex items-center justify-center gap-2 bg-white text-blue-600 py-3 rounded-xl font-black text-sm hover:bg-blue-50 transition-all"
+                >
                   <MessageCircle size={18} className="shrink-0" />
                   Live Chat
                 </button>

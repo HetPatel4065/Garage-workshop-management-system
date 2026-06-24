@@ -66,7 +66,11 @@ router.get(
   optionalAuth,
   getMarketplaceWishlistCount,
 );
-router.get("/marketplace/preownedcars/:id", optionalAuth, getMarketplaceVehicleDetails);
+router.get(
+  "/marketplace/preownedcars/:id",
+  optionalAuth,
+  getMarketplaceVehicleDetails,
+);
 
 const uploadPhotos = upload.fields([
   { name: "photos", maxCount: 100 },

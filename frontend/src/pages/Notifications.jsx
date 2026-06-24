@@ -315,7 +315,7 @@ export default function Notifications() {
   );
 
   return (
-    <div className="p-4 sm:p-6 max-w-400 min-h-screen mx-auto bg-slate-950 text-slate-100 antialiased">
+    <div className="p-4 sm:p-6 bg-gray-100 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>

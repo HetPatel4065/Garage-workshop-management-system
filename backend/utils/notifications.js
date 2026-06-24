@@ -20,10 +20,7 @@ export const getGarageEmails = async (recipientEmail) => {
 
   try {
     const owner = await Owner.findOne({
-      $or: [
-        { email: normalizedEmail },
-        { "coOwners.email": normalizedEmail },
-      ],
+      $or: [{ email: normalizedEmail }, { "coOwners.email": normalizedEmail }],
     });
 
     if (!owner) {
@@ -50,14 +47,26 @@ export const getGarageEmails = async (recipientEmail) => {
 
     return Array.from(emails);
   } catch (err) {
-    console.error("[EMAIL ERROR] Failed to fetch garage emails from database:", err.message);
+    console.error(
+      "[EMAIL ERROR] Failed to fetch garage emails from database:",
+      err.message,
+    );
     return [recipientEmail];
   }
 };
 
 export const sendEmail = async (options, ...args) => {
-  let to, subject, html, attachments = [], smtpConfig = null, fromName = "Garage Admin";
-  if (typeof options === "object" && options !== null && !Array.isArray(options)) {
+  let to,
+    subject,
+    html,
+    attachments = [],
+    smtpConfig = null,
+    fromName = "Garage Admin";
+  if (
+    typeof options === "object" &&
+    options !== null &&
+    !Array.isArray(options)
+  ) {
     ({
       to,
       subject,
@@ -68,7 +77,13 @@ export const sendEmail = async (options, ...args) => {
     } = options);
   } else {
     to = options;
-    [subject, html, attachments = [], smtpConfig = null, fromName = "Garage Admin"] = args;
+    [
+      subject,
+      html,
+      attachments = [],
+      smtpConfig = null,
+      fromName = "Garage Admin",
+    ] = args;
   }
 
   try {
@@ -101,7 +116,10 @@ export const sendEmail = async (options, ...args) => {
     try {
       recipients = await getGarageEmails(to);
     } catch (err) {
-      console.error("[EMAIL ERROR] Failed to fetch garage emails:", err.message);
+      console.error(
+        "[EMAIL ERROR] Failed to fetch garage emails:",
+        err.message,
+      );
     }
 
     for (const recipient of recipients) {
@@ -122,7 +140,10 @@ export const sendEmail = async (options, ...args) => {
           `[EMAIL SENT] ID: ${info.messageId} | Subject: "${subject}" → ${recipient}`,
         );
       } catch (err) {
-        console.error(`[EMAIL ERROR] Failed to send email to ${recipient}:`, err.message);
+        console.error(
+          `[EMAIL ERROR] Failed to send email to ${recipient}:`,
+          err.message,
+        );
       }
     }
   } catch (err) {

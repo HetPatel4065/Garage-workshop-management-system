@@ -1,11 +1,11 @@
 import express from "express";
 import { auth } from "../middleware/auth.middleware.js";
-import { 
-  getServiceCatalog, 
+import {
+  getServiceCatalog,
   addToCatalog,
   getLabourSettings,
   updateCatalogItem,
-  deleteFromCatalog
+  deleteFromCatalog,
 } from "../controllers/serviceCatalog.controller.js";
 
 const router = express.Router();

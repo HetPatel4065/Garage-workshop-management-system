@@ -42,10 +42,10 @@ function filterUrgentReminders(vehicles) {
 
 function PageLoadingFallback() {
   return (
-    <div className="max-w-screen max-h-screen mx-auto flex flex-col items-center justify-center p-8 bg-slate-100 dark:bg-zinc-900 transition-colors">
+    <div className="w-full min-h-[60vh] flex flex-col items-center justify-center p-8 bg-gray-100 dark:bg-zinc-950 transition-colors">
       <div className="flex min-h-40 flex-col items-center justify-center gap-4">
         <div className="relative h-12 w-12">
-          <div className="absolute inset-0 rounded-full border-4 border-slate-300 dark:border-zinc-600"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-slate-300 dark:border-zinc-700"></div>
 
           <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-blue-500"></div>
         </div>
@@ -192,14 +192,7 @@ export default function GarageLayout({ children }) {
   // ── Render ───
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300">
-      {/* Desktop sidebar spacer */}
-      <div
-        className={`hidden lg:block shrink-0 transition-all duration-300 ease-in-out ${
-          collapsed ? "w-20" : "w-68"
-        }`}
-      />
-
+    <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-zinc-950 transition-colors duration-300">
       <GarageSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -220,7 +213,10 @@ export default function GarageLayout({ children }) {
       )}
 
       {/* ── Main content column ── */}
-      <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden relative">
+      <div
+        className="flex flex-col flex-1 min-w-0 overflow-hidden relative"
+        style={{ minWidth: 0 }}
+      >
         {!hideNavbar && (
           <GarageNavbar
             role={user?.role ?? ""}
@@ -239,7 +235,7 @@ export default function GarageLayout({ children }) {
         )}
 
         {/* ── Page content ── */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-100 dark:bg-zinc-900 transition-colors duration-300 relative min-w-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-100 dark:bg-zinc-950 transition-colors duration-300 relative min-w-0">
           <div className="w-full h-full max-w-[2400px] mx-auto">
             <Suspense fallback={<PageLoadingFallback />}>
               <AnimatePresence mode="wait">

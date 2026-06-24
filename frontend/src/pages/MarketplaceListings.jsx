@@ -825,15 +825,10 @@ export default function MarketplaceListings({
       count: totalListings,
       icon: Tag,
       colorClasses: {
-        // Light Mode & Dark Mode active container states
         activeBg: "bg-blue-50 dark:bg-blue-950/40",
         activeBorder: "border-blue-200 dark:border-blue-800",
-
-        // Dynamic badge/icon shapes
         iconBg: "bg-blue-100 dark:bg-blue-900/50",
         iconColor: "text-blue-600 dark:text-blue-400",
-
-        // Typography
         label: "text-blue-600 dark:text-blue-400",
         count: "text-blue-700 dark:text-blue-300",
       },
@@ -846,10 +841,8 @@ export default function MarketplaceListings({
       colorClasses: {
         activeBg: "bg-emerald-50 dark:bg-emerald-950/40",
         activeBorder: "border-emerald-200 dark:border-emerald-800",
-
         iconBg: "bg-emerald-100 dark:bg-emerald-900/50",
         iconColor: "text-emerald-600 dark:text-emerald-400",
-
         label: "text-emerald-600 dark:text-emerald-400",
         count: "text-emerald-700 dark:text-emerald-300",
       },
@@ -862,10 +855,8 @@ export default function MarketplaceListings({
       colorClasses: {
         activeBg: "bg-violet-50 dark:bg-violet-950/40",
         activeBorder: "border-violet-200 dark:border-violet-800",
-
         iconBg: "bg-violet-100 dark:bg-violet-900/50",
         iconColor: "text-violet-600 dark:text-violet-400",
-
         label: "text-violet-600 dark:text-violet-400",
         count: "text-violet-700 dark:text-violet-300",
       },
