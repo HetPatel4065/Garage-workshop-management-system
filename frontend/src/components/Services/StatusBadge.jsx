@@ -12,12 +12,10 @@ export default function StatusBadge({ status }) {
 
   // Safe fallback to handle unknown statuses or undefined values gracefully
   const colorClass =
-    colorMap[status?.toLowerCase()] ||
-    "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20";
-
+    colorMap[status?.toLowerCase()]
   return (
     <span
-      className={`px-2 py-0.5 border rounded text-[10px] uppercase font-bold tracking-widest transition-colors duration-200 ${colorClass}`}
+      className={`px-2 py-0.5  text-[10.5px] uppercase font-bold rounded-lg tracking-tight transition-colors duration-200 flex items-center gap-1  ${colorClass}`}
     >
       {(status || "").replace(/-/g, " ")}
     </span>
