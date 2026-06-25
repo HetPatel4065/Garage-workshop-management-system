@@ -1305,10 +1305,10 @@ export default function Settings() {
                   <div className="space-y-4">
                     {catalog.length > 0 && (
                       <div className="hidden md:flex gap-4 px-5 mb-2">
-                        <div className="flex-1 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">
+                        <div className="flex-1 text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">
                           Service Package Name
                         </div>
-                        <div className="w-48 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">
+                        <div className="w-48 text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">
                           Default Base Price
                         </div>
                         <div className="w-12" />

@@ -9,30 +9,61 @@ import CustomerList from "../components/Customers/CustomerList";
 import { useAuth } from "../context/AuthContext";
 import ConfirmModal from "../components/UI/ConfirmModal";
 import VehicleHistoryModal from "../components/Customers/VehicleHistoryModal";
-import { Plus, X } from "lucide-react";
+import {
+  Plus,
+  X,
+  Users,
+  UserCheck,
+  Clock,
+  UserMinus,
+  ShieldAlert,
+  UserX,
+} from "lucide-react";
 import ExportButton from "../components/common/ExportButton";
 import { useSocket } from "../context/SocketContext";
 
-const CUSTOMER_STATUS_FILTERS = [
-  {
-    value: "Active",
-    classes:
-      "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 border-emerald-300 hover:bg-emerald-200/80",
-    activeRing: "ring-emerald-400",
-  },
-  {
-    value: "Inactive",
-    classes:
-      "bg-gray-100 dark:bg-gray-700/50 text-gray-700 border-gray-300 hover:bg-gray-200/80",
-    activeRing: "ring-gray-400",
-  },
-  {
-    value: "Blocked",
-    classes:
-      "bg-red-100 dark:bg-red-950/50 text-red-700 border-red-300 hover:bg-red-200/80",
-    activeRing: "ring-red-400",
-  },
-];
+// ─── Stat Card ───
+const StatCard = ({
+  label,
+  count,
+  icon: Icon,
+  colorClasses,
+  onClick,
+  active,
+}) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all duration-200 text-left w-full
+      ${
+        active
+          ? `${colorClasses.activeBg} ${colorClasses.activeBorder} shadow-sm scale-[1.02]`
+          : "bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm"
+      }`}
+  >
+    <div
+      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${active ? colorClasses.iconBg : "bg-slate-50 dark:bg-slate-800"}`}
+    >
+      <Icon
+        size={16}
+        className={
+          active ? colorClasses.iconColor : "text-slate-400 dark:text-slate-500"
+        }
+      />
+    </div>
+    <div className="min-w-0">
+      <p
+        className={`text-[10px] font-black uppercase tracking-widest leading-none mb-1 ${active ? colorClasses.label : "text-slate-400 dark:text-slate-500"}`}
+      >
+        {label}
+      </p>
+      <p
+        className={`text-xl font-black leading-none ${active ? colorClasses.count : "text-slate-800 dark:text-slate-200"}`}
+      >
+        {count}
+      </p>
+    </div>
+  </button>
+);
 
 export default function Customers() {
   const { user, token } = useAuth();
@@ -352,6 +383,65 @@ export default function Customers() {
     },
   ];
 
+  const statCards = [
+    {
+      label: "All",
+      count: statusCounts.All,
+      icon: Users,
+      value: "All",
+      colorClasses: {
+        activeBg: "bg-blue-50 dark:bg-blue-950/40",
+        activeBorder: "border-blue-200 dark:border-blue-800",
+        iconBg: "bg-blue-100 dark:bg-blue-900/50",
+        iconColor: "text-blue-600 dark:text-blue-400",
+        label: "text-blue-600 dark:text-blue-400",
+        count: "text-blue-700 dark:text-blue-300",
+      },
+    },
+    {
+      label: "Active",
+      count: statusCounts.Active,
+      icon: UserCheck,
+      value: "Active",
+      colorClasses: {
+        activeBg: "bg-emerald-50 dark:!bg-emerald-950/40",
+        activeBorder: "border-emerald-200 dark:border-emerald-800",
+        iconBg: "bg-emerald-100 dark:!bg-emerald-900/50",
+        iconColor: "text-emerald-600 dark:text-emerald-400",
+        label: "text-emerald-600 dark:text-emerald-400",
+        count: "text-emerald-700 dark:text-emerald-300",
+      },
+    },
+    {
+      label: "Inactive",
+      count: statusCounts.Inactive,
+      icon: UserMinus,
+      value: "Inactive",
+      colorClasses: {
+        activeBg: "bg-slate-50 dark:bg-slate-950/40",
+        activeBorder: "border-slate-200 dark:border-slate-800",
+        iconBg: "bg-slate-100 dark:bg-slate-900/50",
+        iconColor: "text-slate-600 dark:text-slate-400",
+        label: "text-slate-600 dark:text-slate-400",
+        count: "text-slate-700 dark:text-slate-300",
+      },
+    },
+    {
+      label: "Blocked",
+      count: statusCounts.Blocked,
+      icon: ShieldAlert,
+      value: "Blocked",
+      colorClasses: {
+        activeBg: "bg-rose-50 dark:bg-rose-950/40",
+        activeBorder: "border-rose-200 dark:border-rose-800",
+        iconBg: "bg-rose-100 dark:bg-rose-900/50",
+        iconColor: "text-rose-600 dark:text-rose-400",
+        label: "text-rose-600 dark:text-rose-400",
+        count: "text-rose-700 dark:text-rose-300",
+      },
+    },
+  ];
+
   return (
     <div className="p-4 sm:p-6 bg-gray-100 dark:bg-slate-950 min-h-screen">
       <div className="mb-8 pb-5 border-b-3 border-slate-200/80 dark:border-slate-700">
@@ -400,98 +490,80 @@ export default function Customers() {
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="mb-6 flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1">
-          <SearchBar
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setIsTyping(true);
-            }}
-            onSearch={(term) => {
-              const cleanTerm = term.trim();
-              setIsTyping(false);
-              setActiveSearch(cleanTerm);
-              setSearchQuery("");
-              if (cleanTerm) {
-                navigate(`/customers?q=${encodeURIComponent(cleanTerm)}`, {
-                  replace: true,
-                });
-              } else {
-                navigate("/customers", { replace: true });
-              }
-            }}
-            activeSearch={!isTyping && activeSearch}
-            onClearActive={() => {
-              setActiveSearch("");
+      {/* Search Bar */}
+      <div className="mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setIsTyping(true);
+          }}
+          onSearch={(term) => {
+            const cleanTerm = term.trim();
+            setIsTyping(false);
+            setActiveSearch(cleanTerm);
+            setSearchQuery("");
+            if (cleanTerm) {
+              navigate(`/customers?q=${encodeURIComponent(cleanTerm)}`, {
+                replace: true,
+              });
+            } else {
               navigate("/customers", { replace: true });
-            }}
-            placeholder="Search by customer name, email, phone or vehicle..."
-            className="w-full"
-          />
-        </div>
-        <div className="w-full lg:w-64">
-          <select
-            id="customer-status-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
-          >
-            <option value="All">All Statuses ({statusCounts.All})</option>
-            {["Active", "Pending", "Inactive", "Blocked", "Rejected"].map(
-              (k) => (
-                <option key={k} value={k}>
-                  {k} ({statusCounts[k] || 0})
-                </option>
-              ),
-            )}
-          </select>
-        </div>
+            }
+          }}
+          activeSearch={!isTyping && activeSearch}
+          onClearActive={() => {
+            setActiveSearch("");
+            navigate("/customers", { replace: true });
+          }}
+          placeholder="Search by customer name, email, phone or vehicle..."
+          className="w-full"
+        />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 mb-6">
-        <button
-          type="button"
-          onClick={() => setStatusFilter("All")}
-          className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
-            statusFilter === "All"
-              ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-300 ring-offset-1"
-              : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-          }`}
-        >
-          All: {statusCounts.All}
-        </button>
-        {CUSTOMER_STATUS_FILTERS.map(({ value, classes, activeRing }) => {
-          const isActive = statusFilter === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              onClick={() =>
-                setStatusFilter((prev) => (prev === value ? "All" : value))
-              }
-              className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all cursor-auto ${classes} ${
-                isActive
-                  ? `ring-2 ${activeRing} ring-offset-1 shadow-sm scale-[1.02]`
-                  : "opacity-90 hover:opacity-100"
-              }`}
-              aria-pressed={isActive}
-            >
-              {value}: {statusCounts[value] || 0}
-            </button>
-          );
-        })}
-        {(statusFilter === "Pending" || statusFilter === "Rejected") && (
-          <button
-            type="button"
-            onClick={() => setStatusFilter("All")}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition-colors"
-          >
-            Status: {statusFilter} <X size={11} />
-          </button>
-        )}
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        {statCards.map((card) => (
+          <StatCard
+            key={card.value}
+            {...card}
+            active={statusFilter === card.value}
+            onClick={() =>
+              setStatusFilter((prev) =>
+                prev === card.value ? "All" : card.value,
+              )
+            }
+          />
+        ))}
       </div>
+
+      {/* ── Active Filter Chip ── */}
+      {(statusFilter !== "All" || activeSearch) && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-bold text-slate-500">
+            Active Filters:
+          </span>
+          {statusFilter !== "All" && (
+            <button
+              onClick={() => setStatusFilter("All")}
+              className="inline-flex items-center capitalize gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition-colors"
+            >
+              Status: {statusFilter} <X size={11} />
+            </button>
+          )}
+          {activeSearch && (
+            <button
+              onClick={() => {
+                setActiveSearch("");
+                navigate("/customers", { replace: true });
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition-colors"
+            >
+              Search: "{activeSearch}" <X size={11} />
+            </button>
+          )}
+        </div>
+      )}
       <div className="mt-4 border-t border-gray-100 p-4">
         <p className="text-sm font-medium text-gray-600">
           Total Customer:{" "}
