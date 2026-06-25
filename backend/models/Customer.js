@@ -31,7 +31,7 @@ const customerSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Active", "Inactive", "Blocked", "Pending", "Rejected"],
+      enum: ["Active", "Inactive", "Blocked"],
       default: "Active",
     },
     isVerified: {

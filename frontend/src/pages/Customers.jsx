@@ -546,7 +546,7 @@ export default function Customers() {
           {statusFilter !== "All" && (
             <button
               onClick={() => setStatusFilter("All")}
-              className="inline-flex items-center capitalize gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition-colors"
+              className="inline-flex items-center capitalize gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-full text-[11px] font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             >
               Status: {statusFilter} <X size={11} />
             </button>
@@ -557,7 +557,7 @@ export default function Customers() {
                 setActiveSearch("");
                 navigate("/customers", { replace: true });
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-full text-[11px] font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
             >
               Search: "{activeSearch}" <X size={11} />
             </button>

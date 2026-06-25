@@ -32,20 +32,15 @@ export default function CustomerCard({
 }) {
   const STATUS_META = {
     Active:
-      "text-emerald-700 dark:bg-emerald-950/50 bg-emerald-100 border-emerald-100",
+      "text-emerald-700 dark:!bg-emerald-950/70 bg-emerald-100 !border-emerald-400",
     Inactive: "text-gray-600 dark:bg-gray-700/50 bg-gray-100 border-gray-100",
     Blocked: "text-red-700 dark:bg-red-950/50 bg-red-100 border-red-100",
-    Pending: "text-blue-700 dark:bg-blue-950/90 bg-blue-100 border-blue-100",
-    Rejected:
-      "text-orange-700 dark:bg-orange-950/50 bg-orange-100 border-orange-100",
   };
 
   const normalizedStatus = [
     "Active",
     "Inactive",
     "Blocked",
-    "Pending",
-    "Rejected",
   ].includes(customer?.status)
     ? customer.status
     : "Active";
