@@ -289,6 +289,9 @@ export default function Services() {
         const done = (row.requestedServices || [])
           .filter((r) => r.status === "Done")
           .map((r) => r.description);
+        if (row.requestedServices && row.requestedServices[0] === "leave") {
+          return "Holiday";
+        }
         return done.length > 0 ? done.join(", ") : row.serviceName || "N/A";
       },
     },
@@ -297,7 +300,7 @@ export default function Services() {
       accessor: (row) =>
         Array.isArray(row.partsUsed) && row.partsUsed.length > 0
           ? row.partsUsed.map((p) => p.name || p.partName).join(", ")
-          : "None",
+          : "No Used parts",
     },
     {
       header: "Cost",
@@ -347,7 +350,7 @@ export default function Services() {
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
             <ExportButton
-              title="Services List"
+              title="Service Lists"
               columns={exportColumns}
               data={filteredServices}
               filenamePrefix="services"

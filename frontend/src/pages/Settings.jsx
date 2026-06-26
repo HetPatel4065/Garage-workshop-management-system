@@ -36,6 +36,8 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import EmptyState from "../components/UI/EmptyState";
 import ExportButton from "../components/common/ExportButton";
+import ServicePricingSettings from "../components/Settings/ServicePricingSettings";
+
 import {
   exportToPDF,
   exportToExcel,
@@ -241,7 +243,7 @@ export default function Settings() {
     confirm: false,
   });
 
-  // ── Sliding pill tab refs ──────────────────────────────────────────────────
+  // ── Sliding pill tab refs ──
   const tabRefs = useRef({});
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
   const tabTrackRef = useRef(null);
@@ -960,6 +962,7 @@ export default function Settings() {
       adminOnly: true,
     },
     { id: "catalog", label: "Services", icon: <List size={18} /> },
+    { id: "pricing", label: "Service Pricing", icon: <CreditCard size={18} /> }, // 👈 ADD THIS
     {
       id: "notifications",
       label: "Notifications & Live Data",
@@ -1403,6 +1406,9 @@ export default function Settings() {
                     ))}
                   </div>
                 </div>
+              )}
+              {activeTab === "pricing" && (
+                <ServicePricingSettings token={token} />
               )}
 
               {/* ── NOTIFICATIONS TAB ── */}

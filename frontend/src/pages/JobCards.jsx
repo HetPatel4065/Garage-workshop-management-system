@@ -5,6 +5,7 @@ import { useToast } from "../context/ToastContext";
 import SearchBar from "../components/UI/SearchBar";
 import Modal from "../components/UI/Modal";
 import ConfirmModal from "../components/UI/ConfirmModal";
+import JobCardPricingPanel from "../components/Services/JobCardPricingPanel";
 import {
   FileText,
   Save,
@@ -1574,6 +1575,19 @@ export default function JobCards() {
                       </div>
                     </div>
                   )}
+
+                  <JobCardPricingPanel
+                    vehicleModel={
+                      availableCarsForCustomer.find(
+                        (v) => v._id === jc.vehicleId,
+                      )?.model || ""
+                    }
+                    selectedServices={(jc.instructionText || "")
+                      .split("\n")
+                      .map((l) => l.replace(/^\d+\.\s*/, "").trim())
+                      .filter(Boolean)}
+                    token={token}
+                  />
 
                   {/* ── SERVICE INSTRUCTIONS TEXTAREA ── */}
                   <div className="flex flex-col mt-4">

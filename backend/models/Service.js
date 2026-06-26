@@ -140,7 +140,7 @@ serviceSchema.pre("save", async function (next) {
       const lastService = await this.constructor
         .findOne({
           ownerId: this.ownerId,
-          serviceId: { $regex: /^SRV-/ },
+          serviceId: { $regex: /^SRV#(\d+)$/ },
         })
         .sort({ serviceId: -1 })
         .lean();
@@ -155,7 +155,7 @@ serviceSchema.pre("save", async function (next) {
         }
       }
 
-      this.serviceId = `SRV-${nextNum}`;
+      this.serviceId = `SRV#${nextNum}`;
     } catch (err) {
       console.error("Error generating serviceId:", err);
     }

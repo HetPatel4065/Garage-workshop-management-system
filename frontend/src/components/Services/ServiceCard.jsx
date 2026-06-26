@@ -106,7 +106,7 @@ export default function ServiceCard({
           })()}
         </h3>
         <span className="px-2 py-0.5  bg-slate-100 border border-slate-300 text-slate-600 text-[11px] font-bold rounded-lg uppercase tracking-wide">
-          #{service.serviceId || service._id?.slice(-6)?.toUpperCase() || "N/A"}
+          {service.serviceId || service._id?.slice(-6)?.toUpperCase() || "N/A"}
         </span>
         <StatusBadge status={service.status} />
         {service.advisorId?.name && (

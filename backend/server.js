@@ -36,6 +36,7 @@ import initializeAdmin from "./utils/adminLogin.js";
 import Customer from "./models/Customer.js";
 import Owner from "./models/Owner.js";
 import activityLogRoutes from "./routes/activityLog.routes.js";
+import servicePricingRoutes from "./routes/servicePricing.routes.js";
 import {
   initDailyReportCron,
   initServiceReminderCron,
@@ -92,6 +93,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/activity-log", activityLogRoutes);
+app.use("/api/service-pricing", servicePricingRoutes);
 
 // 5. Health Check (UX Win: For monitoring server uptime)
 app.get("/health", (req, res) => {
@@ -123,41 +125,41 @@ mongoose
     // 👤 Initialize/Sync Admin
     await initializeAdmin();
 
-      // Drop legacy global unique indexes; IDs are unique per garage (compound index)
-      try {
-        const customerIndexes = await Customer.collection.indexes();
-        for (const idx of customerIndexes) {
-          const keys = Object.keys(idx.key || {});
-          const isLegacyGlobalCustomerId =
-            idx.name === "customerId_1" &&
-            keys.length === 1 &&
-            keys[0] === "customerId";
-          const isLegacyGlobalPhone =
-            idx.name === "phone_1" && keys.length === 1 && keys[0] === "phone";
-          if (isLegacyGlobalCustomerId || isLegacyGlobalPhone) {
-            await Customer.collection.dropIndex(idx.name);
-            console.log(`Dropped legacy Customer index: ${idx.name}`);
-          }
+    // Drop legacy global unique indexes; IDs are unique per garage (compound index)
+    try {
+      const customerIndexes = await Customer.collection.indexes();
+      for (const idx of customerIndexes) {
+        const keys = Object.keys(idx.key || {});
+        const isLegacyGlobalCustomerId =
+          idx.name === "customerId_1" &&
+          keys.length === 1 &&
+          keys[0] === "customerId";
+        const isLegacyGlobalPhone =
+          idx.name === "phone_1" && keys.length === 1 && keys[0] === "phone";
+        if (isLegacyGlobalCustomerId || isLegacyGlobalPhone) {
+          await Customer.collection.dropIndex(idx.name);
+          console.log(`Dropped legacy Customer index: ${idx.name}`);
         }
-        await Customer.syncIndexes();
-      } catch (indexErr) {
-        console.warn("Customer index sync warning:", indexErr.message);
       }
+      await Customer.syncIndexes();
+    } catch (indexErr) {
+      console.warn("Customer index sync warning:", indexErr.message);
+    }
 
-      // Drop unique garageId_1 index on owners if it exists
-      try {
-        const ownerIndexes = await Owner.collection.indexes();
-        const hasUniqueGarageId = ownerIndexes.find(
-          (idx) => idx.name === "garageId_1" && idx.unique
-        );
-        if (hasUniqueGarageId) {
-          await Owner.collection.dropIndex("garageId_1");
-          console.log("Dropped unique garageId_1 index on Owners collection.");
-        }
-        await Owner.syncIndexes();
-      } catch (ownerIndexErr) {
-        console.warn("Owner index sync warning:", ownerIndexErr.message);
+    // Drop unique garageId_1 index on owners if it exists
+    try {
+      const ownerIndexes = await Owner.collection.indexes();
+      const hasUniqueGarageId = ownerIndexes.find(
+        (idx) => idx.name === "garageId_1" && idx.unique,
+      );
+      if (hasUniqueGarageId) {
+        await Owner.collection.dropIndex("garageId_1");
+        console.log("Dropped unique garageId_1 index on Owners collection.");
       }
+      await Owner.syncIndexes();
+    } catch (ownerIndexErr) {
+      console.warn("Owner index sync warning:", ownerIndexErr.message);
+    }
 
     // Initialize Socket.io
     initSocket(server);
