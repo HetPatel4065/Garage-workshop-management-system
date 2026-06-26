@@ -504,12 +504,12 @@ export default function Dashboard() {
                       />
 
                       {/* Service Name */}
-                      <span className="truncate  text-[12px] font-black uppercase text-slate-700">
+                      <span className="truncate  text-[10px] font-black uppercase text-slate-700">
                         {item.name} {" : "}
                       </span>
 
                       {/* Service Value (Pushed to the right) */}
-                      <span className="ml-1 text-[12px] font-black text-slate-800">
+                      <span className="ml-1 text-[10px] font-black text-slate-800">
                         {item.value}
                       </span>
                     </div>
@@ -550,8 +550,11 @@ export default function Dashboard() {
         </div>
 
         {/* Sidebar — 1 col */}
+
         <div className="space-y-4 sm:space-y-6">
-          <PendingApprovals inspections={inspections} />
+          {user?.role !== "mechanic" && user?.role !== "advisor" && (
+            <PendingApprovals inspections={inspections} />
+          )}
 
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden h-fit">
             <div className="p-5 sm:p-6 pb-4 flex items-center justify-between border-b border-slate-50">

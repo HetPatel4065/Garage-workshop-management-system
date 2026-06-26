@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 
 export default function AboutUs() {
   useEffect(() => {
-    document.title = "About GaragePro | Garage Workshop Management";
 
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {

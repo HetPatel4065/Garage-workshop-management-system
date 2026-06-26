@@ -105,7 +105,7 @@ export default function JobCard({
         </button>
 
         {/* Edit + Delete — Restricted Roles */}
-        {role !== "mechanic" && role !== "advisor" && (
+        {role !== "mechanic" && (
           <div className="flex items-center gap-2">
             <button
               onClick={() => onEdit(jc)}

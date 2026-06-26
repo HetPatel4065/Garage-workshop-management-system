@@ -6,7 +6,7 @@ export default function QuickActionButtons({
   onAddInventory,
   role,
 }) {
-  const isMechanic = role === "mechanic";
+  const isMechanic = role === "mechanic" || role === "advisor";
 
   return (
     <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-8">

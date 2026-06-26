@@ -11,6 +11,7 @@ import {
   Car,
   ArrowLeft,
   MapPin,
+  TagIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
@@ -21,6 +22,7 @@ import {
   FormError,
   FormRow,
 } from "../../components/layout/Form/forms";
+import { FaCar } from "react-icons/fa";
 
 const RegistrationModal = ({ isOpen, onClose, garage }) => {
   const [step, setStep] = useState(1); // 1: Details, 2: OTP, 3: Success
@@ -311,7 +313,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                           },
                         });
                       }}
-                      leftIcon={<Car className="w-5 h-5 text-slate-400" />}
+                      leftIcon={<TagIcon className="w-5 h-5 text-slate-400" />}
                       inputClassName="w-full uppercase pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none text-base font-semibold tracking-wider"
                     />
                   </div>
@@ -324,7 +326,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                       value={formData.vehicleModel}
                       onChange={handleInputChange}
                       placeholder="Toyota Camry"
-                      leftIcon={<Wrench className="w-5 h-5 text-slate-400" />}
+                      leftIcon={<FaCar className="w-5 h-5 text-slate-400" />}
                       inputClassName="w-full capitalize pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-2xl transition-all outline-none"
                     />
                   </div>

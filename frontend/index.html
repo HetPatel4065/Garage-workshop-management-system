@@ -4,31 +4,31 @@
 <head>
   <meta charset="UTF-8" />
   <script>
-  (function() {
-    try {
-      // 1. Check sessionStorage to match your React context
-      var storedTheme = sessionStorage.getItem('theme');
-      
-      // 2. Default to 'light' if it's a completely new tab session
-      var theme = storedTheme ? storedTheme : 'light';
-      
-      var isDark = false;
-      if (theme === 'dark') {
-        isDark = true;
-      } else if (theme === 'system') {
-        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
+    (function () {
+      try {
+        // 1. Check sessionStorage to match your React context
+        var storedTheme = sessionStorage.getItem('theme');
 
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    } catch (e) {}
-  })();
-</script>
+        // 2. Default to 'light' if it's a completely new tab session
+        var theme = storedTheme ? storedTheme : 'light';
 
-  <link rel="icon" type="image/png" href="/logo.png" />
+        var isDark = false;
+        if (theme === 'dark') {
+          isDark = true;
+        } else if (theme === 'system') {
+          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) { }
+    })();
+  </script>
+
+  <link rel="icon" type="image/png" href="/gemini.svg" sizes="1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Garage Management System</title>
 </head>
@@ -42,7 +42,7 @@
         --bg-color: #ffffff;
         --text-color: #111111;
       }
-      
+
       html.dark {
         --bg-color: #090d16;
         --text-color: #f3f4f6;
@@ -51,7 +51,8 @@
       .preloader {
         position: fixed;
         inset: 0;
-        background: var(--bg-color); /* Uses variable */
+        background: var(--bg-color);
+        /* Uses variable */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -71,7 +72,8 @@
       }
 
       .preloader-text {
-        color: var(--text-color); /* Uses variable */
+        color: var(--text-color);
+        /* Uses variable */
         font-weight: 800;
         font-size: 24px;
         letter-spacing: -0.025em;

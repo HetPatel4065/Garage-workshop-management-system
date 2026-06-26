@@ -18,7 +18,6 @@ const backgroundImage = () => {
 };
 const LandingPage = () => {
   useEffect(() => {
-    document.title = "GaragePro | Modern Workshop Management Software";
 
     // Meta description
     let meta = document.querySelector('meta[name="description"]');
