@@ -22,7 +22,7 @@ window.fetch = async (...args) => {
       const clone = response.clone();
       const data = await clone.json();
       if (data.details && Array.isArray(data.details)) {
-        errorMsg = data.details.map((d) => d.message).join(", ");
+        errorMsg = data.details.join(", ");
       } else {
         errorMsg = data.error || data.message || data.msg || errorMsg;
       }

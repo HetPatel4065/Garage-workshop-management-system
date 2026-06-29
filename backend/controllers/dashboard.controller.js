@@ -15,11 +15,9 @@ export const getDashboardStats = async (req, res, next) => {
     const now = new Date();
 
     if (!ownerId) {
-      return res
-        .status(403)
-        .json({
-          error: "Cannot fetch dashboard: User is not linked to a garage",
-        });
+      return res.status(403).json({
+        error: "Cannot fetch dashboard: User is not linked to a garage",
+      });
     }
 
     // Date range calculations (Local Time)
@@ -59,7 +57,7 @@ export const getDashboardStats = async (req, res, next) => {
       createdAt: { $gte: rangeStart },
     });
 
-    //// 🏎️ Fetch Staff Counts
+    // Fetch Staff Counts
     const advisorCount = await Advisor.countDocuments({ ownerId });
     const mechanicCount = await Mechanic.countDocuments({ ownerId });
 
@@ -209,10 +207,10 @@ export const getDashboardStats = async (req, res, next) => {
       previousPeriodServices === 0
         ? 100
         : Math.round(
-          ((currentPeriodServices - previousPeriodServices) /
-            previousPeriodServices) *
-          100,
-        );
+            ((currentPeriodServices - previousPeriodServices) /
+              previousPeriodServices) *
+              100,
+          );
 
     // Customer Trend (based on range)
     const previousPeriodCustomers = await Customer.countDocuments({
@@ -223,10 +221,10 @@ export const getDashboardStats = async (req, res, next) => {
       previousPeriodCustomers === 0
         ? 100
         : Math.round(
-          ((newCustomers - previousPeriodCustomers) /
-            previousPeriodCustomers) *
-          100,
-        );
+            ((newCustomers - previousPeriodCustomers) /
+              previousPeriodCustomers) *
+              100,
+          );
 
     // 6. Get Arrays
     const recentServices = await Service.find({ ownerId })
@@ -238,7 +236,7 @@ export const getDashboardStats = async (req, res, next) => {
 
     const lowStockItems = await Inventory.find({
       ownerId,
-      $expr: { $lte: ["$stock", "$minLimit"] }
+      $expr: { $lte: ["$stock", "$minLimit"] },
     }).limit(5);
 
     // 7. Reminder Statistics
@@ -251,30 +249,30 @@ export const getDashboardStats = async (req, res, next) => {
         $match: {
           ownerId: new mongoose.Types.ObjectId(ownerId),
           status: "Completed",
-          nextServiceDate: { $ne: null }
-        }
+          nextServiceDate: { $ne: null },
+        },
       },
       { $sort: { serviceDate: -1, createdAt: -1 } },
       {
         $group: {
           _id: "$vehicleId",
           nextServiceDate: { $first: "$nextServiceDate" },
-        }
+        },
       },
       {
         $lookup: {
           from: "vehicles",
           localField: "_id",
           foreignField: "_id",
-          as: "vehicleInfo"
-        }
+          as: "vehicleInfo",
+        },
       },
       {
         $unwind: {
           path: "$vehicleInfo",
-          preserveNullAndEmptyArrays: true
-        }
-      }
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ]);
 
     let dueToday = 0;
@@ -310,7 +308,7 @@ export const getDashboardStats = async (req, res, next) => {
         dueToday,
         dueThisWeek,
         overdue: overdueReminders,
-        pending: remindersSent
+        pending: remindersSent,
       },
       staffCount: {
         advisors: Number(advisorCount),

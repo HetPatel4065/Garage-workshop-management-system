@@ -62,8 +62,8 @@ function getInitialState(itemData) {
     retailPrice: itemData?.retailPrice ?? "",
     supplierName: itemData?.supplier?.name || "",
     supplierContact: itemData?.supplier?.contact || "+91 ",
-    location: itemData?.location || "Ahmedabad",
-    carYear: itemData?.carYear || "All Years",
+    location: itemData?.location || "",
+    carYear: itemData?.carYear,
     notes: itemData?.notes || "",
   };
 }
@@ -73,6 +73,7 @@ export default function InventoryForm({
   onSubmit,
   onClose,
   readOnly,
+  existingItems = [],
 }) {
   const isEditing = !!itemData;
   const { addToast } = useToast();
@@ -156,6 +157,22 @@ export default function InventoryForm({
         setActiveTab("details");
       else if (currentErrors.costPrice || currentErrors.retailPrice)
         setActiveTab("stock");
+      return;
+    }
+
+    const isDuplicateSKU = existingItems.some(
+      (item) =>
+        item.sku.trim().toLowerCase() === formData.sku.trim().toLowerCase() &&
+        item._id !== itemData?._id, // allow editing same item
+    );
+
+    if (isDuplicateSKU) {
+      addToast(
+        `SKU "${formData.sku}" already exists. Use a unique Part Number.`,
+        "error",
+      );
+      setErrors((p) => ({ ...p, sku: "This SKU already exists" }));
+      setActiveTab("details");
       return;
     }
 
@@ -275,6 +292,7 @@ export default function InventoryForm({
                 <TextInput
                   id="inventory-name"
                   label="Part Name"
+                  placeholder="Name of the part"
                   required
                   value={formData.name}
                   onChange={(e) => set("name", e.target.value)}
@@ -288,6 +306,7 @@ export default function InventoryForm({
                 <TextInput
                   id="inventory-sku"
                   label="SKU / Part Number"
+                  placeholder="Unique identifier for the part"
                   required
                   value={formData.sku}
                   onChange={(e) => set("sku", e.target.value)}
@@ -368,6 +387,7 @@ export default function InventoryForm({
                 <TextInput
                   id="inventory-supplierName"
                   label="Supplier Name"
+                  placeholder="Supplier / Vendor Name"
                   value={formData.supplierName}
                   onChange={(e) =>
                     set("supplierName", capitalizeWords(e.target.value))
@@ -394,7 +414,6 @@ export default function InventoryForm({
                     }
                   }}
                   error={errors.supplierContact}
-                  placeholder="+91 9000000000"
                   hint="Format: +91 9000000000"
                   readOnly={readOnly}
                 />
@@ -405,6 +424,7 @@ export default function InventoryForm({
                 <TextInput
                   id="inventory-location"
                   label="Supplier Location"
+                  placeholder="City Name"
                   value={formData.location}
                   onChange={(e) =>
                     set("location", capitalizeWords(e.target.value))

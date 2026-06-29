@@ -41,7 +41,7 @@ export const updateMechanic = async (req, res) => {
     ).select("-password");
 
     if (!mechanic) return res.status(404).json({ error: "Mechanic not found" });
-    
+
     await logActivity(
       req,
       "update",

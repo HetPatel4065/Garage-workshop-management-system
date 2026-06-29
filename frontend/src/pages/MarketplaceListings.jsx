@@ -915,13 +915,13 @@ export default function MarketplaceListings({
           >
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 space-y-2">
-                <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                <div className="text-sm capitalize font-bold text-slate-900 dark:text-white truncate">
                   {vehicle.title || "Untitled Vehicle"}
                 </div>
-                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                <p className="text-xs capitalize text-slate-500 dark:text-zinc-400">
                   {vehicle.brand} • {vehicle.model} • {vehicle.regYear}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                <p className="text-xs capitalize text-slate-500 dark:text-zinc-400">
                   Customer: {booking.customerId?.name || "Unknown"} •{" "}
                   {booking.customerId?.phone ||
                     booking.customerId?.email ||

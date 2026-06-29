@@ -8,7 +8,11 @@ import Owner from "../models/Owner.js";
 import { sendEmail, buildDailyReportEmail } from "../utils/notifications.js";
 import Notification from "../models/Notification.js";
 import { emitToOwner } from "../utils/socket.js";
-import { uploadInvoicePDF, deleteInvoicePDF, getSignedDownloadUrl } from "../services/cloudinary.service.js";
+import {
+  uploadInvoicePDF,
+  deleteInvoicePDF,
+  getSignedDownloadUrl,
+} from "../services/cloudinary.service.js";
 import fs from "fs/promises";
 import { createReadStream } from "fs";
 import path from "path";
@@ -141,7 +145,7 @@ export const createInvoiceDraft = async (req, res) => {
 
     await logActivity(
       req,
-      existingInvoice ? "update" : "create",  
+      existingInvoice ? "update" : "create",
       "Invoice",
       existingInvoice
         ? `Updated invoice draft ${invoiceToReturn.invoiceNumber} for service ${service._id}`
@@ -156,7 +160,11 @@ export const createInvoiceDraft = async (req, res) => {
       populate: [{ path: "partsUsed.partId" }, { path: "vehicleId" }],
     });
 
-    emitToOwner(ownerId, existingInvoice ? "invoice:updated" : "invoice:created", invoiceToReturn);
+    emitToOwner(
+      ownerId,
+      existingInvoice ? "invoice:updated" : "invoice:created",
+      invoiceToReturn,
+    );
 
     res.status(existingInvoice ? 200 : 201).json({
       message: existingInvoice
@@ -240,7 +248,6 @@ export const finalizeInvoice = async (req, res) => {
 
     invoice.status = "Finalized";
     invoice.finalizedAt = new Date();
-
     await invoice.save();
 
     // 📧 Send email report if emailReports notification is ON
@@ -273,13 +280,20 @@ export const finalizeInvoice = async (req, res) => {
     }
 
     // 🔔 Create Dashboard Notification for Unpaid Invoice
-    await createNotification({
-      ownerId,
-      title: "Unpaid Invoice",
-      message: `Invoice ${invoice.invoiceNumber} for ₹${invoice.total} has been finalized and is awaiting payment.`,
-      type: "unpaid_invoice",
-      link: `/billing`,
-    });
+    try {
+      const notification = await createNotification({
+        ownerId,
+        title: "Unpaid Invoice",
+        message: `Invoice ${invoice.invoiceNumber} for ₹${invoice.total} has been finalized and is awaiting payment.`,
+        type: "unpaid_invoice",
+        link: `/billing`,
+      });
+
+      // ✅ Emit the notification via socket so frontend receives it instantly
+      emitToOwner(ownerId, "notification:new", notification);
+    } catch (notifErr) {
+      console.error("[NOTIFY] Dashboard notification error:", notifErr.message);
+    }
 
     await invoice.populate("customerId");
     await invoice.populate({
@@ -294,6 +308,8 @@ export const finalizeInvoice = async (req, res) => {
       invoice,
     });
   } catch (error) {
+    // ✅ Log the actual error so you can debug it
+    console.error("[FINALIZE INVOICE] Error:", error.message);
     res.status(500).json({ error: "Finalization failed" });
   }
 };
@@ -337,7 +353,7 @@ export const updateInvoiceStatus = async (req, res) => {
       "update",
       "Invoice",
       `Updated invoice ${invoice.invoiceNumber} — ${invoice.status}`,
-      invoice._id
+      invoice._id,
     );
 
     await invoice.populate("customerId");
@@ -379,7 +395,7 @@ export const deleteInvoice = async (req, res) => {
 
     await logActivity(
       req,
-      "delete", 
+      "delete",
       "Invoice",
       `Deleted invoice ${invoice.invoiceNumber} with status ${invoice.status}`,
       invoice._id,
@@ -433,12 +449,18 @@ export const generateInvoicePDF = async (req, res) => {
 
     // 4. Upload to Cloudinary via the centralised service
     try {
-      const { secure_url, public_id } = await uploadInvoicePDF(filePath, ownerId);
+      const { secure_url, public_id } = await uploadInvoicePDF(
+        filePath,
+        ownerId,
+      );
       invoice.pdfUrl = secure_url;
       invoice.publicId = public_id;
       await invoice.save();
     } catch (err) {
-      console.error("[Billing] Cloudinary upload failed for invoice PDF:", err.message);
+      console.error(
+        "[Billing] Cloudinary upload failed for invoice PDF:",
+        err.message,
+      );
       // Fallback: keep a local URL so the download proxy can regenerate on the fly
       const BASE_URL = process.env.BACKEND_URL || "http://localhost:5000";
       invoice.pdfUrl = `${BASE_URL}/uploads/${relativePath}`;
@@ -471,7 +493,9 @@ export const downloadInvoicePDF = async (req, res) => {
   try {
     const invoice = await Invoice.findOne({ _id: id, ownerId });
     if (!invoice) {
-      console.error(`[Billing] downloadInvoicePDF - invoice not found: ${id}, ownerId: ${ownerId}`);
+      console.error(
+        `[Billing] downloadInvoicePDF - invoice not found: ${id}, ownerId: ${ownerId}`,
+      );
       return res.status(404).json({ error: "Invoice not found" });
     }
 
@@ -484,23 +508,32 @@ export const downloadInvoicePDF = async (req, res) => {
     if (invoice.publicId) {
       try {
         const signedUrl = getSignedDownloadUrl(invoice.publicId);
-        console.log("[Billing] downloadInvoicePDF - fetching from Cloudinary signed URL (server-side)", {
-          invoiceId: id,
-          publicId: invoice.publicId,
-        });
+        console.log(
+          "[Billing] downloadInvoicePDF - fetching from Cloudinary signed URL (server-side)",
+          {
+            invoiceId: id,
+            publicId: invoice.publicId,
+          },
+        );
 
         const cloudinaryResponse = await fetch(signedUrl);
 
         if (!cloudinaryResponse.ok) {
           const errText = await cloudinaryResponse.text().catch(() => "");
-          console.error("[Billing] downloadInvoicePDF - Cloudinary signed URL fetch failed", {
-            status: cloudinaryResponse.status,
-            body: errText,
-          });
+          console.error(
+            "[Billing] downloadInvoicePDF - Cloudinary signed URL fetch failed",
+            {
+              status: cloudinaryResponse.status,
+              body: errText,
+            },
+          );
           // Fall through to on-the-fly regeneration
         } else {
           res.setHeader("Content-Type", "application/pdf");
-          res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${filename}"`,
+          );
 
           // Stream Cloudinary response body → Express response
           for await (const chunk of cloudinaryResponse.body) {
@@ -509,16 +542,23 @@ export const downloadInvoicePDF = async (req, res) => {
           return res.end();
         }
       } catch (signErr) {
-        console.error("[Billing] downloadInvoicePDF - signed URL fetch error:", signErr.message);
+        console.error(
+          "[Billing] downloadInvoicePDF - signed URL fetch error:",
+          signErr.message,
+        );
         // Fall through to on-the-fly regeneration
       }
     }
 
     // ── PATH 2: no publicId (legacy / fallback) → regenerate on the fly ──
-    console.log(`[Billing] downloadInvoicePDF - no publicId, regenerating PDF on the fly for invoice: ${id}`);
+    console.log(
+      `[Billing] downloadInvoicePDF - no publicId, regenerating PDF on the fly for invoice: ${id}`,
+    );
 
     if (!invoice.pdfUrl) {
-      console.error(`[Billing] downloadInvoicePDF - invoice has no pdfUrl and no publicId: ${id}`);
+      console.error(
+        `[Billing] downloadInvoicePDF - invoice has no pdfUrl and no publicId: ${id}`,
+      );
     }
 
     const populatedInvoice = await Invoice.findOne({ _id: id, ownerId })
@@ -542,10 +582,14 @@ export const downloadInvoicePDF = async (req, res) => {
       logo: settings?.invoiceLogo || owner?.logo || "",
       mobileNumber: settings?.contactNumber || owner?.mobileNumber || "",
       garageName: settings?.garageName || owner?.garageName || "Garage Name",
-      businessAddress: settings?.businessAddress || owner?.address || "Garage Address",
+      businessAddress:
+        settings?.businessAddress || owner?.address || "Garage Address",
     };
 
-    const relativePath = await generateAndSaveInvoicePDF(populatedInvoice, branding);
+    const relativePath = await generateAndSaveInvoicePDF(
+      populatedInvoice,
+      branding,
+    );
     const generatedFilePath = path.join(process.cwd(), "uploads", relativePath);
 
     res.setHeader("Content-Type", "application/pdf");
@@ -562,7 +606,10 @@ export const downloadInvoicePDF = async (req, res) => {
     });
 
     readStream.on("error", (err) => {
-      console.error("[Billing] downloadInvoicePDF - stream error:", err.message);
+      console.error(
+        "[Billing] downloadInvoicePDF - stream error:",
+        err.message,
+      );
       if (!res.headersSent) {
         res.status(500).json({ error: "Failed to stream invoice PDF" });
       }
@@ -575,7 +622,12 @@ export const downloadInvoicePDF = async (req, res) => {
       ownerId,
       error: error?.message || error,
     });
-    return res.status(500).json({ error: "Failed to download invoice PDF", details: error.message });
+    return res
+      .status(500)
+      .json({
+        error: "Failed to download invoice PDF",
+        details: error.message,
+      });
   }
 };
 
@@ -595,7 +647,10 @@ export const shareInvoice = async (req, res) => {
 
     const filePath = req.file.path;
     try {
-      const { secure_url, public_id } = await uploadInvoicePDF(filePath, ownerId);
+      const { secure_url, public_id } = await uploadInvoicePDF(
+        filePath,
+        ownerId,
+      );
       invoice.pdfUrl = secure_url;
       invoice.publicId = public_id;
       await invoice.save();
@@ -606,7 +661,10 @@ export const shareInvoice = async (req, res) => {
         .status(200)
         .json({ message: "Invoice link generated", shareLink: invoice.pdfUrl });
     } catch (err) {
-      console.error("[Billing] Cloudinary upload failed for shared invoice:", err.message);
+      console.error(
+        "[Billing] Cloudinary upload failed for shared invoice:",
+        err.message,
+      );
       const publicUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/uploads/${req.file.filename}`;
       invoice.pdfUrl = publicUrl;
       invoice.publicId = null;

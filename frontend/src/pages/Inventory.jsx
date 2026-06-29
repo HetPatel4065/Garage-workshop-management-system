@@ -34,6 +34,7 @@ export default function Inventory() {
   const [viewOnly, setViewOnly] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [inventoryItems, setInventoryItems] = useState([]);
   const { addToast } = useToast();
   const { user, token } = useAuth();
   const role = user?.role || "user";
@@ -80,7 +81,7 @@ export default function Inventory() {
 
     const handleUpdated = (updatedItem) => {
       setItems((prev) =>
-        prev.map((i) => (i._id === updatedItem._id ? updatedItem : i))
+        prev.map((i) => (i._id === updatedItem._id ? updatedItem : i)),
       );
     };
 
@@ -197,8 +198,13 @@ export default function Inventory() {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("Backend error:", data);
-        throw new Error(data.error || "Operation failed");
+        console.error("Full details:", JSON.stringify(data, null, 2));
+        throw new Error(
+          data.error ||
+            data.message ||
+            JSON.stringify(data) ||
+            "Operation failed",
+        );
       }
 
       if (isEdit) {
@@ -404,6 +410,7 @@ export default function Inventory() {
             setModalOpen(false);
             setViewOnly(false);
           }}
+          existingItems={inventoryItems}
           readOnly={isMechanic || viewOnly}
         />
       </Modal>

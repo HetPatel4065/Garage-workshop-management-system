@@ -1245,15 +1245,15 @@ export const resetPassword = async (req, res) => {
       (await Owner.findOne({
         resetToken: token,
         resetTokenExpiry: { $gt: new Date() },
-      }).select("+password +resetToken +resetTokenExpiry")) ||
-      (await Advisor.findOne({
-        resetToken: token,
-        resetTokenExpiry: { $gt: new Date() },
-      }).select("+password +resetToken +resetTokenExpiry")) ||
-      (await Mechanic.findOne({
-        resetToken: token,
-        resetTokenExpiry: { $gt: new Date() },
-      }).select("+password +resetToken +resetTokenExpiry"));
+      }).select("+password +resetToken +resetTokenExpiry"))
+      // (await Advisor.findOne({
+      //   resetToken: token,
+      //   resetTokenExpiry: { $gt: new Date() },
+      // }).select("+password +resetToken +resetTokenExpiry")) ||
+      // (await Mechanic.findOne({
+      //   resetToken: token,
+      //   resetTokenExpiry: { $gt: new Date() },
+      // }).select("+password +resetToken +resetTokenExpiry"));
 
     if (!user) {
       return res.status(400).json({

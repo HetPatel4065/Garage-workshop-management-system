@@ -79,7 +79,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
 
       if (response.data.success) {
         setStep(2);
-        setCountdown(30);
+        setCountdown(300);
       }
     } catch (err) {
       setError(
@@ -140,7 +140,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
         email: formData.email,
         garageId: garage._id,
       });
-      setCountdown(30);
+      setCountdown(300);
     } catch (err) {
       setError("Failed to resend OTP.");
     } finally {
@@ -454,7 +454,7 @@ const RegistrationModal = ({ isOpen, onClose, garage }) => {
                       className="text-blue-600 font-bold hover:underline disabled:text-slate-400 disabled:no-underline"
                     >
                       {countdown > 0
-                        ? `Resend code in ${countdown}s`
+                        ? `Resend code in ${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")}`
                         : "Resend code"}
                     </button>
 

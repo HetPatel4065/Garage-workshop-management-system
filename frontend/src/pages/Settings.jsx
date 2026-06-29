@@ -871,7 +871,7 @@ export default function Settings() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const filename = `garage_backup_${backupRange}_days_${new Date().toISOString().split("T")[0]}.zip`;
+      const filename = `${formData.garageName}_${backupRange}_days_${new Date().toISOString().split("T")[0]}.zip`;
       a.download = filename;
       document.body.appendChild(a);
       a.click();

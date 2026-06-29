@@ -7,7 +7,7 @@ import { emitToOwner } from "../utils/socket.js";
 
 export const createJobCard = async (req, res) => {
   try {
-    const { vehicleId, serviceInstructions, status, advisorId, mechanicId } =
+    const { vehicleId, serviceInstructions, advisorId, mechanicId } =
       req.body;
     const ownerId = req.user.effectiveOwnerId;
     if (!ownerId) return res.status(403).json({ error: "Unauthorized" });

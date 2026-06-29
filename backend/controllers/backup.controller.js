@@ -26,11 +26,11 @@ export const generateBackup = async (req, res) => {
   try {
     const { range } = req.query;
     const ownerId = req.user.effectiveOwnerId;
-    
+
     let serviceInvoiceFilter = { ownerId };
     let jobCardFilter = { garageId: ownerId };
     let rangeText = range === "all" ? "all_time" : `${range || 7}_days`;
-    
+
     if (range !== "all") {
       const days = parseInt(range) || 7;
       const startDate = new Date();
@@ -38,12 +38,24 @@ export const generateBackup = async (req, res) => {
       serviceInvoiceFilter.createdAt = { $gte: startDate };
       jobCardFilter.$or = [
         { serviceDate: { $gte: startDate } },
-        { createdAt: { $gte: startDate } }
+        { createdAt: { $gte: startDate } },
       ];
     }
 
     // 1. Fetch Data
-    const [services, invoices, payments, customers, inventory, advisors, mechanics, vehicles, jobcards, owner, settings] = await Promise.all([
+    const [
+      services,
+      invoices,
+      payments,
+      customers,
+      inventory,
+      advisors,
+      mechanics,
+      vehicles,
+      jobcards,
+      owner,
+      settings,
+    ] = await Promise.all([
       Service.find(serviceInvoiceFilter).lean(),
       Invoice.find(serviceInvoiceFilter).lean(),
       Invoice.find({ ...serviceInvoiceFilter, amountPaid: { $gt: 0 } }).lean(),
@@ -54,7 +66,7 @@ export const generateBackup = async (req, res) => {
       Vehicle.find({ garageId: ownerId }).lean(),
       JobCard.find(jobCardFilter).lean(),
       Owner.findById(ownerId).lean(),
-      GarageSettings.findOne({ ownerId }).lean()
+      GarageSettings.findOne({ ownerId }).lean(),
     ]);
 
     const entities = [
@@ -78,10 +90,20 @@ export const generateBackup = async (req, res) => {
         for (const key in item) {
           if (key === "ownerId") continue;
           const val = item[key];
-          
-          if (val && typeof val === "object" && (val._bsontype === "ObjectID" || (val.constructor && (val.constructor.name === "ObjectId" || val.constructor.name === "ObjectID")))) {
+
+          if (
+            val &&
+            typeof val === "object" &&
+            (val._bsontype === "ObjectID" ||
+              (val.constructor &&
+                (val.constructor.name === "ObjectId" ||
+                  val.constructor.name === "ObjectID")))
+          ) {
             flattened[key] = val.toString();
-          } else if (Array.isArray(val) || (typeof val === "object" && val !== null && !(val instanceof Date))) {
+          } else if (
+            Array.isArray(val) ||
+            (typeof val === "object" && val !== null && !(val instanceof Date))
+          ) {
             flattened[key] = JSON.stringify(val);
           } else {
             flattened[key] = val;
@@ -93,7 +115,7 @@ export const generateBackup = async (req, res) => {
 
     // 3. Zip and Stream
     const archive = archiver("zip", { zlib: { level: 9 } });
-    const filename = `garage_backup_${rangeText}_${new Date().toISOString().split("T")[0]}.zip`;
+    const filename = `${owner?.garageName}${rangeText}_${new Date().toISOString().split("T")[0]}.zip`;
 
     res.setHeader("Content-Type", "application/zip");
     res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
@@ -117,7 +139,9 @@ export const generateBackup = async (req, res) => {
       metadata.totalRecords[entity.name] = entity.data.length;
     }
 
-    archive.append(JSON.stringify(metadata, null, 2), { name: "metadata.json" });
+    archive.append(JSON.stringify(metadata, null, 2), {
+      name: "metadata.json",
+    });
     await archive.finalize();
   } catch (error) {
     console.error("Backup Error:", error);
@@ -172,7 +196,11 @@ export const restoreBackup = async (req, res) => {
                 const unflattened = {};
                 for (const key in data) {
                   let val = data[key];
-                  if (typeof val === "string" && val.startsWith('"') && val.endsWith('"')) {
+                  if (
+                    typeof val === "string" &&
+                    val.startsWith('"') &&
+                    val.endsWith('"')
+                  ) {
                     val = val.slice(1, -1);
                   }
                   try {
@@ -194,15 +222,18 @@ export const restoreBackup = async (req, res) => {
           let restoredCount = 0;
           for (const row of rows) {
             try {
-              const idField = (entityName === "vehicles" || entityName === "jobcards") ? "garageId" : "ownerId";
+              const idField =
+                entityName === "vehicles" || entityName === "jobcards"
+                  ? "garageId"
+                  : "ownerId";
               row[idField] = ownerId;
-              
+
               // Clean up ID mismatch
               if (idField === "garageId") delete row.ownerId;
               else delete row.garageId;
 
               const filter = { [idField]: ownerId };
-              
+
               if (row._id) {
                 filter._id = row._id;
               } else if (entityName === "invoices" && row.invoiceNumber) {
@@ -215,7 +246,10 @@ export const restoreBackup = async (req, res) => {
                 filter.sku = row.sku;
               } else if (entityName === "jobcards" && row.jobCardId) {
                 filter.jobCardId = row.jobCardId;
-              } else if ((entityName === "advisors" || entityName === "mechanics") && row.email) {
+              } else if (
+                (entityName === "advisors" || entityName === "mechanics") &&
+                row.email
+              ) {
                 filter.email = row.email;
               }
 
@@ -226,7 +260,9 @@ export const restoreBackup = async (req, res) => {
                 await Owner.findByIdAndUpdate(ownerId, updateData);
               } else if (entityName === "settings") {
                 const { _id, ...updateData } = row;
-                await GarageSettings.findOneAndUpdate({ ownerId }, updateData, { upsert: true });
+                await GarageSettings.findOneAndUpdate({ ownerId }, updateData, {
+                  upsert: true,
+                });
               } else {
                 await Model.findOneAndUpdate(filter, row, { upsert: true });
               }
