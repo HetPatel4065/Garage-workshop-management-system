@@ -193,7 +193,7 @@ export const approveRequestedCustomer = async (req, res) => {
   }
 };
 
-// 📅 UPDATE APPOINTMENT (For already approved/pending requests)
+// 📅 UPDATE APPOINTMENT (For pending requests)
 export const updateAppointment = async (req, res) => {
   try {
     const ownerId = req.user.effectiveOwnerId;

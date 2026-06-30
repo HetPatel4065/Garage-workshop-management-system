@@ -59,7 +59,7 @@ const vehicleSaleSchema = new mongoose.Schema(
     },
     bodyType: {
       type: String,
-      enum: ["Hatchback", "Sedan", "SUV", "MUV", "Minivan", "Coupe"],
+      enum: ["Hatchback", "Sedan", "SUV", "MPV", "Minivan", "Coupe"],
       trim: true,
     },
     seats: {

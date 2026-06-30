@@ -27,7 +27,7 @@ const BODY_TYPE_VALUES = [
   "Hatchback",
   "Sedan",
   "SUV",
-  "MUV",
+  "MPV",
   "Minivan",
   "Coupe",
 ];

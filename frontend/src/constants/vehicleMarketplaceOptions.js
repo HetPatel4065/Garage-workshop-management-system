@@ -3,7 +3,7 @@ export const BODY_TYPE_OPTIONS = [
   "Hatchback",
   "Sedan",
   "SUV",
-  "MUV",
+  "MPV",
   "Minivan",
   "Coupe",
 ];

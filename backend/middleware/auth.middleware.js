@@ -27,7 +27,8 @@ const auth = async (req, res, next) => {
     if (typeof decoded.id === "string" && decoded.id.includes("_co_")) {
       const [parentOwnerId, idxStr] = decoded.id.split("_co_");
       const idx = parseInt(idxStr);
-      const parentOwner = await Owner.findById(parentOwnerId).select("-password");
+      const parentOwner =
+        await Owner.findById(parentOwnerId).select("-password");
       if (parentOwner && parentOwner.coOwners && parentOwner.coOwners[idx]) {
         const co = parentOwner.coOwners[idx];
         user = {
@@ -43,7 +44,9 @@ const auth = async (req, res, next) => {
           mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
           isActive: parentOwner.isActive,
           permissions: parentOwner.permissions || ["all"],
-          toObject: function() { return this; }
+          toObject: function () {
+            return this;
+          },
         };
         detectedRole = "owner";
       }
@@ -173,7 +176,7 @@ const auth = async (req, res, next) => {
 
     userObj.effectiveOwnerId = effectiveOwnerId;
 
-    // 🏎️ ATTACH GARAGE METADATA (For staff members who don't have it on their own profile)
+    //  ATTACH GARAGE METADATA (For staff members who don't have it on their own profile)
     if (userObj.role !== "owner" && userObj.effectiveOwnerId) {
       let ownerDetails = await User.findById(userObj.effectiveOwnerId).select(
         "garageName address logo mobileNumber",
@@ -194,7 +197,9 @@ const auth = async (req, res, next) => {
 
     // 🛡️ ACTIVE STATUS & GARAGE SUSPENSION CHECK
     if (user.isActive === false) {
-      return res.status(403).json({ message: "Access denied. Your account is inactive." });
+      return res
+        .status(403)
+        .json({ message: "Access denied. Your account is inactive." });
     }
 
     if (userObj.role !== "admin") {
@@ -223,9 +228,10 @@ const auth = async (req, res, next) => {
       }
 
       if (garageSuspended) {
-        const msg = userObj.role === "owner"
-          ? "Access denied. Your garage has been suspended by the administrator."
-          : "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
+        const msg =
+          userObj.role === "owner"
+            ? "Access denied. Your garage has been suspended by the administrator."
+            : "Access denied. Your garage has been suspended by the administrator. Please contact your garage owner.";
         return res.status(403).json({ message: msg });
       }
     }
@@ -309,7 +315,8 @@ const optionalAuth = async (req, res, next) => {
     if (typeof decoded.id === "string" && decoded.id.includes("_co_")) {
       const [parentOwnerId, idxStr] = decoded.id.split("_co_");
       const idx = parseInt(idxStr);
-      const parentOwner = await Owner.findById(parentOwnerId).select("-password");
+      const parentOwner =
+        await Owner.findById(parentOwnerId).select("-password");
       if (parentOwner && parentOwner.coOwners && parentOwner.coOwners[idx]) {
         const co = parentOwner.coOwners[idx];
         user = {
@@ -325,7 +332,9 @@ const optionalAuth = async (req, res, next) => {
           mobileNumber: co.mobileNumber || parentOwner.mobileNumber,
           isActive: parentOwner.isActive,
           permissions: parentOwner.permissions || ["all"],
-          toObject: function() { return this; }
+          toObject: function () {
+            return this;
+          },
         };
         detectedRole = "owner";
       }

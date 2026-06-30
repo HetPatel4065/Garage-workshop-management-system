@@ -145,8 +145,8 @@ export const initServiceReminderCron = () => {
         {
           $match: {
             status: "Completed",
-            nextServiceDate: { $exists: true, $ne: null }
-          }
+            nextServiceDate: { $exists: true, $ne: null },
+          },
         },
         { $sort: { serviceDate: -1, createdAt: -1 } },
         {
@@ -155,55 +155,55 @@ export const initServiceReminderCron = () => {
             nextServiceDate: { $first: "$nextServiceDate" },
             customerId: { $first: "$customerId" },
             ownerId: { $first: "$ownerId" },
-          }
+          },
         },
         {
           $lookup: {
             from: "vehicles",
             localField: "_id",
             foreignField: "_id",
-            as: "vehicleInfo"
-          }
+            as: "vehicleInfo",
+          },
         },
         {
           $unwind: {
             path: "$vehicleInfo",
-            preserveNullAndEmptyArrays: true
-          }
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $match: {
-            "vehicleInfo.status": "With Owner"
-          }
+            "vehicleInfo.status": "With Owner",
+          },
         },
         {
           $lookup: {
             from: "customers",
             localField: "customerId",
             foreignField: "_id",
-            as: "customerInfo"
-          }
+            as: "customerInfo",
+          },
         },
         {
           $unwind: {
             path: "$customerInfo",
-            preserveNullAndEmptyArrays: true
-          }
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
             from: "owners",
             localField: "ownerId",
             foreignField: "_id",
-            as: "garageInfo"
-          }
+            as: "garageInfo",
+          },
         },
         {
           $unwind: {
             path: "$garageInfo",
-            preserveNullAndEmptyArrays: true
-          }
-        }
+            preserveNullAndEmptyArrays: true,
+          },
+        },
       ]);
 
       for (const service of latestServices) {

@@ -127,7 +127,7 @@ export default function CustomerLogin() {
           setStep(3);
         } else {
           setStep(2);
-          setCountdown(30);
+          setCountdown(300);
         }
       }
     } catch (err) {
@@ -209,13 +209,15 @@ export default function CustomerLogin() {
       await axios.post(`${import.meta.env.VITE_API_URL}/portal/login-otp`, {
         email,
       });
-      setCountdown(30);
+      setCountdown(300);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to resend OTP.");
     } finally {
       setLoading(false);
     }
   };
+
+  const formattedTime = `${String(Math.floor(countdown / 60)).padStart(2, "0")}:${String(countdown % 60).padStart(2, "0")}`;
 
   return (
     <div className="min-h-screen bg-[#070b13] flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-blue-500/30">
@@ -341,21 +343,28 @@ export default function CustomerLogin() {
                     </p>
                   </div>
 
-                  <FormInput
-                    id="customer-otp"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    required
-                    value={otp}
-                    onChange={(e) =>
-                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                    }
-                    placeholder="000000"
-                    label="One-Time Password"
-                    labelClassName="text-md font-semibold text-slate-300 mb-1.5"
-                    inputClassName="h-14 border-slate-800 bg-[#0e1117] text-center text-2xl font-black tracking-[0.6rem] text-slate-100 placeholder-slate-800 focus:ring-blue-500/20 focus:border-blue-500"
-                  />
+                  <div>
+                    <label
+                      htmlFor="customer-otp"
+                      className="mb-1.5 block text-sm font-semibold text-slate-300"
+                    >
+                      One-Time Password
+                    </label>
+
+                    <input
+                      id="customer-otp"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      required
+                      value={otp}
+                      onChange={(e) =>
+                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
+                      placeholder="000000"
+                      className="h-14 w-full rounded-md border border-slate-800 bg-[#0e1117] text-center text-2xl font-black tracking-[0.6rem] text-slate-100 placeholder-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    />
+                  </div>
 
                   {error && (
                     <FormError
@@ -395,7 +404,7 @@ export default function CustomerLogin() {
                       className="text-xs font-semibold text-blue-400 hover:text-blue-300 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
                     >
                       {countdown > 0
-                        ? `Resend in ${countdown}s`
+                        ? `Resend in ${formattedTime}`
                         : "Resend code"}
                     </button>
                   </div>

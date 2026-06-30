@@ -158,7 +158,10 @@ export const sendInspectionReminderToOwner = async (
   try {
     recipients = await getGarageEmails(ownerEmail);
   } catch (err) {
-    console.error("Error fetching garage emails for inspection reminder:", err.message);
+    console.error(
+      "Error fetching garage emails for inspection reminder:",
+      err.message,
+    );
   }
 
   let success = false;
@@ -203,7 +206,10 @@ export const sendInspectionReminderToOwner = async (
       await transporter.sendMail(mailOptions);
       success = true;
     } catch (error) {
-      console.error(`Error sending inspection reminder email to ${recipient}:`, error);
+      console.error(
+        `Error sending inspection reminder email to ${recipient}:`,
+        error,
+      );
     }
   }
   return success;

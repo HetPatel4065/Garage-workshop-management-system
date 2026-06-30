@@ -13,6 +13,7 @@ import {
 } from "../controllers/billing.controller.js";
 import multer from "multer";
 import path from "path";
+import { auth, authorize } from "../middleware/auth.middleware.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -28,8 +29,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-import { auth, authorize } from "../middleware/auth.middleware.js";
 
 router.post(
   "/generate-draft",

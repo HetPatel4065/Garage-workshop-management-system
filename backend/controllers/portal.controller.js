@@ -24,8 +24,6 @@ import { createReadStream } from "fs";
 import path from "path";
 import { logActivity } from "../utils/activityLogger.js";
 
-
-
 const STAFF_PORTAL_ROLES = ["admin"];
 
 const isStaffPortalUser = (user) =>
@@ -845,65 +843,12 @@ export const allocateGarage = async (req, res) => {
     const allOwners = await Owner.find({
       garageName: { $exists: true, $ne: "" },
     }).lean();
-
-    const calculateDistance = (lat1, lon1, lat2, lon2) => {
-      if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
-      const R = 6371;
-      const dLat = (lat2 - lat1) * (Math.PI / 180);
-      const dLon = (lon2 - lon1) * (Math.PI / 180);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) *
-          Math.cos(lat2 * (Math.PI / 180)) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    };
-
-    let nearest = allOwners;
-    if (lat && lng) {
-      nearest = allOwners
-        .map((o) => ({
-          garageId: o._id,
-          garageName: o.garageName,
-          address: o.address,
-          mobileNumber: o.mobileNumber,
-          logo: o.logo,
-          location: o.location,
-          distance: calculateDistance(
-            lat,
-            lng,
-            o.location?.lat,
-            o.location?.lng,
-          ),
-        }))
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 3);
-    } else {
-      nearest = nearest
-        .map((o) => ({
-          garageId: o._id,
-          garageName: o.garageName,
-          address: o.address,
-          mobileNumber: o.mobileNumber,
-          logo: o.logo,
-          location: o.location,
-        }))
-        .slice(0, 3);
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        type: "NEAREST",
-        garages: nearest,
-      },
-    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
 // 📄 GENERATE INVOICE PDF FOR PORTAL
 export const generatePortalInvoicePDF = async (req, res) => {
   const { id } = req.params;

@@ -34,7 +34,7 @@ const inventorySchema = new mongoose.Schema(
       type: String,
       default: "Universal", // e.g., Honda City, All Models
       trim: true,
-      required:[true,"For better "]
+      required:[true,"For better"]
     },
     carYear: {
       type: String,

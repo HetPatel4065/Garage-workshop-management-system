@@ -6,7 +6,7 @@ const CATEGORY_COLORS = {
   Sedan: "bg-blue-50 text-blue-700 border-blue-200",
   "Compact SUV": "bg-cyan-50 text-cyan-700 border-cyan-200",
   SUV: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  MUV: "bg-purple-50 text-purple-700 border-purple-200",
+  MPV: "bg-purple-50 text-purple-700 border-purple-200",
   Luxury: "bg-amber-50 text-amber-700 border-amber-200",
   "Ultra Luxury": "bg-rose-50 text-rose-700 border-rose-200",
 };

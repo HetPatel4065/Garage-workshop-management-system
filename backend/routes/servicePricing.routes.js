@@ -1,13 +1,19 @@
 import express from "express";
-import * as ctrl from "../controllers/servicePricing.controller.js";
+import {
+  getCategoryByModel,
+  getPricingForServices,
+  getAllPricing,
+  upsertPricing,
+  deletePricing,
+} from "../controllers/servicePricing.controller.js";
 import { auth } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/category", auth, ctrl.getCategoryByModel);
-router.get("/for-services", auth, ctrl.getPricingForServices);
-router.get("/", auth, ctrl.getAllPricing);
-router.post("/", auth, ctrl.upsertPricing);
-router.delete("/:id", auth, ctrl.deletePricing);
+router.get("/category", auth, getCategoryByModel);
+router.get("/for-services", auth, getPricingForServices);
+router.get("/", auth, getAllPricing);
+router.post("/", auth, upsertPricing);
+router.delete("/:id", auth, deletePricing);
 
 export default router;

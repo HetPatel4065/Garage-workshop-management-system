@@ -32,7 +32,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
       const writeStream = fs.createWriteStream(filepath);
       doc.pipe(writeStream);
 
-      // ─── Design Tokens (Shared with all renders) ─────────────────────────
+      // ─── Design Tokens (Shared with all renders) ───
       const BLUE = "#2563eb"; // Modern Blue
       const DARK = "#0f172a"; // Slate-900
       const GRAY = "#64748b"; // Slate-500
@@ -51,7 +51,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
             })
           : "-";
 
-      // ─── 1. Header (Premium Modern Layout) ───────────────────────────────
+      // ─── 1. Header (Premium Modern Layout) ───
 
       // Top Blue Bar
       doc.rect(0, 0, PAGE_W, 80).fill(BLUE);
@@ -117,7 +117,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
           { align: "right", width: PAGE_W - (hasLogo ? 170 : 80) },
         );
 
-      // ─── 2. Business & Customer Info ────────────────────────────────────
+      // ─── 2. Business & Customer Info ───
       const infoY = 110;
 
       // Business Info (Left)
@@ -179,7 +179,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
           width: 180,
         });
 
-      // ─── 3. Details Bar (Vehicle & Dates) ───────────────────────────────
+      // ─── 3. Details Bar (Vehicle & Dates) ───
       const barY = 200;
       const vehicle =
         invoice.serviceId?.vehicleId || invoice.serviceId?.vehicle;
@@ -216,7 +216,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
         .font("Helvetica-Bold")
         .text(formatDate(invoice.createdAt), PAGE_W - 220, barY + 22);
 
-      // ─── 4. Items Table ─────────────────────────────────────────────────
+      // ─── 4. Items Table ───
       const tableY = 270;
       let rowY = tableY;
 
@@ -304,7 +304,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
         drawRow(item.name, item.qty, item.rate, item.total),
       );
 
-      // ─── 5. Summary Section ─────────────────────────────────────────────
+      // ─── 5. Summary Section ───
       rowY += 20;
       const summaryX = PAGE_W - 240;
 
@@ -356,7 +356,7 @@ const generateAndSaveInvoicePDF = (invoice, settings = {}) => {
           { width: 90, align: "right" },
         );
 
-      // ─── 6. Footer ──────────────────────────────────────────────────────
+      // ─── 6. Footer ───
       const footerY = doc.page.height - 80;
 
       if (settings.upiId) {

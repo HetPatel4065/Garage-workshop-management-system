@@ -10,7 +10,7 @@ const servicePricingSchema = new mongoose.Schema(
         "Sedan",
         "Compact SUV",
         "SUV",
-        "MUV",
+        "MPV",
         "Luxury",
         "Ultra Luxury",
       ],
